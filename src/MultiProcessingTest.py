@@ -115,7 +115,7 @@ class DeviceProcessHandler:
 		self.attributeSlots = {}
 		
 	def addAttributeSlot(self, attributeName, slot):
-		self.attributeWidgets[attributeName] = slot
+		self.attributeSlots[attributeName] = slot
 		
 	def handleEvent(self):
 		try:
