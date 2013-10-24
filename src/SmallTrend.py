@@ -149,9 +149,9 @@ class SmallTrend(QtGui.QWidget):
 	def resizeEvent(self, e):
 		self.xScale = (self.size().width() - self.axisOffset*2-2) / self.xSpan		
 		self.yScale = (self.size().height() - self.axisOffset*2-2) / self.ySpan
-		print self.curvePen.isCosmetic()
-		print 'In resizeEvent: scale ', self.xScale, self.yScale
-		print 'Extents: ', self.size().width(), self.size().height() 
+# 		print self.curvePen.isCosmetic()
+# 		print 'In resizeEvent: scale ', self.xScale, self.yScale
+# 		print 'Extents: ', self.size().width(), self.size().height() 
 		
 		self.generatePointList()
 					

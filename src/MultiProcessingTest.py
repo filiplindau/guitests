@@ -27,6 +27,7 @@ class ClientCommand:
 class DeviceConnectionProcess(mp.Process):
 	def __init__(self, deviceName, deviceEventQueue, clientCommandQueue):
 		mp.Process.__init__(self)
+		self.stateCheckPeriod = 1.0
 		self.deviceName = deviceName
 		self.device = None
 		self.deviceEventQueue = deviceEventQueue
@@ -88,7 +89,8 @@ class DeviceConnectionProcess(mp.Process):
 			time.sleep(0.5)
 				
 	def connectedState(self):
-		self.deviceEventQueue.put(DeviceEvent('state','connected'))		
+		self.deviceEventQueue.put(DeviceEvent('state','connected'))
+		lastStateCheck = time.clock()		
 		while self.state == 'connected':
 			cmd = self.checkCommands()
 			if cmd.command == 'getAttribute':
@@ -102,7 +104,16 @@ class DeviceConnectionProcess(mp.Process):
 					self.device.write_attribute(cmd.data.name, cmd.data.value)
 				except Exception, e:
 					self.deviceEventQueue.put(DeviceEvent('error',e))
-			time.sleep(0.1) 
+			tmpStateCheckTime = time.clock()
+			if tmpStateCheckTime - lastStateCheck > self.stateCheckPeriod:
+				try:
+					self.device.ping()
+				except Exception, e:
+					if e[0].reason == 'API_DeviceNotExported':
+						self.state = 'proxy'
+					if e[0].reason == 'API_DeviceNotDefined':
+						self.state = 'disconnected'
+			time.sleep(0.05) 
 	
 
 class DeviceProcessHandler:

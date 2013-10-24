@@ -25,6 +25,24 @@ standbyColor = '#9c9cff'
 unknownColor = '#45616f'
 disableColor = '#ff00ff'
 
+class QTangoColors():
+	def __init__(self):
+		self.backgroundColor = '#000000'
+		self.primaryColor0 = '#ff9900'
+		self.primaryColor1 = '#ffcc66'
+		self.primaryColor2 = '#feff99'
+		self.secondaryColor0 = '#66cbff'
+		self.secondaryColor1 = '#3399ff'
+		self.secondaryColor2 = '#99cdff'
+		
+		self.faultColor = '#ff0000'
+		self.alarmColor = '#f7bd5a'
+		self.onColor = '#99dd66'
+		self.offColor = '#ffffff'
+		self.standbyColor = '#9c9cff'
+		self.unknownColor = '#45616f'
+		self.disableColor = '#ff00ff'
+
 barHeight = 30
 barWidth = 90
 
@@ -238,6 +256,128 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 	def setAttributeValue(self, value):
 		self.valueSpinbox.setValue(value)
 		self.update()
+
+class QTangoWriteAttributeDouble(QtGui.QWidget):
+	def __init__(self, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		self.attrColors = QTangoColors()
+		self.setupLayout()
+		
+	def setupLayout(self):
+		self.startLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.startLabel.setStyleSheet(st)
+		self.middleLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.middleLabel.setStyleSheet(st)
+		self.endLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(barHeight / 2)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.endLabel.setStyleSheet(st)
+
+		self.nameLabel = QtGui.QLabel('Test')
+		s = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', self.attrColors.backgroundColor, '; \n',
+					'color: ', self.attrColors.secondaryColor0, ';}'))
+		self.nameLabel.setStyleSheet(s)
+	
+		font = self.nameLabel.font()
+		font.setFamily('TrebuchetMS')
+		font.setStretch(QtGui.QFont.Condensed)
+		font.setPointSize(int(barHeight * 0.75))
+		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+		self.readValueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 0px; \n',
+            'border-color: #339; \n',
+            'border-style: solid; \n',
+            'border-radius: 0; \n',
+            'border: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(barWidth), 'px; \n',
+            'min-height: ', str(barHeight), 'px; \n',
+            'max-height: ', str(barHeight), 'px; \n',
+            'qproperty-readOnly: 1; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.readValueSpinbox.font()
+		font.setFamily('TrebuchetMS')
+		font.setStretch(QtGui.QFont.Condensed)
+		font.setPointSize(int(barHeight * 0.7))
+		self.readValueSpinbox.setFont(font)
+		self.readValueSpinbox.setStyleSheet(s)
+		self.readValueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.readValueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+		self.writeValueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 0px; \n',
+            'border-color: #339; \n',
+            'border-style: solid; \n',
+            'border-radius: 0; \n',
+            'border: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(barWidth), 'px; \n',
+            'min-height: ', str(barHeight), 'px; \n',
+            'max-height: ', str(barHeight), 'px; \n',
+            'qproperty-readOnly: 0; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.writeValueSpinbox.font()
+		font.setFamily('TrebuchetMS')
+		font.setStretch(QtGui.QFont.Condensed)
+		font.setPointSize(int(barHeight * 0.7))
+		self.writeValueSpinbox.setFont(font)
+		self.writeValueSpinbox.setStyleSheet(s)
+		self.writeValueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.writeValueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+
+		spacerItem = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
+
+		layout = QtGui.QHBoxLayout(self)
+		layout.setContentsMargins(0,0,0,0)
+		layout.setMargin(int(barHeight/10))
+		
+#		layout.addSpacerItem(spacerItem)		
+		layout.addWidget(self.startLabel)
+		layout.addWidget(self.nameLabel)
+		layout.addWidget(self.readValueSpinbox)
+		layout.addWidget(self.middleLabel)
+		layout.addWidget(self.writeValueSpinbox)
+		layout.addWidget(self.endLabel)
+
+	def attributeName(self):
+		return str(self.nameLabel.text())
+
+	@QtCore.pyqtSignature('setAttributeName(QString)')
+
+	def setAttributeName(self, aName):
+		self.nameLabel.setText(aName)
+		self.update()
+		
+	def setAttributeValue(self, value):
+		self.valueSpinbox.setValue(value)
+		self.update()
+
 		
 class QTangoDeviceStatus(QtGui.QWidget):
 	def __init__(self, parent=None):
@@ -378,3 +518,99 @@ class QTangoDeviceStatus(QtGui.QWidget):
 		
 		self.update()
 
+class QTangoDeviceNameStatus(QtGui.QWidget):
+	def __init__(self, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		self.startLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', secondaryColor0, ';}'))
+		self.startLabel.setStyleSheet(st)
+		self.endLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(barHeight / 2)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', secondaryColor0, ';}'))
+		self.endLabel.setStyleSheet(st)
+
+		self.nameLabel = QtGui.QLabel('Test')
+		s = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', backgroundColor, '; \n',
+					'color: ', secondaryColor0, ';}'))
+		self.nameLabel.setStyleSheet(s)
+	
+		font = self.nameLabel.font()
+		font.setFamily('TrebuchetMS')
+		font.setStretch(QtGui.QFont.Condensed)
+		font.setPointSize(int(barHeight * 0.75))
+		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)		
+
+
+		layout = QtGui.QHBoxLayout(self)
+		layout.setContentsMargins(0,0,0,0)
+		layout.setMargin(int(barHeight/10))
+		
+#		layout.addSpacerItem(spacerItem)		
+		layout.addWidget(self.startLabel)
+		layout.addWidget(self.nameLabel)
+		layout.addWidget(self.endLabel)
+		
+	def attributeName(self):
+		return str(self.nameLabel.text())
+
+	@QtCore.pyqtSignature('setAttributeName(QString)')
+
+	def setAttributeName(self, aName):
+		self.nameLabel.setText(aName)
+		self.update()
+				
+	def setState(self, state):
+		state_str = str(state)
+		if state_str == str(pt.DevState.OFF):
+			color = offColor
+			stateString = 'OFF'
+		elif state_str == str(pt.DevState.ON):
+			color = onColor
+			stateString = 'ON'
+		elif state_str == str(pt.DevState.FAULT):
+			color = faultColor
+			stateString = 'FAULT'
+		elif state_str == str(pt.DevState.ALARM):
+			color = alarmColor
+			stateString = 'ALARM'
+		elif state_str == str(pt.DevState.STANDBY):
+			color = standbyColor
+			stateString = 'STANDBY'
+		elif state_str == str(pt.DevState.UNKNOWN):
+			color = unknownColor
+			stateString = 'UNKNOWN'
+		elif state_str == str(pt.DevState.DISABLE):
+			color = disableColor
+			stateString = 'DISABLE'
+		else:
+			color = unknownColor
+			stateString = 'UNKNOWN'
+		s = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(barHeight / 6)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', color, ';}'))
+		self.startLabel.setStyleSheet(s)
+		s = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'min-width: ', str(int(barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(barHeight / 2)), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', color, ';}'))
+		self.endLabel.setStyleSheet(s)
+		s = ''.join(('QLabel {min-height: ', str(barHeight), 'px; \n',
+					'max-height: ', str(barHeight), 'px; \n',
+					'background-color: ', backgroundColor, '; \n',
+					'color: ', color, ';}'))
+		self.nameLabel.setStyleSheet(s)
+		
+		self.update()
