@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 """
-Created on 17 okt 2013
+Created on 24 okt 2013
 
 @author: Filip
 """
@@ -14,7 +14,6 @@ import PyTango as pt
 import threading
 import multiprocessing as mp 
 import Queue
-from SmallTrend import SmallTrend
 
 class DeviceEvent:
 	def __init__(self, eventType, data = None):
@@ -62,6 +61,8 @@ class DeviceConnectionProcess(mp.Process):
 		while 1:
 			if self.state == 'terminate':
 				self.deviceEventQueue.put(DeviceEvent('state','terminate'))
+				self.deviceEventQueue.close()
+				self.deviceEventQueue.join_thread()
 				break
 			else:
 				stateHandler = self.stateHandlerDict[self.state]
@@ -70,9 +71,12 @@ class DeviceConnectionProcess(mp.Process):
 	def checkCommands(self):
 		try:
 			cmd = self.clientCommandQueue.get(block=False)
+			self.deviceEventQueue.put(DeviceEvent('info',''.join((cmd.command, ' ', str(cmd.data)))))
 			if cmd.command == 'terminate':
 				self.state = 'terminate'
 				self.deviceEventQueue.put(DeviceEvent('info',''.join((self.deviceName, ' terminating'))))
+				while self.clientCommandQueue.empty() == False:
+					self.clientCommandQueue.get(block=False)
 			elif cmd.command == 'getState':
 				self.deviceEventQueue.put(DeviceEvent('state',self.state))
 			elif cmd.command == 'registerAttribute':
@@ -136,12 +140,18 @@ class DeviceConnectionProcess(mp.Process):
 					devAttr.timestamp = attr.time.totime()
 					self.deviceEventQueue.put(DeviceEvent('attribute',devAttr))
 				except Exception, e:
-					self.deviceEventQueue.put(DeviceEvent('error',e))
+					self.deviceEventQueue.put(DeviceEvent('error',str(e)))
 			elif cmd.command == 'setAttribute':
+				# First element in data is the attribute name, second is the new value
 				try:
-					self.device.write_attribute(cmd.data.name, cmd.data.value)
+					self.device.write_attribute(cmd.data[0], cmd.data[1])
 				except Exception, e:
-					self.deviceEventQueue.put(DeviceEvent('error',e))
+					self.deviceEventQueue.put(DeviceEvent('error',str(e)))
+			elif cmd.command == 'tangoCommand':
+				try:
+					self.device.command_inout(cmd.data)
+				except Exception, e:
+					self.deviceEventQueue.put(DeviceEvent('error',str(e)))
 					
 			# Periodically check if the connection to the device server is alive and registered attributes
 			checkTime = time.time()
@@ -172,7 +182,7 @@ class DeviceConnectionProcess(mp.Process):
 						devAttr.timestamp = attr.time.totime()
 						self.deviceEventQueue.put(DeviceEvent('regAttribute',devAttr))
 					except Exception, e:
-						self.deviceEventQueue.put(DeviceEvent('error',e))
+						self.deviceEventQueue.put(DeviceEvent('error',str(e)))
 					
 			time.sleep(0.05) 
 	
@@ -196,6 +206,7 @@ class DeviceProcessHandler:
 	def handleEvent(self):
 		while self.eventQueue.empty() == False:
 			ev = self.eventQueue.get(block = False)
+#			print ev.eventType, ev.data
 			if ev.eventType == 'regAttribute':
 				try:
 					self.attributeSlots[str.lower(ev.data.name)](ev.data)
@@ -206,6 +217,7 @@ class DeviceProcessHandler:
 				return ev
 			elif ev.eventType == 'state':
 				self.state = ev.data
+				print self.state
 				return ev
 			else:
 				print ev.eventType, ev.data
@@ -215,9 +227,17 @@ class DeviceProcessHandler:
 		self.commandQueue.put(cmd)
 				
 	def terminate(self):
+		print self.name, ' terminating'
 		self.commandQueue.put(ClientCommand(command = 'terminate'))
-		while self.eventQueue.empty() == False:
-			ev = self.eventQueue.get(block = False)
+		self.process.terminate()
+# 		time.sleep(0.5)
+# 		while self.eventQueue.empty() == False:
+# 			ev = self.eventQueue.get(block = False)
+# 			print self.name, ':', ev.eventType, ev.data
+# 		self.process.join(0.25)
+# 		if self.process.is_alive() == True:
+# 			print self.name, ': Force terminate'
+# 			self.process.terminate()
 		
 	def startProcess(self):
 		self.process.start()
@@ -228,11 +248,11 @@ class TangoDeviceClientTest(QtGui.QWidget):
 #		self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 		self.timeVector = None
 		self.xData = None
+		self.xDataTemp = None
 		
 		self.devices = {}
-		self.devices['finesse']=DeviceProcessHandler('testfel/seedlaser/finesse')
-		self.devices['spectrometer']=DeviceProcessHandler('testfel/seedlaser/spectrometer_osc')
-		self.devices['leelaser']=DeviceProcessHandler('testfel/seedlaser/leelaser_mp')
+		self.devices['finesse']=DeviceProcessHandler('testfel/gunlaser/finesse')
+		self.devices['spectrometer']=DeviceProcessHandler('testfel/gunlaser/osc_spectrometer')
 		
 		self.setupLayout()
 		
@@ -269,19 +289,12 @@ class TangoDeviceClientTest(QtGui.QWidget):
 							self.spectrometerName.setState(pt.DevState.UNKNOWN)
 						else:
 							self.devices['spectrometer'].addAttributeSlot('PeakEnergy', self.readPeakEnergy, 0.3)
+							self.devices['spectrometer'].addAttributeSlot('SpectrumWidth', self.readPeakWidth, 0.3)
 							self.devices['spectrometer'].addAttributeSlot('Spectrum', self.readSpectrum, 0.3)
 							self.devices['spectrometer'].addAttributeSlot('State', self.readSpectrometerState, 0.5)
 							
 							self.devices['spectrometer'].sendCommand(ClientCommand('getAttribute','Wavelengths'))
 							self.spectrometerName.setDisabled(False)
-					elif device == 'leelaser':
-						if self.devices[device].state != 'connected':
-							self.leelaserName.setDisabled(True)
-							self.leelaserName.setState(pt.DevState.UNKNOWN)
-						else:
-							self.devices['leelaser'].addAttributeSlot('State', self.readLeelaserState, 0.5)
-
-							self.leelaserName.setDisabled(False)
 
 				elif devEvent.eventType == 'attribute':
 					if device == 'spectrometer':
@@ -292,9 +305,26 @@ class TangoDeviceClientTest(QtGui.QWidget):
 	
 	def readLaserTemperature(self, data):
 		self.laserTempWidget.setAttributeValue(data.value)
+		if self.xDataTemp == None:
+			self.xDataTemp = np.array([time.time()])
+			yData = np.array([data.value])
+		else:
+			self.xDataTemp = np.append(self.xDataTemp, time.time())
+			yData = np.append(self.laserTempTrendCurve.yData, data.value)
+			if yData.shape[0] > 100000:
+				yData = yData[-90000:]
+				self.xDataTemp = self.xDataTemp[-90000:]
+		self.laserTempTrendCurve.setData(self.xDataTemp-self.xDataTemp[-1], yData, antialias = True)
+
 
 	def readLaserPower(self, data):
 		self.laserPowerWidget.setAttributeValue(data.value)
+		
+	def writeLaserPower(self):
+		power = self.laserPowerWidget.writeValueSpinbox.value()
+		data = ['Power', power]
+		self.devices['finesse'].sendCommand(ClientCommand('setAttribute', data))
+		print power
 		
 	def readFinesseState(self, data):
 		self.finesseName.setState(data.value)
@@ -302,8 +332,6 @@ class TangoDeviceClientTest(QtGui.QWidget):
 	def readSpectrometerState(self, data):
 		self.spectrometerName.setState(data.value)
 
-	def readLeelaserState(self, data):
-		self.leelaserName.setState(data.value)
 
 	def readPeakEnergy(self, data):
 		self.peakEnergyWidget.setAttributeValue(data.value)
@@ -320,12 +348,27 @@ class TangoDeviceClientTest(QtGui.QWidget):
 				self.xData = self.xData[-90000:]
 		self.laserEnergyTrendCurve.setData(self.xData-self.xData[-1], yData, antialias = True)
 		
+	def readPeakWidth(self, data):
+		self.peakWidthWidget.setAttributeValue(data.value)
+		
 	def readSpectrum(self, data):
 		if self.timeVector == None:
 			self.oscSpectrumCurve.setData(data.value)
 		else:
 			self.oscSpectrumCurve.setData(y = data.value, x = self.timeVector, antialias = True)
 		self.oscSpectrumPlot.update()
+		
+	def onFinesse(self):
+		self.devices['finesse'].sendCommand(ClientCommand('tangoCommand','On'))
+		
+	def offFinesse(self):
+		self.devices['finesse'].sendCommand(ClientCommand('tangoCommand','Off'))
+		
+	def openFinesseShutter(self):
+		self.devices['finesse'].sendCommand(ClientCommand('tangoCommand','Open'))
+
+	def closeFinesseShutter(self):
+		self.devices['finesse'].sendCommand(ClientCommand('tangoCommand','Close'))
 
 	def setupAttributeLayout(self, attributeList = []):
 		self.attributeQObjects = []
@@ -343,6 +386,24 @@ class TangoDeviceClientTest(QtGui.QWidget):
 	def setupLayout(self):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
+		
+		self.frameSizes = qw.QTangoSizes()
+		self.frameSizes.readAttributeWidth = 240
+		self.frameSizes.writeAttributeWidth = 299
+		self.frameSizes.fontStretch= 80
+		self.frameSizes.fontType = 'Segoe UI'
+		self.frameSizes.fontType = 'Trebuchet MS'
+		self.attrSizes = qw.QTangoSizes()
+		self.attrSizes.barHeight = 18
+		self.attrSizes.barWidth = 42
+		self.attrSizes.readAttributeWidth = 240
+		self.attrSizes.writeAttributeWidth = 299
+		self.attrSizes.fontStretch= 80
+		self.attrSizes.fontType = 'Segoe UI'
+		self.attrSizes.fontType = 'Trebuchet MS'
+		
+		
+		self.colors = qw.QTangoColors()
 		
 		layout0 = QtGui.QVBoxLayout(self)
 		layout0.setMargin(0)
@@ -369,24 +430,32 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.layoutAttributes.setSpacing(0)
 		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
 		
-		self.title = qw.QTangoTitleBar('Oscillator')
-		self.sidebar = qw.QTangoSideBar()
+		self.title = qw.QTangoTitleBar('Gunlaser oscillator')
+		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar.addCmdButton('On', self.onFinesse)
+		self.sidebar.addCmdButton('Off', self.offFinesse)
+		self.sidebar.addCmdButton('Open', self.openFinesseShutter)
+		self.sidebar.addCmdButton('Close', self.closeFinesseShutter)
 		self.bottombar = qw.QTangoHorizontalBar()
-		self.finesseName = qw.QTangoDeviceNameStatus()
+		self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
 		self.finesseName.setAttributeName('Finesse')
-		self.spectrometerName = qw.QTangoDeviceNameStatus()
+		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
 		self.spectrometerName.setAttributeName('Spectrometer')
-		self.leelaserName = qw.QTangoDeviceNameStatus()
-		self.leelaserName.setAttributeName('MP LeeLaser')
-		self.laserTempWidget = qw.QTangoReadAttributeDouble()
+		self.laserTempWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
 		self.laserTempWidget.setAttributeName('Laser temperature')
-		self.laserPowerWidget = qw.QTangoReadAttributeDouble()
+		self.laserPowerWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
 		self.laserPowerWidget.setAttributeName('Laser power')
-		self.peakEnergyWidget = qw.QTangoReadAttributeDouble()
+		self.peakWidthWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+		self.peakWidthWidget.setAttributeName('Peak width')
+		self.peakEnergyWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
 		self.peakEnergyWidget.setAttributeName('Peak energy')
-# 		self.laserEnergyTrend = SmallTrend()
-# 		self.laserEnergyTrend.ySpan = 0.6
-# 		self.laserEnergyTrend.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
+
+		self.laserTempTrend = pg.PlotWidget(name = 'oscTempTrend')
+		self.laserTempTrend.setXRange(-600, 0)
+		self.laserTempTrend.setMaximumHeight(90)
+		self.laserTempTrend.setMaximumWidth(300)
+		self.laserTempTrendCurve = self.laserTempTrend.plot()
+		self.laserTempTrendCurve.setPen('#66cbff')
 		
 		self.laserEnergyTrend = pg.PlotWidget(name = 'oscEnergyTrend')
 		self.laserEnergyTrend.setXRange(-600, 0)
@@ -396,9 +465,11 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.laserEnergyTrendCurve.setPen('#66cbff')
 
 		self.oscSpectrumPlot = pg.PlotWidget(name = 'oscSpectrum')
-		self.oscSpectrumPlot.setXRange(700, 900)
+		self.oscSpectrumPlot.setXRange(760, 820)
 		self.oscSpectrumCurve = self.oscSpectrumPlot.plot()
 		self.oscSpectrumCurve.setPen('#66cbff')
+				
+		self.laserPowerWidget.writeValueSpinbox.editingFinished.connect(self.writeLaserPower)
 		
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
@@ -407,11 +478,12 @@ class TangoDeviceClientTest(QtGui.QWidget):
 #		layoutData.addSpacerItem(spacerItemH)
 						
 		self.layoutAttributes.addWidget(self.finesseName)
-		self.layoutAttributes.addWidget(self.leelaserName)
 		self.layoutAttributes.addWidget(self.spectrometerName)
 		self.layoutAttributes.addSpacerItem(spacerItemV)		
 		self.layoutAttributes.addWidget(self.laserTempWidget)
+		self.layoutAttributes.addWidget(self.laserTempTrend)
 		self.layoutAttributes.addWidget(self.laserPowerWidget)
+		self.layoutAttributes.addWidget(self.peakWidthWidget)
 		self.layoutAttributes.addWidget(self.peakEnergyWidget)
 		self.layoutAttributes.addWidget(self.laserEnergyTrend)
 		
