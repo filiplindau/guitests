@@ -255,10 +255,163 @@ class QTangoCommandButton(QtGui.QWidget):
 		font.setPointSize(int(self.sizes.barHeight * 0.5))		
 		cmdButton.setFont(font)
 		
+class QTangoCommandSelection(QtGui.QWidget):
+	def __init__(self, title, sizes = None, colors = None, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+
+		if colors == None:
+			self.attrColors = QTangoColors()
+		else:
+			self.attrColors = colors
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes
+		self.cmdButtons = OrderedDict()
+		self.title = title
+		self.layout = None
+		self.setupLayout()		
+		
+	def setupLayout(self):
+		# Init layouts once
+		if self.layout == None:
+
+			self.startLabel = QtGui.QLabel('')
+			st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+						'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+						'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+	#					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+						'background-color: ', self.attrColors.secondaryColor0, ';}'))
+			self.startLabel.setStyleSheet(st)
+			self.endLabel = QtGui.QLabel('')
+			st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+						'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+						'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+	#					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+						'background-color: ', self.attrColors.secondaryColor0, ';}'))
+			self.endLabel.setStyleSheet(st)
+	
+			self.nameLabel = QtGui.QLabel(self.title)
+			s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+						'max-height: ', str(self.sizes.barHeight), 'px; \n',
+						'background-color: ', self.attrColors.backgroundColor, '; \n',
+						'color: ', self.attrColors.secondaryColor0, ';}'))
+			self.nameLabel.setStyleSheet(s)
+		
+			font = self.nameLabel.font()
+			font.setFamily(self.sizes.fontType)
+			font.setStretch(self.sizes.fontStretch)
+			font.setPointSize(int(self.sizes.barHeight * 0.75))
+			font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+			self.nameLabel.setFont(font)
+			self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)		
+			self.nameLabel.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)		
+	
+			self.statusLabel = QtGui.QLabel('Status')
+			s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+						'max-height: ', str(self.sizes.barHeight), 'px; \n',
+						'background-color: ', self.attrColors.backgroundColor, '; \n',
+						'color: ', self.attrColors.secondaryColor0, ';}'))
+			self.statusLabel.setStyleSheet(s)
+		
+			font = self.statusLabel.font()
+			font.setFamily(self.sizes.fontType)
+			font.setStretch(self.sizes.fontStretch)
+			font.setPointSize(int(self.sizes.barHeight * 0.75))
+			font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+			self.statusLabel.setFont(font)
+			self.statusLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+			self.statusLabel.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)		
+	
+			self.layout = QtGui.QHBoxLayout(self)
+			self.layout.setContentsMargins(0,0,0,0)
+			self.layout.setMargin(int(self.sizes.barHeight/10))
+			
+			self.layout2 = QtGui.QVBoxLayout()
+			self.layout2.setContentsMargins(0,0,0,0)
+			self.layout2.setMargin(int(self.sizes.barHeight/10))			
+			
+			self.layoutInfo = QtGui.QHBoxLayout()
+			self.layoutInfo.setContentsMargins(0,0,0,0)
+			self.layoutInfo.setMargin(int(self.sizes.barHeight/10))
+			self.layoutInfo.setMargin(0)
+			self.layoutInfo.setSpacing(int(self.sizes.barHeight / 2))
+			self.layoutInfo.addWidget(self.nameLabel)		
+			self.layoutInfo.addWidget(self.statusLabel)
+			self.layoutButtons = QtGui.QHBoxLayout()
+			self.layoutButtons.setContentsMargins(0,0,0,0)
+			self.layoutButtons.setMargin(int(self.sizes.barHeight/10))
+			self.layoutButtons.setMargin(0)
+			self.layoutButtons.setSpacing(int(self.sizes.barHeight / 2))
+			self.layout2.addLayout(self.layoutInfo)		
+			self.layout2.addLayout(self.layoutButtons)
+			
+			self.layout.addWidget(self.startLabel)		
+			self.layout.addLayout(self.layout2)		
+			self.layout.addWidget(self.endLabel)
+
+
+# Clear out old layout
+		if self.cmdButtons.keys().__len__() > 0:
+			for i in reversed(range(self.layoutButtons.count())): 
+				self.layoutButtons.itemAt(i).widget().setParent(None)
+
+# Add buttons	
+		for cmdButton in self.cmdButtons.itervalues():
+			self.layoutButtons.addWidget(cmdButton)		
+#		self.layoutButtons.setSpacing(int(self.sizes.barHeight / 10))
+		
+		
+		self.update()
+		
+		self.setMaximumWidth(self.sizes.readAttributeWidth)
+		self.setMinimumWidth(self.sizes.readAttributeWidth)
+		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+		
+	def setStatus(self, statusText, state = None):
+		self.statusLabel.setText(statusText)	
+		self.statusLabel.repaint()
+		
+#		self.update()	
+		
+	def addCmdButton(self, name, slot):
+		cmdButton = QtGui.QPushButton('CMD ')
+		buttonHeight = self.sizes.barHeight*1.75
+		s = ''.join(('QPushButton {	background-color: ', self.attrColors.secondaryColor0, '; \n',
+					'color: ', self.attrColors.backgroundColor, '; \n',
+					'min-height: ', str(int(buttonHeight)), 'px; \n',
+					'max-height: ', str(int(buttonHeight)), 'px; \n',
+#					'min-width: ', str(int(self.sizes.barWidth)), 'px; \n',
+#					'max-width: ', str(int(self.sizes.barWidth)), 'px; \n',
+					'padding-left: 5px; \n',
+					'padding-right: 5px; \n',
+					'border-width: 0px; \n',
+					'border-style: solid; \n',
+					'border-color: #339; \n',
+					'border-radius: 0; \n',
+					'border: 0px; \n',
+					'text-align: right bottom;\n',
+					'padding: 0px; \n',
+					'margin: 0px; \n',
+					'} \n',
+					'QPushButton:hover{ background-color: ', self.attrColors.secondaryColor1, ';} \n',
+					'QPushButton:hover:pressed{ background-color: ', self.attrColors.secondaryColor2, ';} \n'))
+		cmdButton.setStyleSheet(s)
+		
+		cmdButton.setText(''.join((name, ' ')))
+		font = cmdButton.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)#QtGui.QFont.Condensed)
+		font.setPointSize(int(buttonHeight  * 0.4))	
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)	
+		cmdButton.setFont(font)
+		
 		if slot != None:
 			cmdButton.clicked.connect(slot)
 		
-		self.cmdButtons[title] = cmdButton		
+		self.cmdButtons[name] = cmdButton	
+		
+		self.setupLayout()	
 		
 
 		
@@ -279,8 +432,6 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 		readValueWidth = self.sizes.barWidth
 		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2-readValueWidth
 
-		print 'readAttr readwidth:', readWidth
-				
 		self.startLabel = QtGui.QLabel('')
 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
 					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
@@ -373,6 +524,126 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 		self.valueSpinbox.setValue(value)
 		self.update()
 
+class QTangoReadAttributeSlider(QtGui.QWidget):
+	def __init__(self, sizes = None, colors = None, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		if colors == None:
+			self.attrColors = QTangoColors()
+		else:
+			self.attrColors = colors
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes		
+		self.setupLayout()
+		
+	def setupLayout(self):
+		readValueWidth = self.sizes.barWidth
+		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2-readValueWidth
+
+		self.startLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.startLabel.setStyleSheet(st)
+		self.endLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.endLabel.setStyleSheet(st)
+
+		self.nameLabel = QtGui.QLabel('Test')
+		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(readWidth)), 'px; \n',
+					'max-width: ', str(int(readWidth)), 'px; \n',
+					'background-color: ', self.attrColors.backgroundColor, '; \n',
+					'color: ', self.attrColors.secondaryColor0, ';}'))
+		self.nameLabel.setStyleSheet(s)
+	
+		font = self.nameLabel.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+#		font.setPointSize(int(self.sizes.fontSize))
+		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+		self.nameLabel.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+
+		self.valueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 0px; \n',
+            'border-color: #339; \n',
+            'border-style: solid; \n',
+            'border-radius: 0; \n',
+            'border: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(int(readValueWidth)), 'px; \n',
+			'max-width: ', str(int(readValueWidth)), 'px; \n',
+            'min-height: ', str(self.sizes.barHeight), 'px; \n',
+            'max-height: ', str(self.sizes.barHeight), 'px; \n',
+            'qproperty-readOnly: 1; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.valueSpinbox.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+		self.valueSpinbox.setFont(font)
+		self.valueSpinbox.setStyleSheet(s)
+		self.valueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.valueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+		self.valueSlider = QtGui.QSlider()
+
+		self.layout = QtGui.QHBoxLayout(self)
+		self.layout.setContentsMargins(0,0,0,0)
+		self.layout.setMargin(int(self.sizes.barHeight/10))
+		
+		self.layout2 = QtGui.QVBoxLayout()
+		self.layout2.setContentsMargins(0,0,0,0)
+		self.layout2.setMargin(int(self.sizes.barHeight/10))			
+		
+		self.layoutInfo = QtGui.QHBoxLayout()
+		self.layoutInfo.setContentsMargins(0,0,0,0)
+		self.layoutInfo.setMargin(int(self.sizes.barHeight/10))
+		self.layoutInfo.setMargin(0)
+		self.layoutInfo.setSpacing(int(self.sizes.barHeight / 2))
+		self.layoutInfo.addWidget(self.nameLabel)		
+		self.layout2.addLayout(self.layoutInfo)		
+		self.layout2.addWidget(self.valueSlider)
+		self.layout.addWidget(self.startLabel)		
+		self.layout.addLayout(self.layout2)		
+		self.layout.addWidget(self.endLabel)
+		
+		self.setMaximumWidth(self.sizes.readAttributeWidth)
+		self.setMinimumWidth(self.sizes.readAttributeWidth)
+		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+
+	def attributeName(self):
+		return str(self.nameLabel.text())
+
+	@QtCore.pyqtSignature('setAttributeName(QString)')
+
+	def setAttributeName(self, aName):
+		self.nameLabel.setText(aName)
+		self.update()
+		
+	def setAttributeValue(self, value):
+		self.valueSpinbox.setValue(value)
+		self.update()
+
+
 class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -389,9 +660,9 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 		
 	def setupLayout(self):
 		readValueWidth = self.sizes.barWidth
-		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2-readValueWidth
+		readWidth = self.sizes.readAttributeWidth-int(self.sizes.barHeight/6)-readValueWidth
 		print 'writeAttr readwidth:', readWidth
-		writeValueWidth = self.sizes.writeAttributeWidth-self.sizes.readAttributeWidth-self.sizes.barHeight/2
+		writeValueWidth = self.sizes.writeAttributeWidth-self.sizes.readAttributeWidth-int(self.sizes.barHeight/6)-int(self.sizes.barHeight/2)
 		
 		self.startLabel = QtGui.QLabel('')
 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
@@ -495,7 +766,7 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 
 		layout = QtGui.QHBoxLayout(self)
 		layout.setContentsMargins(0,0,0,0)
-		layout.setMargin(int(barHeight/10))
+		layout.setMargin(int(self.sizes.barHeight/10))
 		
 #		layout.addSpacerItem(spacerItem)		
 		layout.addWidget(self.startLabel)
