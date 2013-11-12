@@ -14,6 +14,9 @@ class ButtonTest(QtGui.QWidget):
 	def __init__(self, parent = None):
 		QtGui.QWidget.__init__(self,parent)
 		
+		self.value = 0.5
+		self.lastTime = time.clock()
+		
 		self.setupLayout()
 		
 	def buttonFunction(self):
@@ -23,17 +26,45 @@ class ButtonTest(QtGui.QWidget):
 		self.buttonWidget.statusLabel.update()
 		self.buttonWidget.layoutInfo.update()
 		self.update()
+		
+	def timerFunction(self):
+		
+		newValue = (np.sin(time.clock()-self.lastTime)+1)/2+np.random.rand()*0.1
+		self.sliderWidget.setAttributeValue(newValue)
 	
 	def setupLayout(self):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 		
-		self.buttonWidget = qw.QTangoCommandSelection('Test')
+		self.attrSizes = qw.QTangoSizes()
+		self.attrSizes.barHeight = 18
+		self.attrSizes.barWidth = 42
+		self.attrSizes.readAttributeWidth = 240
+		self.attrSizes.writeAttributeWidth = 299
+		self.attrSizes.fontStretch= 80
+		self.attrSizes.fontType = 'Segoe UI'
+		
+		
+		self.buttonWidget = qw.QTangoCommandSelection('Test', sizes = self.attrSizes)
 		self.buttonWidget.addCmdButton('Change', self.buttonFunction)
 		self.buttonWidget.addCmdButton('B2', self.buttonFunction)
+		
+#		self.sliderWidget = qw.QTangoHSliderBase()
+		self.sliderWidget = qw.QTangoReadAttributeSlider(sizes = self.attrSizes)
+		self.sliderWidget.setAttributeWarningLimits(0.25, 0.9)
+		self.sliderWidget.setSliderLimits(0.2, 0.8)
+		self.sliderWidget.setAttributeValue(0.9)
+		self.sliderWidget.setAttributeName('Temperature')
+#		self.sliderWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 				
 		self.layout = QtGui.QVBoxLayout(self)
 		self.layout.addWidget(self.buttonWidget)
+		self.layout.addWidget(self.sliderWidget)
+		
+		self.timer = QtCore.QTimer()
+		self.timer.timeout.connect(self.timerFunction)
+		self.timer.setInterval(300)
+		self.timer.start()
 		
 		self.update()
 

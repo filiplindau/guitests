@@ -407,16 +407,16 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.frameSizes.readAttributeWidth = 240
 		self.frameSizes.writeAttributeWidth = 299
 		self.frameSizes.fontStretch= 80
-		self.frameSizes.fontType = 'Segoe UI'
-#		self.frameSizes.fontType = 'Trebuchet MS'
+#		self.frameSizes.fontType = 'Segoe UI'
+		self.frameSizes.fontType = 'Trebuchet MS'
 		self.attrSizes = qw.QTangoSizes()
 		self.attrSizes.barHeight = 18
 		self.attrSizes.barWidth = 42
 		self.attrSizes.readAttributeWidth = 240
 		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
-#		self.attrSizes.fontType = 'Trebuchet MS'
+		self.attrSizes.fontStretch= 90
+#		self.attrSizes.fontType = 'Segoe UI'
+		self.attrSizes.fontType = 'Trebuchet MS'
 		
 		
 		self.colors = qw.QTangoColors()
@@ -467,14 +467,24 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.laserOperationWidget.addCmdButton('Stop', self.offFinesse)
 
 		
-		self.laserTempWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+# 		self.laserTempWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+# 		self.laserTempWidget.setAttributeName('Laser temperature')
+		self.laserTempWidget = qw.QTangoReadAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.laserTempWidget.setAttributeName('Laser temperature')
+		self.laserTempWidget.setAttributeWarningLimits(25, 26)
+		self.laserTempWidget.setSliderLimits(23, 27)
 		self.laserPowerWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
 		self.laserPowerWidget.setAttributeName('Laser power')
-		self.peakWidthWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+		self.laserPowerSliderWidget = qw.QTangoHSliderBase()
+		self.peakWidthWidget = qw.QTangoReadAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.peakWidthWidget.setAttributeName('Peak width')
-		self.peakEnergyWidget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+		self.peakWidthWidget.setAttributeWarningLimits(7, 20)
+		self.peakWidthWidget.setSliderLimits(0, 15)
+		self.peakEnergyWidget = qw.QTangoReadAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.peakEnergyWidget.setAttributeName('Peak energy')
+		self.peakEnergyWidget.setAttributeWarningLimits(0.02, 1)
+		self.peakEnergyWidget.setSliderLimits(0, 0.04)
+		
 
 		self.laserTempTrend = pg.PlotWidget(name = 'oscTempTrend')
 		self.laserTempTrend.setXRange(-600, 0)
