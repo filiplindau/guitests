@@ -8,7 +8,9 @@ from PyQt4 import QtGui, QtCore, Qt
 import numpy as np
 import sys
 import PyTango as pt
+import pyqtgraph as pg
 from collections import OrderedDict
+import time
 
 backgroundColor = '#000000'
 primaryColor0 = '#ff9900'
@@ -327,6 +329,7 @@ class QTangoCommandSelection(QtGui.QWidget):
 			self.layout = QtGui.QHBoxLayout(self)
 			self.layout.setContentsMargins(0,0,0,0)
 			self.layout.setMargin(int(self.sizes.barHeight/10))
+			self.layout.setSpacing(self.sizes.barHeight/6)
 			
 			self.layout2 = QtGui.QVBoxLayout()
 			self.layout2.setContentsMargins(0,0,0,0)
@@ -526,6 +529,155 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 		self.valueSpinbox.setValue(value)
 		self.update()
 
+class QTangoReadAttributeTrend(QtGui.QWidget):
+	def __init__(self, sizes = None, colors = None, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		if colors == None:
+			self.attrColors = QTangoColors()
+		else:
+			self.attrColors = colors
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes		
+		self.setupLayout()
+		
+	def setupLayout(self):
+		readValueWidth = self.sizes.barWidth
+		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2
+
+		self.startLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+#					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.startLabel.setStyleSheet(st)
+		self.endLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+#					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.endLabel.setStyleSheet(st)
+
+		self.nameLabel = QtGui.QLabel('Test')
+		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(readWidth)), 'px; \n',
+					'max-width: ', str(int(readWidth)), 'px; \n',
+					'background-color: ', self.attrColors.backgroundColor, '; \n',
+					'color: ', self.attrColors.secondaryColor0, ';}'))
+		self.nameLabel.setStyleSheet(s)
+	
+		font = self.nameLabel.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+#		font.setPointSize(int(self.sizes.fontSize))
+		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+		self.nameLabel.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+
+		self.valueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 0px; \n',
+            'border-color: #339; \n',
+            'border-style: solid; \n',
+            'border-radius: 0; \n',
+            'border: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(int(readValueWidth)), 'px; \n',
+			'max-width: ', str(int(readValueWidth)), 'px; \n',
+            'min-height: ', str(self.sizes.barHeight), 'px; \n',
+            'max-height: ', str(self.sizes.barHeight), 'px; \n',
+            'qproperty-readOnly: 1; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.valueSpinbox.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.75))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+		self.valueSpinbox.setFont(font)
+		self.valueSpinbox.setStyleSheet(s)
+		self.valueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.valueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)	
+		
+# 		self.valueTrend = pg.PlotWidget(name = 'valueTrend')
+# 		self.valueTrend.setXRange(-600, 0)
+# #		self.valueTrend.setMaximumHeight(self.sizes.barHeight)
+# 		self.valueTrend.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+# 		self.valueTrend.setMaximumWidth(300)
+# 		pi=self.valueTrend.getPlotItem()
+# 		pi.hideAxis('left')
+# 		pi.hideAxis('bottom')
+# 		
+# 		self.valueTrendCurve = self.valueTrend.plot()
+# 		self.valueTrendCurve.setPen('#66cbff', width = 1.5)		
+# 		
+# 		xData = np.linspace(-600, 0, 2000)
+# 		yData = np.sin(xData*10*np.pi/600)+1
+# 		self.valueTrendCurve.setData(xData, yData, antialias = True)
+		self.valueTrend = QTangoTrendBase(self.sizes, self.attrColors)
+		
+		self.layout = QtGui.QHBoxLayout(self)
+		self.layout.setContentsMargins(0,0,0,0)
+		self.layout.setMargin(int(self.sizes.barHeight/10))
+		self.layout.setSpacing(self.sizes.barHeight/6)
+		
+		self.layoutGrid = QtGui.QGridLayout()
+		self.layoutGrid.setContentsMargins(0, 0, 0, 0)
+		self.layoutGrid.setMargin(int(self.sizes.barHeight/10))
+		self.layoutGrid.addWidget(self.nameLabel, 0, 0)
+		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)		
+		self.layoutGrid.addWidget(self.valueTrend, 1, 0, 1, 2)
+		self.layoutGrid.setHorizontalSpacing(self.sizes.barHeight/4)
+		self.layoutGrid.setVerticalSpacing(0)
+# 		self.layoutTrend = QtGui.QVBoxLayout()
+# 		self.layoutTrend.setContentsMargins(0, 0, 0, 0)
+# 		self.layoutTrend.setMargin(int(self.sizes.barHeight/10))
+# 		self.layoutTrend.addWidget(self.nameLabel)
+# 		self.layoutTrend.addWidget(self.valueTrend)
+# 		self.layoutTrend.setSpacing(self.sizes.barHeight/4)
+
+		self.layout.addWidget(self.startLabel)
+#		self.layout.addLayout(self.layoutTrend)		
+		self.layout.addLayout(self.layoutGrid)		
+		self.layout.addWidget(self.endLabel)
+		
+		self.setMaximumWidth(self.sizes.readAttributeWidth)
+		self.setMinimumWidth(self.sizes.readAttributeWidth)
+		self.setMaximumHeight(self.sizes.barHeight*4)
+		self.setMinimumHeight(self.sizes.barHeight*4)
+		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)		
+
+	def attributeName(self):
+		return str(self.nameLabel.text())
+
+	@QtCore.pyqtSignature('setAttributeName(QString)')
+
+	def setAttributeName(self, aName):
+		self.nameLabel.setText(aName)
+		self.update()
+		
+	def setAttributeValue(self, value):
+		t = time.time()
+		self.valueSpinbox.setValue(value)
+		self.valueTrend.addPoint(t, value)
+		self.update()
+		
+	def setAttributeWarningLimits(self, warnLow, warnHigh):
+		self.valueTrend.setWarningLimits(warnLow, warnHigh)
+		
+	def setTrendLimits(self, low, high):
+		self.valueTrend.setYRange(low, high)
+		
 class QTangoHSliderBase(QtGui.QSlider):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QSlider.__init__(self, parent)
@@ -542,6 +694,7 @@ class QTangoHSliderBase(QtGui.QSlider):
 		self.attrMaximum = 1
 		self.attrMinimum = 0		
 		self.attrValue = 0.5
+		self.attrWriteValue = None
 		self.warnHigh = 0.9
 		self.warnLow = 0.1
 		
@@ -556,14 +709,16 @@ class QTangoHSliderBase(QtGui.QSlider):
 		w = size.width()
 		h = size.height()
 		
-		startH = h/8.0
+		startH = h/6.0
 		lineW = h/4.0
 		arrowW = h/3.0
+		writeW = h/8.0
 		
-		textVertPos = h-h/16.0		
+		textVertPos = h-h/16.0
+		textVertPos = h		
 		xVal = w*(self.attrValue-self.attrMinimum)/(self.attrMaximum-self.attrMinimum)
 
-		font = QtGui.QFont(self.sizes.fontType, self.sizes.barHeight*0.7, self.sizes.fontWeight)
+		font = QtGui.QFont(self.sizes.fontType, self.sizes.barHeight*0.5, self.sizes.fontWeight)
 		font.setStretch(self.sizes.fontStretch)
 		
 		sVal = "{:.2f}".format((self.attrValue))
@@ -592,6 +747,7 @@ class QTangoHSliderBase(QtGui.QSlider):
 					QtCore.QPointF(xVal+arrowW/2.0,h)])
 			
 		colorAttr = QtGui.QColor(self.attrColors.secondaryColor0)
+		colorWriteAttr = QtGui.QColor(self.attrColors.secondaryColor2)
 		penAttr = QtGui.QPen(colorAttr)
 		penAttr.setWidthF(lineW)
 		brushAttr = QtGui.QBrush(colorAttr)
@@ -602,7 +758,7 @@ class QTangoHSliderBase(QtGui.QSlider):
 		penWarn.setWidthF(lineW)
 		brushWarn = QtGui.QBrush(colorWarn)
 		
-		qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+		qp.setRenderHint(QtGui.QPainter.Antialiasing, False)
 		qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
 		qp.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
 		# Draw warning line
@@ -615,27 +771,41 @@ class QTangoHSliderBase(QtGui.QSlider):
 		qp.drawLine(w*(self.warnLow-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),startH,
 				w*(self.warnHigh-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),startH)
 		# Draw arrow
-		if self.attrValue < self.warnLow or self.attrValue > self.warnHigh: 
-			pen = penWarn
-			brush = brushWarn
-			qp.setBrush(brush)
-		else:
-			pen = penAttr
-			brush = brushAttr
+		qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+		# Change color of arrow when in warning range
+# 		if self.attrValue < self.warnLow or self.attrValue > self.warnHigh: 
+# 			pen = penWarn
+# 			brush = brushWarn
+# 			qp.setBrush(brush)
+# 		else:
+# 			pen = penAttr
+# 			brush = brushAttr
+		pen = penAttr
 		pen.setWidthF(0)
 		qp.setPen(pen)
 		qp.drawPolygon(poly)
+		if self.attrWriteValue != None:
+			pen.setWidthF(writeW)
+			pen.setColor(colorWriteAttr)
+			qp.setPen(pen)
+			xValW = w*(self.attrWriteValue-self.attrMinimum)/(self.attrMaximum-self.attrMinimum)
+			qp.drawLine(xValW, h, xValW, 0)
 		# Draw texts
-		qp.drawText(textPoint, sVal)
+#		qp.drawText(textPoint, sVal)
 		# Don't draw the limit texts if the value text is overlapping
+		pen.setColor(colorAttr)
+		qp.setPen(pen)
 		if xVal - arrowW/2 > sMinWidth:
 			qp.drawText(QtCore.QPointF(0, textVertPos), sMin)
 		if textPoint.x()+sValWidth < w-sMaxWidth:
 			qp.drawText(QtCore.QPointF(w-sMaxWidth, textVertPos), sMax)
 
-
 	def setValue(self, value):
 		self.attrValue = value
+		self.update()
+		
+	def setWriteValue(self, value):
+		self.attrWriteValue = value
 		self.update()
 		
 	def setWarningLimits(self, warnLow, warnHigh):
@@ -647,6 +817,86 @@ class QTangoHSliderBase(QtGui.QSlider):
 		self.attrMinimum = min
 		self.attrMaximum = max
 		self.update()
+		
+class QTangoTrendBase(pg.PlotWidget):
+	def __init__(self, sizes = None, colors = None, parent=None):
+		pg.PlotWidget.__init__(self, useOpenGL = True)
+		if colors == None:
+			self.attrColors = QTangoColors()
+		else:
+			self.attrColors = colors
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes		
+
+		self.valuesSize = 100000
+
+		self.setupLayout()
+		self.setupData()
+		
+		
+	def setupLayout(self):
+		self.setXRange(-600, 0)
+		self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+		self.setMaximumWidth(self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2)
+		pi=self.getPlotItem()
+		axLeft = pi.getAxis('left')
+		axLeft.setPen(self.attrColors.secondaryColor0)
+#		axLeft.setWidth(1)
+		axBottom = pi.getAxis('bottom')
+		axBottom.setPen(self.attrColors.secondaryColor0)
+#		axBottom.setWidth(1)
+
+# 		axRight = pi.getAxis('right')
+# 		axRight.setPen(self.attrColors.secondaryColor0)
+# 		axRight.setWidth(0)
+# 		axRight.setTicks([])
+# 		axRight.showLabel(False)
+# 		pi.showAxis('right')
+
+		colorWarn = QtGui.QColor(self.attrColors.warnColor)
+#		colorWarn = QtGui.QColor('#339922')
+		colorWarn.setAlphaF(0.75)
+		brushWarn = QtGui.QBrush(colorWarn, style = QtCore.Qt.SolidPattern)
+		penLines = QtGui.QPen(QtGui.QColor('#55555500'))
+		
+		self.warningRegionUpper = pg.LinearRegionItem(values=[24, 100], orientation = pg.LinearRegionItem.Horizontal, 
+													brush = brushWarn, movable = False)
+		self.warningRegionUpper.lines[0].setPen(penLines)
+		self.warningRegionUpper.lines[1].setPen(penLines)
+		self.warningRegionLower = pg.LinearRegionItem(values=[-100, 26], orientation = pg.LinearRegionItem.Horizontal, 
+													brush = brushWarn, movable = False)
+		self.warningRegionLower.lines[0].setPen(penLines)
+		self.warningRegionLower.lines[1].setPen(penLines)
+		self.addItem(self.warningRegionUpper)	
+		self.addItem(self.warningRegionLower)
+		self.valueTrendCurve = self.plot()
+		self.valueTrendCurve.setPen(self.attrColors.secondaryColor0, width = 1.5)
+		
+	def setupData(self):
+		self.xValues = np.linspace(-10000, 0, self.valuesSize)
+		self.yValues = np.sin(self.xValues*10*np.pi/600)+1
+		self.currentDataIndex = 0
+		self.valueTrendCurve.setData(self.xValues, self.yValues, antialias = True)
+		
+	def setWarningLimits(self, warnLow, warnHigh):
+		self.warningRegionUpper.setRegion([warnHigh, 1e6])
+		self.warningRegionLower.setRegion([-1e6, warnLow])
+		
+		
+	def addPoint(self, xNew, yNew):
+		if self.currentDataIndex+1 > self.valuesSize:
+			self.xData[0:self.valuesSize*0.75]=self.xData[self.valuesSize-self.valuesSize*0.75, self.valuesSize]
+			self.yData[0:self.valuesSize*0.75]=self.yData[self.valuesSize-self.valuesSize*0.75, self.valuesSize]
+			self.currentDataIndex = self.valuesSize*0.75
+		elif self.currentDataIndex == 0:
+			self.xValues[0] = xNew
+			self.yValues[0] = yNew
+		self.currentDataIndex+=1
+		self.xValues[self.currentDataIndex] = xNew
+		self.yValues[self.currentDataIndex] = yNew
+		self.valueTrendCurve.setData(self.xValues[0:self.currentDataIndex]-xNew, self.yValues[0:self.currentDataIndex], antialias = True)
 		
 
 class QTangoReadAttributeSlider(QtGui.QWidget):
@@ -722,7 +972,7 @@ class QTangoReadAttributeSlider(QtGui.QWidget):
 		font.setFamily(self.sizes.fontType)
 		font.setStretch(self.sizes.fontStretch)
 		font.setWeight(self.sizes.fontWeight)
-		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setPointSize(int(self.sizes.barHeight * 0.75))
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.valueSpinbox.setFont(font)
 		self.valueSpinbox.setStyleSheet(s)
@@ -736,21 +986,33 @@ class QTangoReadAttributeSlider(QtGui.QWidget):
 		self.layout = QtGui.QHBoxLayout(self)
 		self.layout.setContentsMargins(0,0,0,0)
 		self.layout.setMargin(int(self.sizes.barHeight/10))
+		self.layout.setSpacing(self.sizes.barHeight/6)
 		
-		self.layout2 = QtGui.QVBoxLayout()
-		self.layout2.setContentsMargins(0,0,0,0)
-		self.layout2.setMargin(int(self.sizes.barHeight/10))			
-		
-		self.layoutInfo = QtGui.QHBoxLayout()
-		self.layoutInfo.setContentsMargins(0,0,0,0)
-		self.layoutInfo.setMargin(int(self.sizes.barHeight/10))
-		self.layoutInfo.setMargin(0)
-		self.layoutInfo.setSpacing(int(self.sizes.barHeight / 2))
-		self.layoutInfo.addWidget(self.nameLabel)		
-		self.layout2.addLayout(self.layoutInfo)		
-		self.layout2.addWidget(self.valueSlider)
+# 		self.layout2 = QtGui.QVBoxLayout()
+# 		self.layout2.setContentsMargins(0,0,0,0)
+# 		self.layout2.setMargin(int(self.sizes.barHeight/10))			
+# 		
+# 		self.layoutInfo = QtGui.QHBoxLayout()
+# 		self.layoutInfo.setContentsMargins(0,0,0,0)
+# 		self.layoutInfo.setMargin(int(self.sizes.barHeight/10))
+# 		self.layoutInfo.setMargin(0)
+# 		self.layoutInfo.setSpacing(int(self.sizes.barHeight / 2))
+# 		self.layoutInfo.addWidget(self.nameLabel)		
+# 		self.layout2.addLayout(self.layoutInfo)		
+# 		self.layout2.addWidget(self.valueSlider)
+
+		self.layoutGrid = QtGui.QGridLayout()
+		self.layoutGrid.setContentsMargins(0, 0, 0, 0)
+		self.layoutGrid.setMargin(int(self.sizes.barHeight/10))
+		self.layoutGrid.addWidget(self.nameLabel, 0, 0, )
+		self.layoutGrid.addWidget(self.valueSlider, 1, 0)
+		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)		
+		self.layoutGrid.setHorizontalSpacing(self.sizes.barHeight/4)
+#		self.layoutGrid.setVerticalSpacing(self.sizes.barHeight/12)
+		self.layoutGrid.setVerticalSpacing(0)
+
 		self.layout.addWidget(self.startLabel)		
-		self.layout.addLayout(self.layout2)		
+		self.layout.addLayout(self.layoutGrid)		
 		self.layout.addWidget(self.endLabel)
 		
 		self.setMaximumWidth(self.sizes.readAttributeWidth)
@@ -779,6 +1041,185 @@ class QTangoReadAttributeSlider(QtGui.QWidget):
 	def setSliderLimits(self, min, max):
 		self.valueSlider.setSliderLimits(min, max)
 
+class QTangoWriteAttributeSlider(QtGui.QWidget):
+	def __init__(self, sizes = None, colors = None, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		if colors == None:
+			self.attrColors = QTangoColors()
+		else:
+			self.attrColors = colors
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes		
+		self.setupLayout()
+		
+	def setupLayout(self):
+		readValueWidth = self.sizes.barWidth
+		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2
+
+		self.startLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+#					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.startLabel.setStyleSheet(st)
+		self.endLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+#					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.endLabel.setStyleSheet(st)
+
+		self.nameLabel = QtGui.QLabel('Test')
+		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(readWidth)), 'px; \n',
+					'max-width: ', str(int(readWidth)), 'px; \n',
+					'background-color: ', self.attrColors.backgroundColor, '; \n',
+					'color: ', self.attrColors.secondaryColor0, ';}'))
+		self.nameLabel.setStyleSheet(s)
+	
+		font = self.nameLabel.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+#		font.setPointSize(int(self.sizes.fontSize))
+		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+		self.nameLabel.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+
+		self.valueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 0px; \n',
+            'border-color: #339; \n',
+            'border-style: solid; \n',
+            'border-radius: 0; \n',
+            'border: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(int(readValueWidth)), 'px; \n',
+			'max-width: ', str(int(readValueWidth)), 'px; \n',
+            'min-height: ', str(self.sizes.barHeight), 'px; \n',
+            'max-height: ', str(self.sizes.barHeight), 'px; \n',
+            'qproperty-readOnly: 1; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.valueSpinbox.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.75))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+		self.valueSpinbox.setFont(font)
+		self.valueSpinbox.setStyleSheet(s)
+		self.valueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.valueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+		self.writeValueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'selection-background-color: ', self.attrColors.secondaryColor0, '; \n',
+            'selection-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 1px; \n',
+            'border-color: ', self.attrColors.secondaryColor0, '; \n',
+            'border-style: solid; \n',
+            'border-radius: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(int(readValueWidth)), 'px; \n',
+            'max-width: ', str(int(readValueWidth)), 'px; \n',
+            'min-height: ', str(self.sizes.barHeight), 'px; \n',
+            'max-height: ', str(self.sizes.barHeight), 'px; \n',
+            'qproperty-readOnly: 0; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.writeValueSpinbox.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+		self.writeValueSpinbox.setFont(font)
+		self.writeValueSpinbox.setStyleSheet(s)
+		self.writeValueSpinbox.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
+		self.writeValueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+		self.writeValueSpinbox.editingFinished.connect(self.editingFinished)
+
+		self.valueSlider = QTangoHSliderBase(self.sizes, self.attrColors)
+		self.valueSlider.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+		self.valueSlider.setMaximumHeight(self.sizes.barHeight)
+
+		self.layout = QtGui.QHBoxLayout(self)
+		self.layout.setContentsMargins(0,0,0,0)
+		self.layout.setMargin(int(self.sizes.barHeight/10))
+		self.layout.setSpacing(self.sizes.barHeight/6)
+		
+# 		self.layout2 = QtGui.QVBoxLayout()
+# 		self.layout2.setContentsMargins(0,0,0,0)
+# 		self.layout2.setMargin(int(self.sizes.barHeight/10))			
+# 		
+# 		self.layoutInfo = QtGui.QHBoxLayout()
+# 		self.layoutInfo.setContentsMargins(0,0,0,0)
+# 		self.layoutInfo.setMargin(int(self.sizes.barHeight/10))
+# 		self.layoutInfo.setMargin(0)
+# 		self.layoutInfo.setSpacing(int(self.sizes.barHeight / 2))
+# 		self.layoutInfo.addWidget(self.nameLabel)		
+# 		self.layout2.addLayout(self.layoutInfo)		
+# 		self.layout2.addWidget(self.valueSlider)
+
+		self.layoutGrid = QtGui.QGridLayout()
+		self.layoutGrid.setContentsMargins(0, 0, 0, 0)
+		self.layoutGrid.setMargin(int(self.sizes.barHeight/10))
+		self.layoutGrid.addWidget(self.nameLabel, 0, 0, )
+		self.layoutGrid.addWidget(self.valueSlider, 1, 0)
+		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)
+		self.layoutGrid.addWidget(self.writeValueSpinbox, 1, 1)
+
+		self.layout.addWidget(self.startLabel)		
+		self.layout.addLayout(self.layoutGrid)		
+		self.layout.addWidget(self.endLabel)
+		
+		self.setMaximumWidth(self.sizes.readAttributeWidth)
+		self.setMinimumWidth(self.sizes.readAttributeWidth)
+		self.setMaximumHeight(self.sizes.barHeight*2.5)
+		#self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
+	def attributeName(self):
+		return str(self.nameLabel.text())
+
+	@QtCore.pyqtSignature('setAttributeName(QString)')
+
+	def setAttributeName(self, aName):
+		self.nameLabel.setText(aName)
+		self.update()
+		
+	def setAttributeValue(self, value):
+		self.valueSpinbox.setValue(value)
+		self.valueSlider.setValue(value)
+		self.update()
+		
+	def setAttributeWriteValue(self, value):
+		self.writeValueSpinbox.setValue(value)
+		self.valueSlider.setWriteValue(value)
+		self.update()
+		
+	def setAttributeWarningLimits(self, warnLow, warnHigh):
+		self.valueSlider.setWarningLimits(warnLow, warnHigh)
+		
+	def setSliderLimits(self, min, max):
+		self.valueSlider.setSliderLimits(min, max)
+		
+	def editingFinished(self):
+		self.valueSlider.setWriteValue(self.writeValueSpinbox.value())
+		self.update()
+		print 'updating slider to ', self.writeValueSpinbox.value()
 
 class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):

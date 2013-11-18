@@ -307,16 +307,17 @@ class TangoDeviceClientTest(QtGui.QWidget):
 	
 	def readLaserTemperature(self, data):
 		self.laserTempWidget.setAttributeValue(data.value)
-		if self.xDataTemp == None:
-			self.xDataTemp = np.array([time.time()])
-			yData = np.array([data.value])
-		else:
-			self.xDataTemp = np.append(self.xDataTemp, time.time())
-			yData = np.append(self.laserTempTrendCurve.yData, data.value)
-			if yData.shape[0] > 100000:
-				yData = yData[-90000:]
-				self.xDataTemp = self.xDataTemp[-90000:]
-		self.laserTempTrendCurve.setData(self.xDataTemp-self.xDataTemp[-1], yData, antialias = True)
+# 		if self.xDataTemp == None:
+# 			self.xDataTemp = np.array([time.time()])
+# 			yData = np.array([data.value])
+# 		else:
+# 			self.xDataTemp = np.append(self.xDataTemp, time.time())
+# 			yData = np.append(self.laserTempTrendCurve.yData, data.value)
+# 			if yData.shape[0] > 100000:
+# 				yData = yData[-90000:]
+# 				self.xDataTemp = self.xDataTemp[-90000:]
+# 		self.laserTempTrendCurve.setData(self.xDataTemp-self.xDataTemp[-1], yData, antialias = True)
+		self.laserTempWidget2.setAttributeValue(data.value)
 
 
 	def readLaserPower(self, data):
@@ -325,8 +326,8 @@ class TangoDeviceClientTest(QtGui.QWidget):
 	def writeLaserPower(self):
 		power = self.laserPowerWidget.writeValueSpinbox.value()
 		data = ['Power', power]
-		self.devices['finesse'].sendCommand(ClientCommand('setAttribute', data))
-		print power
+#		self.devices['finesse'].sendCommand(ClientCommand('setAttribute', data))
+		print 'Power: ', power
 		
 	def readFinesseState(self, data):
 		self.finesseName.setState(data.value)
@@ -346,26 +347,27 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.peakEnergyWidget.setAttributeValue(data.value)
 #		self.laserEnergyTrend.updateData(time.time(), data.value)
 #		oldData = self.laserEnergyTrendCurve.getData()
-		if self.xData == None:
-			self.xData = np.array([time.time()])
-			yData = np.array([data.value])
-		else:
-			self.xData = np.append(self.xData, time.time())
-			yData = np.append(self.laserEnergyTrendCurve.yData, data.value)
-			if yData.shape[0] > 100000:
-				yData = yData[-90000:]
-				self.xData = self.xData[-90000:]
-		self.laserEnergyTrendCurve.setData(self.xData-self.xData[-1], yData, antialias = True)
+# 		if self.xData == None:
+# 			self.xData = np.array([time.time()])
+# 			yData = np.array([data.value])
+# 		else:
+# 			self.xData = np.append(self.xData, time.time())
+# 			yData = np.append(self.laserEnergyTrendCurve.yData, data.value)
+# 			if yData.shape[0] > 100000:
+# 				yData = yData[-90000:]
+# 				self.xData = self.xData[-90000:]
+# 		self.laserEnergyTrendCurve.setData(self.xData-self.xData[-1], yData, antialias = True)
 		
 	def readPeakWidth(self, data):
 		self.peakWidthWidget.setAttributeValue(data.value)
 		
 	def readSpectrum(self, data):
-		if self.timeVector == None:
-			self.oscSpectrumCurve.setData(data.value)
-		else:
-			self.oscSpectrumCurve.setData(y = data.value, x = self.timeVector, antialias = True)
-		self.oscSpectrumPlot.update()
+# 		if self.timeVector == None:
+# 			self.oscSpectrumCurve.setData(data.value)
+# 		else:
+# 			self.oscSpectrumCurve.setData(y = data.value, x = self.timeVector, antialias = True)
+# 		self.oscSpectrumPlot.update()
+		pass
 		
 	def onFinesse(self):
 		self.devices['finesse'].sendCommand(ClientCommand('tangoCommand','On'))
@@ -407,16 +409,16 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.frameSizes.readAttributeWidth = 240
 		self.frameSizes.writeAttributeWidth = 299
 		self.frameSizes.fontStretch= 80
-#		self.frameSizes.fontType = 'Segoe UI'
-		self.frameSizes.fontType = 'Trebuchet MS'
+		self.frameSizes.fontType = 'Segoe UI'
+#		self.frameSizes.fontType = 'Trebuchet MS'
 		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 18
-		self.attrSizes.barWidth = 42
+		self.attrSizes.barHeight = 20
+		self.attrSizes.barWidth = 60
 		self.attrSizes.readAttributeWidth = 240
 		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 90
-#		self.attrSizes.fontType = 'Segoe UI'
-		self.attrSizes.fontType = 'Trebuchet MS'
+		self.attrSizes.fontStretch= 80
+		self.attrSizes.fontType = 'Segoe UI'
+#		self.attrSizes.fontType = 'Trebuchet MS'
 		
 		
 		self.colors = qw.QTangoColors()
@@ -473,9 +475,19 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.laserTempWidget.setAttributeName('Laser temperature')
 		self.laserTempWidget.setAttributeWarningLimits(25, 26)
 		self.laserTempWidget.setSliderLimits(23, 27)
-		self.laserPowerWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+
+		self.laserTempWidget2 = qw.QTangoReadAttributeTrend(colors = self.colors, sizes = self.attrSizes)
+		self.laserTempWidget2.setAttributeName('Laser temperature')
+		self.laserTempWidget2.setAttributeWarningLimits(25, 26)
+		self.laserTempWidget2.setTrendLimits(23, 27)
+
+
+#		self.laserPowerWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+		self.laserPowerWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.laserPowerWidget.setAttributeName('Laser power')
-		self.laserPowerSliderWidget = qw.QTangoHSliderBase()
+		self.laserPowerWidget.setSliderLimits(0, 6)
+		self.laserPowerWidget.setAttributeWarningLimits(4, 5.5)
+		self.laserPowerWidget.setAttributeWriteValue(5)
 		self.peakWidthWidget = qw.QTangoReadAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.peakWidthWidget.setAttributeName('Peak width')
 		self.peakWidthWidget.setAttributeWarningLimits(7, 20)
@@ -486,31 +498,31 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.peakEnergyWidget.setSliderLimits(0, 0.04)
 		
 
-		self.laserTempTrend = pg.PlotWidget(name = 'oscTempTrend')
-		self.laserTempTrend.setXRange(-600, 0)
-		self.laserTempTrend.setMaximumHeight(90)
-		self.laserTempTrend.setMaximumWidth(300)
-		self.laserTempTrendCurve = self.laserTempTrend.plot()
-		self.laserTempTrendCurve.setPen('#66cbff', width = 1.5)
-		
-		self.laserEnergyTrend = pg.PlotWidget(name = 'oscEnergyTrend')
-		self.laserEnergyTrend.setXRange(-600, 0)
-		self.laserEnergyTrend.setMaximumHeight(90)
-		self.laserEnergyTrend.setMaximumWidth(300)
-		self.laserEnergyTrendCurve = self.laserEnergyTrend.plot()
-		self.laserEnergyTrendCurve.setPen('#66cbff', width = 1.5)
+# 		self.laserTempTrend = pg.PlotWidget(name = 'oscTempTrend')
+# 		self.laserTempTrend.setXRange(-600, 0)
+# 		self.laserTempTrend.setMaximumHeight(90)
+# 		self.laserTempTrend.setMaximumWidth(300)
+# 		self.laserTempTrendCurve = self.laserTempTrend.plot()
+# 		self.laserTempTrendCurve.setPen('#66cbff', width = 1.5)
+# 		
+# 		self.laserEnergyTrend = pg.PlotWidget(name = 'oscEnergyTrend')
+# 		self.laserEnergyTrend.setXRange(-600, 0)
+# 		self.laserEnergyTrend.setMaximumHeight(90)
+# 		self.laserEnergyTrend.setMaximumWidth(300)
+# 		self.laserEnergyTrendCurve = self.laserEnergyTrend.plot()
+# 		self.laserEnergyTrendCurve.setPen('#66cbff', width = 1.5)
 
-		self.oscSpectrumPlot = pg.PlotWidget(name = 'oscSpectrum')
-		self.oscSpectrumPlot.setXRange(760, 820)
-		self.oscSpectrumCurve = self.oscSpectrumPlot.plot()
-		self.oscSpectrumCurve.setPen('#66cbff', width = 1.5)
+# 		self.oscSpectrumPlot = pg.PlotWidget(name = 'oscSpectrum')
+# 		self.oscSpectrumPlot.setXRange(760, 820)
+# 		self.oscSpectrumCurve = self.oscSpectrumPlot.plot()
+# 		self.oscSpectrumCurve.setPen('#66cbff', width = 1.5)
 				
 		self.laserPowerWidget.writeValueSpinbox.editingFinished.connect(self.writeLaserPower)
 		
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
 		layoutData.addLayout(self.layoutAttributes)
-		layoutData.addWidget(self.oscSpectrumPlot)
+#		layoutData.addWidget(self.oscSpectrumPlot)
 #		layoutData.addSpacerItem(spacerItemH)
 						
 		self.layoutAttributes.addWidget(self.finesseName)
@@ -519,11 +531,12 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.layoutAttributes.addWidget(self.shutterWidget)
 		self.layoutAttributes.addWidget(self.laserOperationWidget)		
 		self.layoutAttributes.addWidget(self.laserTempWidget)
-		self.layoutAttributes.addWidget(self.laserTempTrend)
+		self.layoutAttributes.addWidget(self.laserTempWidget2)
+#		self.layoutAttributes.addWidget(self.laserTempTrend)
 		self.layoutAttributes.addWidget(self.laserPowerWidget)
 		self.layoutAttributes.addWidget(self.peakWidthWidget)
 		self.layoutAttributes.addWidget(self.peakEnergyWidget)
-		self.layoutAttributes.addWidget(self.laserEnergyTrend)
+#		self.layoutAttributes.addWidget(self.laserEnergyTrend)
 		
 		layout1.addWidget(self.sidebar)
 		layout1.addLayout(layout2)
