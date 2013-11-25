@@ -28,7 +28,7 @@ standbyColor = '#9c9cff'
 unknownColor = '#45616f'
 disableColor = '#ff00ff'
 
-class QTangoColors():
+class QTangoColors(object):
 	def __init__(self):
 		self.backgroundColor = '#000000'
 		self.primaryColor0 = '#ff9900'
@@ -47,7 +47,7 @@ class QTangoColors():
 		self.unknownColor = '#45616f'
 		self.disableColor = '#ff00ff'
 
-class QTangoSizes():
+class QTangoSizes(object):
 	def __init__(self):
 		self.barHeight = 30
 		self.barWidth = 90
@@ -93,13 +93,15 @@ class QTangoTitleBar(QtGui.QWidget):
 					'}'))
 		self.nameLabel.setStyleSheet(s)
 		
-		self.nameLabel.setText(self.title)
+		self.nameLabel.setText(self.title.upper())
 		font = self.nameLabel.font()
 		font.setFamily('TrebuchetMS')
 		font.setStretch(QtGui.QFont.Condensed)
+		font.setWeight(QtGui.QFont.Light)
 		font.setPointSize(int(barHeight * 1.15))
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 		
 		self.layout = QtGui.QHBoxLayout(self)
 		self.layout.setSpacing(int(barHeight / 5))
@@ -285,7 +287,7 @@ class QTangoCommandSelection(QtGui.QWidget):
 			self.nameLabel.setText(self.title)
 			self.statusLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)			
 			self.statusLabel.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
-			self.statusLabel.setText('Status')
+			self.statusLabel.setText('')
 	
 
 			self.layout = QtGui.QHBoxLayout(self)
@@ -507,6 +509,7 @@ class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox):
 		self.setStyleSheet(s)
 		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
 		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+		self.setMaximum(1e9)
 		
 class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -552,7 +555,8 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 
 		self.setStyleSheet(s)
 		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)		
+		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)	
+		self.setMaximum(1e9)	
 
 	def valueReady(self, value):
 		print 'Value ready::', value
@@ -582,6 +586,29 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 
 		print txt, pos
 		self.setSingleStep(10 ** pos)
+		
+	def setColors(self, attrColorName, backgroundColorName):
+		backgroundColor = self.attrColors.__getattribute__(backgroundColorName)
+		mainColor = self.attrColors.__getattribute__(attrColorName)
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', backgroundColor, '; \n',
+            'selection-background-color: ', mainColor, '; \n',
+            'selection-color: ', backgroundColor, '; \n',
+            'border-width: 1px; \n',
+            'border-color: ', mainColor, '; \n',
+            'border-style: solid; \n',
+            'border-radius: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(self.sizes.barWidth), 'px; \n',
+            'max-width: ', str(self.sizes.barWidth), 'px; \n',
+            'min-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+            'max-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+            'qproperty-readOnly: 0; \n',
+            'color: ', mainColor, ';} \n'))
+		
+		self.setStyleSheet(s)
 				
 class QTangoReadAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -1147,9 +1174,9 @@ class QTangoReadAttributeSpectrum(QtGui.QWidget):
 		self.layout.addLayout(self.layoutGrid)		
 		self.layout.addWidget(self.endLabel)
 		
-		self.setMaximumWidth(self.sizes.readAttributeWidth)
+#		self.setMaximumWidth(self.sizes.readAttributeWidth)
 		self.setMinimumWidth(self.sizes.readAttributeWidth)
-		self.setMaximumHeight(self.sizes.barHeight*6)
+#		self.setMaximumHeight(self.sizes.barHeight*6)
 		self.setMinimumHeight(self.sizes.barHeight*6)
 		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)		
 
@@ -1228,9 +1255,17 @@ class QTangoWriteAttributeSlider(QtGui.QWidget):
 		self.nameLabel.setText(aName)
 		self.update()
 		
-	def setAttributeValue(self, value):
-		self.valueSpinbox.setValue(value)
-		self.valueSlider.setValue(value)
+	def setAttributeValue(self, data):
+		if type(data) == pt._PyTango.DeviceAttribute:
+			self.valueSpinbox.setValue(data.value)
+			self.valueSlider.setValue(data.value)
+			if data.w_value != self.writeValueSpinbox.value():
+				self.writeValueSpinbox.setColors('primaryColor0', 'secondaryColor1')
+			else:
+				self.writeValueSpinbox.setColors('secondaryColor0', 'backgroundColor')
+		else:
+			self.valueSpinbox.setValue(data)
+			self.valueSlider.setValue(data)
 		self.update()
 		
 	def setAttributeWriteValue(self, value):
@@ -1248,6 +1283,9 @@ class QTangoWriteAttributeSlider(QtGui.QWidget):
 		self.valueSlider.setWriteValue(self.writeValueSpinbox.value())
 		self.update()
 		print 'updating slider to ', self.writeValueSpinbox.value()
+
+	def getWriteValue(self):
+		return self.writeValueSpinbox.value()
 
 class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -1399,6 +1437,9 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 		self.readValueSpinbox.setValue(value)
 		self.update()
 
+	def getWriteValue(self):
+		return self.writeValueSpinbox.value()
+	
 		
 class QTangoDeviceStatus(QtGui.QWidget):
 	def __init__(self, parent=None):
@@ -1581,7 +1622,7 @@ class QTangoDeviceNameStatus(QtGui.QWidget):
 		font = self.nameLabel.font()
 		font.setFamily(self.sizes.fontType)
 		font.setStretch(self.sizes.fontStretch)
-		font.setPointSize(int(self.sizes.barHeight * 0.75))
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.nameLabel.setFont(font)
 		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)		
