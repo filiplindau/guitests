@@ -9,26 +9,46 @@ from PyQt4 import QtGui, QtCore
 import time 
 import sys
 
-class AttributeClass(object):
-	def __init__(self, name, device, interval, callback = None):
+
+class AttributeClass(QtCore.QObject):
+	import PyTango as pt
+	attrSignal = QtCore.pyqtSignal(pt.device_attribute.DeviceAttribute)
+	def __init__(self, name, device, interval):
+		super(AttributeClass, self).__init__()
 		self.name = name
 		self.device = device
 		self.interval = interval
-		self.callback = callback
 		
 		self.lastRead = time.time()
 		self.attr = None
+		self.readThread = threading.Thread(name = self.name, target = self.attr_read)
+		self.stopThread = False
+		
+		self.startRead() 
 		
 	def attr_read(self):
-		t = time.time()
-		if t-self.lastRead > self.interval:
-			self.lastRead = t
-			self.attr = self.device.read_attribute(self.name)
-			if self.callback != None:
-				self.callback(self.attr)
+		while self.stopThread == False:
+			t = time.time()
+			if t-self.lastRead > self.interval:
+				self.lastRead = t				
+				try:
+					self.attr = self.device.read_attribute(self.name)
+					self.attrSignal.emit(self.attr)
+				except Exception, e:
+					print self.name, ' recovering from ', str(e)				
+			time.sleep(self.interval)
+		print self.name, ' stopped'
 				
 	def attr_write(self, wvalue):
 		self.device.write_attribute(self.name, wvalue)
+		
+	def stopRead(self):
+		self.stopThread = True
+		
+	def startRead(self):
+		self.stopRead()
+		self.stopThread = False
+		self.readThread.start()
 
 class TangoDeviceClient(QtGui.QWidget):
 	def __init__(self, parent = None):
@@ -46,18 +66,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.devices = {}
 		self.devices['spectrometer']=pt.DeviceProxy('testfel/gunlaser/osc_spectrometer')
 
-		splash.showMessage('Initializing attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
-		app.processEvents()
-		
-		self.attributes = {}
-		self.attributes['peakenergy'] = AttributeClass('peakenergy', self.devices['spectrometer'], 0.3, self.readPeakEnergy)
-		self.attributes['peakwidth'] = AttributeClass('spectrumwidth', self.devices['spectrometer'], 0.3, self.readPeakWidth)
-		self.attributes['spectrum'] = AttributeClass('spectrum', self.devices['spectrometer'], 0.3, self.readSpectrum)
-		self.attributes['exposure'] = AttributeClass('exposuretime', self.devices['spectrometer'], 0.3, self.readExposure)
-		self.attributes['spectrometerstate'] = AttributeClass('state', self.devices['spectrometer'], 0.3, self.readSpectrometerState)		
-		self.attributes['spectrometerstatus'] = AttributeClass('status', self.devices['spectrometer'], 0.3, self.readSpectrometerStatus)
-
-		splash.showMessage('Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+		splash.showMessage('Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 
 		timeVectorAttr = self.devices['spectrometer'].read_attribute('wavelengths')
@@ -65,14 +74,37 @@ class TangoDeviceClient(QtGui.QWidget):
 
 		expInit = self.devices['spectrometer'].read_attribute('exposuretime')
 		self.exposureWidget.setAttributeWriteValue(expInit.w_value)
+
+		splash.showMessage('Initializing attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+		app.processEvents()
+
+		self.guiLock = threading.Lock()				
+		self.attributes = {}
+		self.attributes['peakenergy'] = AttributeClass('peakenergy', self.devices['spectrometer'], 0.3)
+		self.attributes['peakwidth'] = AttributeClass('spectrumwidth', self.devices['spectrometer'], 0.3)
+		self.attributes['spectrum'] = AttributeClass('spectrum', self.devices['spectrometer'], 0.3)
+		self.attributes['exposure'] = AttributeClass('exposuretime', self.devices['spectrometer'], 0.3)
+# 		self.attributes['spectrometerstate'] = AttributeClass('state', self.devices['spectrometer'], 0.3, self.readSpectrometerState)		
+ 		self.attributes['spectrometerstatus'] = AttributeClass('status', self.devices['spectrometer'], 0.3)
+ 		
+ 		self.attributes['peakenergy'].attrSignal.connect(self.readPeakEnergy)
+ 		self.attributes['peakwidth'].attrSignal.connect(self.readPeakWidth)
+ 		self.attributes['spectrum'].attrSignal.connect(self.readSpectrum)
+ 		self.attributes['exposure'].attrSignal.connect(self.readExposure)
+
+		splash.showMessage('Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+		app.processEvents()
+
+# 		self.timer = QtCore.QTimer(self)
+# 		self.timer.timeout.connect(self.checkDevices)
+# 		self.timer.start(100)
 		
-		self.timer = QtCore.QTimer(self)
-		self.timer.timeout.connect(self.checkDevices)
-		self.timer.start(100)
+
 		
 	def checkDevices(self):
 		for a in self.attributes.itervalues():
-			a.attr_read()
+			pass
+#			a.attr_read()
 	
 	def readSpectrometerState(self, data):
 		self.spectrometerName.setState(data.value)
@@ -92,8 +124,10 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.exposureWidget.setAttributeValue(data)
 
 	def writeExposure(self):
+		self.guiLock.acquire()
 		w = self.exposureWidget.getWriteValue()
 		self.attributes['exposure'].attr_write(w)
+		self.guiLock.release()
 		
 	def readSpectrum(self, data):
 		if self.timeVector == None:
@@ -125,6 +159,10 @@ class TangoDeviceClient(QtGui.QWidget):
 	def closeEvent(self, event):
 # 		for device in self.devices.itervalues():
 # 			device.terminate()
+		for a in self.attributes.itervalues():
+			print 'Stopping', a.name
+			a.stopRead()
+			a.readThread.join()
 		event.accept()
 		
 	def setupLayout(self):

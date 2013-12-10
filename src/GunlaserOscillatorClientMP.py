@@ -344,7 +344,7 @@ class TangoDeviceClientTest(QtGui.QWidget):
 
 
 	def readPeakEnergy(self, data):
-		self.peakEnergyWidget.setAttributeValue(data.value)
+		self.peakEnergyWidget.setAttributeValue(data.value*20)
 #		self.laserEnergyTrend.updateData(time.time(), data.value)
 #		oldData = self.laserEnergyTrendCurve.getData()
 # 		if self.xData == None:
@@ -493,8 +493,8 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		self.peakWidthWidget.setSliderLimits(0, 15)
 		self.peakEnergyWidget = qw.QTangoReadAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.peakEnergyWidget.setAttributeName('Laser energy')
-		self.peakEnergyWidget.setAttributeWarningLimits(0.02, 1)
-		self.peakEnergyWidget.setSliderLimits(0, 0.04)
+		self.peakEnergyWidget.setAttributeWarningLimits(0.4, 10)
+		self.peakEnergyWidget.setSliderLimits(0, 1)
 		
 
 # 		self.laserTempTrend = pg.PlotWidget(name = 'oscTempTrend')
@@ -514,6 +514,7 @@ class TangoDeviceClientTest(QtGui.QWidget):
  		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
  		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
  		self.oscSpectrumPlot.setXRange(760, 820)
+ 		self.oscSpectrumPlot.fixedSize(True)
 				
 		self.laserPowerWidget.writeValueSpinbox.editingFinished.connect(self.writeLaserPower)
 		
