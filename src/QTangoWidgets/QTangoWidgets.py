@@ -613,9 +613,12 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 		QtGui.QDoubleSpinBox.__init__(self, parent)
 		self.setLocale(QtCore.QLocale(QtCore.QLocale.English))		
 		self.lineEdit().cursorPositionChanged.connect(self.changeStep)
+		self.lineEdit().editingFinished.connect(self.editReady)
+		self.lineEdit().returnPressed.connect(self.editReady)
 		self.valueChanged.connect(self.valueReady)
 		self.editingFinished.connect(self.editReady)		
 		self.storedCursorPos = 0
+		self.lastKey = QtCore.Qt.Key_0
 		if colors == None:
 			self.attrColors = QTangoColors()
 		else:
@@ -661,6 +664,7 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 
 	def editReady(self):
 		print 'Edit ready::'
+		print 'Cursor pos set to ', self.storedCursorPos
 		self.lineEdit().setCursorPosition(self.storedCursorPos)
 
 	def stepBy(self, steps):
@@ -669,20 +673,29 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 		
 	def changeStep(self, old, new):
 		print 'In changeStep::'
-		txt = str(self.text())
-		commaPos = txt.find('.')
-		self.storedCursorPos = self.lineEdit().cursorPosition()
-		pos = commaPos - self.storedCursorPos + 1
-		print 'pos', pos
-		print 'comma pos', commaPos
-		print 'stored pos', self.storedCursorPos
-		if pos + self.decimals() < 0:
-			pos = -self.decimals()
-		elif pos > 0:
-			pos -= 1
-
-		print txt, pos
-		self.setSingleStep(10 ** pos)
+		# Check if the last key was return, then the cursor
+		# shouldn't change
+		if self.lastKey != QtCore.Qt.Key_Return:
+			txt = str(self.text())
+			commaPos = txt.find('.')
+			self.storedCursorPos = self.lineEdit().cursorPosition()
+			pos = commaPos - self.storedCursorPos + 1
+			print 'pos', pos
+			print 'comma pos', commaPos
+			print 'stored pos', self.storedCursorPos
+			if pos + self.decimals() < 0:
+				pos = -self.decimals()
+			elif pos > 0:
+				pos -= 1
+	
+			print txt, pos
+			self.setSingleStep(10 ** pos)
+		
+	def keyPressEvent(self, event):
+		# Record keypress to check if it was return in changeStep
+		if type(event) == QtGui.QKeyEvent:
+			self.lastKey = event.key()
+		super(QTangoWriteAttributeSpinBox, self).keyPressEvent(event)
 		
 	def setColors(self, attrColorName, backgroundColorName):
 		backgroundColor = self.attrColors.__getattribute__(backgroundColorName)
