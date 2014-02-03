@@ -28,16 +28,54 @@ class AttributeClass(QtCore.QObject):
 		self.startRead() 
 		
 	def attr_read(self):
+		replyReady = True
 		while self.stopThread == False:
 			t = time.time()
+				
 			if t-self.lastRead > self.interval:
-				self.lastRead = t
+				self.lastRead = t				
 				try:
-					self.attr = self.device.read_attribute(self.name)
+					id = self.device.read_attribute_asynch(self.name)
+					
+					replyReady = False
+				except pt.DevFailed, e:
+					if e[0].reason == 'API_DeviceTimeOut':
+						print 'Timeout'
+					else:
+						print self.name, ' error ', e[0].reason
+					self.attr = pt.DeviceAttribute()
+					self.attr.quality = pt.AttrQuality.ATTR_INVALID
+					self.attr.value = None
+					self.attr.w_value = None
 					self.attrSignal.emit(self.attr)
 				except Exception, e:
-					print self.name, ' recovering from ', str(e)
-			time.sleep(self.interval)
+					print self.name, ' recovering from ', str(e)				
+					self.attr = pt.DeviceAttribute()
+					self.attr.quality = pt.AttrQuality.ATTR_INVALID
+					self.attr.value = None
+					self.attrSignal.emit(self.attr)
+					
+				while replyReady == False and self.stopThread == False:
+					try:
+						self.attr = self.device.read_attribute_reply(id)
+						replyReady = True
+						self.attrSignal.emit(self.attr)
+						# Read only once if interval = None:
+						if self.interval == None:
+							self.stopThread = True
+							self.interval = 0.0
+					except Exception, e:
+						if e[0].reason == 'API_AsynReplyNotArrived':
+#							print self.name, ' not replied'
+							time.sleep(0.1)
+						else:
+							replyReady = True
+							print 'Error reply ', self.name, str(e)
+				
+			if self.interval != None:
+				time.sleep(self.interval)
+			else:
+				time.sleep(1)
 		print self.name, ' stopped'
 				
 	def attr_write(self, wvalue):
@@ -83,23 +121,23 @@ class TangoDeviceClient(QtGui.QWidget):
 		splash.showMessage('Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 
-		readComplete = False		
-		while readComplete == False:
-			try:
-				hInit = self.devices['m0h'].read_attribute('position')
-				self.positionHWidget.setAttributeWriteValue(hInit.w_value)
-				readComplete = True
-			except Exception, e:
-				print e
-
-		readComplete = False		
-		while readComplete == False:
-			try:
-				vInit = self.devices['m0v'].read_attribute('position')
-				self.positionVWidget.setAttributeWriteValue(vInit.w_value)
-				readComplete = True
-			except Exception, e:
-				print e
+# 		readComplete = False		
+# 		while readComplete == False:
+# 			try:
+# 				hInit = self.devices['m0h'].read_attribute('position')
+# 				self.positionHWidget.setAttributeWriteValue(hInit.w_value)
+# 				readComplete = True
+# 			except Exception, e:
+# 				print e
+# 
+# 		readComplete = False		
+# 		while readComplete == False:
+# 			try:
+# 				vInit = self.devices['m0v'].read_attribute('position')
+# 				self.positionVWidget.setAttributeWriteValue(vInit.w_value)
+# 				readComplete = True
+# 			except Exception, e:
+# 				print e
 
 		splash.showMessage('Initializing attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
@@ -113,7 +151,6 @@ class TangoDeviceClient(QtGui.QWidget):
 
 # 		self.attributes['status_v'] = AttributeClass('status', self.devices['m0v'], 0.3)
 # 		self.attributes['status_h'] = AttributeClass('status', self.devices['m0h'], 0.3)
-		time.sleep(3)
 		self.attributes['state_v'] = AttributeClass('state', self.devices['m0v'], 0.3)
 		self.attributes['state_h'] = AttributeClass('state', self.devices['m0h'], 0.3)
 		
@@ -139,28 +176,53 @@ class TangoDeviceClient(QtGui.QWidget):
 #			a.attr_read()
 	
 	def readStateH(self, data):
-		self.hName.setState(data.value)
+		self.hName.setState(data)
+		data.value = ''
+		self.onOffCommands.setStatus(data)
 
 	def readStateV(self, data):
-		self.vName.setState(data.value)
+		self.vName.setState(data)
 
 	def readStatusH(self, data):
 		pass
 #		self.onOffCommands.setStatus(data.value, data.quality)
 
 	def readLimitH(self, data):
-		self.limit0H.setAttributeValue(data.value[0])
-		self.limit1H.setAttributeValue(data.value[1])
+		# The limits attribute is a spectrum attribute.
+		# Convert to two scalar attributes with the
+		# value of each limit switch as value.
+		vals = data.value
+		if data.dim_x>1:
+			data.value[0] = vals[0]
+			self.limit0H.setAttributeValue(data)
+			data.value[0] = vals[1]
+			self.limit1H.setAttributeValue(data)
+		else:
+			# Something wrong, maybe not initialized
+			self.limit0H.setAttributeValue(data)
+			self.limit1H.setAttributeValue(data)
+		
 
 	def readLimitV(self, data):
-		self.limit0V.setAttributeValue(data.value[0])
-		self.limit1V.setAttributeValue(data.value[1])
+		# The limits attribute is a spectrum attribute.
+		# Convert to two scalar attributes with the
+		# value of each limit switch as value.
+		vals = data.value
+		if data.dim_x>1:
+			data.value[0] = vals[0]
+			self.limit0V.setAttributeValue(data)
+			data.value[0] = vals[1]
+			self.limit1V.setAttributeValue(data)
+		else:
+			# Something wrong, maybe not initialized
+			self.limit0V.setAttributeValue(data)
+			self.limit1V.setAttributeValue(data)
 
 	def readPositionH(self, data):
-		self.positionHWidget.setAttributeValue(data.value)
+		self.positionHWidget.setAttributeValue(data)
 
 	def readPositionV(self, data):
-		self.positionVWidget.setAttributeValue(data.value)
+		self.positionVWidget.setAttributeValue(data)
 		
 	def writePositionH(self):
 		w = self.positionHWidget.getWriteValue()
@@ -199,7 +261,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 		
-		w = 200
+		w = 250
 		
 		self.frameSizes = qw.QTangoSizes()
 		self.frameSizes.readAttributeWidth = w
@@ -271,19 +333,19 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.positionHWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.positionHWidget.setAttributeName('Horizontal pos')
 		self.positionHWidget.writeValueSpinbox.editingFinished.connect(self.writePositionH)
-		self.positionHWidget.setAttributeWarningLimits(0, 6)
+		self.positionHWidget.setAttributeWarningLimits([0, 6])
 		self.positionHWidget.setSliderLimits(0, 6)
 		
 		self.positionVWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
 		self.positionVWidget.setAttributeName('Vertical pos')
 		self.positionVWidget.writeValueSpinbox.editingFinished.connect(self.writePositionV)
-		self.positionVWidget.setAttributeWarningLimits(0, 6)
+		self.positionVWidget.setAttributeWarningLimits([0, 6])
 		self.positionVWidget.setSliderLimits(0, 6)
 			
 		layout2.addWidget(self.title)		
- 		layout2.addLayout(layoutData)
- 		layoutData.addLayout(self.layoutAttributes)
-# 		layoutData.addWidget(self.oscSpectrumPlot)
+		layout2.addLayout(layoutData)
+		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addSpacerItem(spacerItemH)
 						
 		self.layoutAttributes.addWidget(self.hName)
 		self.layoutAttributes.addWidget(self.vName)

@@ -27,16 +27,54 @@ class AttributeClass(QtCore.QObject):
 		self.startRead() 
 		
 	def attr_read(self):
+		replyReady = True
 		while self.stopThread == False:
 			t = time.time()
+				
 			if t-self.lastRead > self.interval:
 				self.lastRead = t				
 				try:
-					self.attr = self.device.read_attribute(self.name)
+					id = self.device.read_attribute_asynch(self.name)
+					
+					replyReady = False
+				except pt.DevFailed, e:
+					if e[0].reason == 'API_DeviceTimeOut':
+						print 'Timeout'
+					else:
+						print self.name, ' error ', e[0].reason
+					self.attr = pt.DeviceAttribute()
+					self.attr.quality = pt.AttrQuality.ATTR_INVALID
+					self.attr.value = None
+					self.attr.w_value = None
 					self.attrSignal.emit(self.attr)
 				except Exception, e:
 					print self.name, ' recovering from ', str(e)				
-			time.sleep(self.interval)
+					self.attr = pt.DeviceAttribute()
+					self.attr.quality = pt.AttrQuality.ATTR_INVALID
+					self.attr.value = None
+					self.attrSignal.emit(self.attr)
+					
+				while replyReady == False and self.stopThread == False:
+					try:
+						self.attr = self.device.read_attribute_reply(id)
+						replyReady = True
+						self.attrSignal.emit(self.attr)
+						# Read only once if interval = None:
+						if self.interval == None:
+							self.stopThread = True
+							self.interval = 0.0
+					except Exception, e:
+						if e[0].reason == 'API_AsynReplyNotArrived':
+#							print self.name, ' not replied'
+							time.sleep(0.1)
+						else:
+							replyReady = True
+							print 'Error reply ', self.name, str(e)
+				
+			if self.interval != None:
+				time.sleep(self.interval)
+			else:
+				time.sleep(1)
 		print self.name, ' stopped'
 				
 	def attr_write(self, wvalue):
@@ -63,45 +101,48 @@ class TangoDeviceClient(QtGui.QWidget):
 		splash.showMessage('Initializing devices', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 		
+		t0=time.clock()
 		self.devices = {}
 		self.devices['spectrometer']=pt.DeviceProxy('testfel/gunlaser/osc_spectrometer')
 		self.devices['finesse']=pt.DeviceProxy('testfel/gunlaser/finesse')
+		print time.clock()-t0, ' s'
 
 		splash.showMessage('Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 
-		initAttr = 0
-		while initAttr < 3:
-			try:
-				splash.showMessage('Reading startup attributes, timeVec', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
-				app.processEvents()
-				timeVectorAttr = self.devices['spectrometer'].read_attribute('wavelengths')
-				initAttr = 4
-			except:
-				initAttr += 1
-				splash.showMessage(''.join(('Read timeVector fail #', str(initAttr))), alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
-				app.processEvents()
-		self.timeVector = timeVectorAttr.value
+# 		initAttr = 0
+# 		while initAttr < 3:
+# 			try:
+# 				splash.showMessage('Reading startup attributes, timeVec', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+# 				app.processEvents()
+# 				timeVectorAttr = self.devices['spectrometer'].read_attribute('wavelengths')
+# 				self.timeVector = timeVectorAttr.value				
+# 				initAttr = 4
+# 			except:
+# 				initAttr += 1
+# 				self.timeVector = None
+# 				splash.showMessage(''.join(('Read timeVector fail #', str(initAttr))), alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+# 				app.processEvents()
 
- 		initAttr = 0
- 		while initAttr < 3:
- 			try:
-				splash.showMessage('Reading startup attributes, power', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
-				app.processEvents()
- 				powerInit = self.devices['finesse'].read_attribute('power')
- 				initAttr = 4
- 			except:
- 				initAttr += 1
- 				splash.showMessage(''.join(('Read power fail #', str(initAttr))), alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
- 				print ''.join(('Read power fail #', str(initAttr)))
- 				app.processEvents()
- 		self.laserPowerWidget.setAttributeWriteValue(powerInit.w_value)
-
-		splash.showMessage('Initializing attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
-		app.processEvents()
+# 		initAttr = 0
+# 		while initAttr < 3:
+# 			try:
+# 				splash.showMessage('Reading startup attributes, power', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+# 				app.processEvents()
+# 				powerInit = self.devices['finesse'].read_attribute('power')
+# 				initAttr = 4
+# 			except:
+# 				initAttr += 1
+# 				splash.showMessage(''.join(('Read power fail #', str(initAttr))), alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+# 				print ''.join(('Read power fail #', str(initAttr)))
+# 				app.processEvents()
+# 		self.laserPowerWidget.setAttributeWriteValue(powerInit.w_value)
+# 		splash.showMessage('Initializing attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+# 		app.processEvents()
 
 		self.guiLock = threading.Lock()				
 		self.attributes = {}
+		self.attributes['wavelengths'] = AttributeClass('wavelengths', self.devices['spectrometer'], None)
 		self.attributes['peakenergy'] = AttributeClass('peakenergy', self.devices['spectrometer'], 0.3)
 		self.attributes['peakwidth'] = AttributeClass('spectrumwidth', self.devices['spectrometer'], 0.3)
 		self.attributes['spectrum'] = AttributeClass('spectrum', self.devices['spectrometer'], 0.3)
@@ -110,20 +151,19 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.attributes['peakenergy'].attrSignal.connect(self.readPeakEnergy)
 		self.attributes['peakwidth'].attrSignal.connect(self.readPeakWidth)
 		self.attributes['spectrum'].attrSignal.connect(self.readSpectrum)
+		self.attributes['wavelengths'].attrSignal.connect(self.readWavelengths)
 		self.attributes['spectrometerState'].attrSignal.connect(self.readSpectrometerState)
 
 		self.attributes['pumpPower'] = AttributeClass('power', self.devices['finesse'], 0.3)
 		self.attributes['pumpTemp'] = AttributeClass('lasertemperature', self.devices['finesse'], 0.3)
-# 		self.attributes['pumpCurrent'] = AttributeClass('current', self.devices['finesse'], 0.3)
-		self.attributes['pumpStatus'] = AttributeClass('status', self.devices['finesse'], 0.3)
-		self.attributes['pumpState'] = AttributeClass('state', self.devices['finesse'], 0.3)
+ 		self.attributes['pumpStatus'] = AttributeClass('status', self.devices['finesse'], 0.3)
+ 		self.attributes['pumpState'] = AttributeClass('state', self.devices['finesse'], 0.3)
 		self.attributes['pumpShutterState'] = AttributeClass('shutterstate', self.devices['finesse'], 0.3)
 		self.attributes['pumpOperationState'] = AttributeClass('laseroperationstate', self.devices['finesse'], 0.3)
 		
 		self.attributes['pumpPower'].attrSignal.connect(self.readPumpPower)
 		self.attributes['pumpTemp'].attrSignal.connect(self.readPumpTemp)
-# 		self.attributes['pumpCurrent'].attrSignal.connect(self.readPumpCurrent)
-		self.attributes['pumpState'].attrSignal.connect(self.readPumpState)
+ 		self.attributes['pumpState'].attrSignal.connect(self.readPumpState)
 		self.attributes['pumpShutterState'].attrSignal.connect(self.readPumpShutterState)
 		self.attributes['pumpOperationState'].attrSignal.connect(self.readPumpOperationState)
 
@@ -143,6 +183,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #			a.attr_read()
 	
 	def readPumpPower(self, data):
+#		print 'readPump', data.value
 		self.laserPowerWidget.setAttributeValue(data)
 		
 	def writePumpPower(self):
@@ -152,25 +193,27 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.guiLock.release()
 		
 	def readPumpTemp(self, data):
-#		self.laserTempWidget.setAttributeValue(data.value)
+#		print 'readTemp', data.value
 		self.laserTempWidget.setAttributeValue(data)
 		self.laserTempWidget2.setAttributeValue(data)
 	
 	def readSpectrometerState(self, data):
-		self.spectrometerName.setState(data.value)
+		self.spectrometerName.setState(data)
+		data.value = ''
+		self.onOffCommands.setStatus(data)
 
 	def readSpectrometerStatus(self, data):
 		pass
 #		self.onOffCommands.setStatus(data.value, data.quality)
 
 	def readPumpState(self, data):
-		self.finesseName.setState(data.value)
+		self.finesseName.setState(data)
 
 	def readPumpShutterState(self, data):
-		self.shutterWidget.setStatus(data.value)
+		self.shutterWidget.setStatus(data)
 
 	def readPumpOperationState(self, data):
-		self.laserOperationWidget.setStatus(data.value)
+		self.laserOperationWidget.setStatus(data)
 
 
 	def readPeakEnergy(self, data):
@@ -189,12 +232,19 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.attributes['exposure'].attr_write(w)
 		self.guiLock.release()
 		
+	def readWavelengths(self, data):
+		try:
+			print 'time vector read: ', data.value.shape[0]
+		except:
+			pass
+		self.timeVector = data.value
+		
 	def readSpectrum(self, data):
 		if self.timeVector == None:
-			self.oscSpectrumPlot.setSpectrum(0, data.value)
+			print 'No time vector'
 		else:
-			self.oscSpectrumPlot.setSpectrum(xData = self.timeVector, yData = data.value)
-		self.oscSpectrumPlot.update()
+			self.oscSpectrumPlot.setSpectrum(xData = self.timeVector, yData = data)
+			self.oscSpectrumPlot.update()
 		
 	def initSpectrometer(self):
 		self.devices['spectrometer'].command_inout('init')
@@ -244,7 +294,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		
 		self.frameSizes = qw.QTangoSizes()
 		self.frameSizes.readAttributeWidth = 300
-		self.frameSizes.writeAttributeWidth = 299
+		self.frameSizes.writeAttributeWidth = 150
 		self.frameSizes.fontStretch= 80
 		self.frameSizes.fontType = 'Segoe UI'
 #		self.frameSizes.fontType = 'Trebuchet MS'
@@ -336,10 +386,10 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.peakEnergyWidget.setAttributeWarningLimits([0.02, 1])
 		self.peakEnergyWidget.setSliderLimits(0, 0.04)
 		
- 		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
- 		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
- 		self.oscSpectrumPlot.setXRange(760, 820)
- 		self.oscSpectrumPlot.fixedSize(True)
+		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
+		self.oscSpectrumPlot.setXRange(760, 820)
+		self.oscSpectrumPlot.fixedSize(True)
 		
 				
 		layout2.addWidget(self.title)		

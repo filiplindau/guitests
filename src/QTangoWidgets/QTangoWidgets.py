@@ -48,6 +48,7 @@ class QTangoColors(object):
 		self.standbyColor = '#9c9cff'
 		self.unknownColor = '#45616f'
 		self.disableColor = '#ff00ff'
+		self.movingColor = '#feff99'
 		
 		self.validColor = self.secondaryColor0
 		self.invalidColor = self.unknownColor
@@ -67,6 +68,111 @@ class QTangoSizes(object):
 		
 barHeight = 30
 barWidth = 90
+
+class QTangoAttributeBase(QtGui.QWidget):
+	def __init__(self, sizes = None, colors = None, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		if colors == None:
+			self.attrColors = QTangoColors()
+		else:
+			self.attrColors = colors
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes		
+			
+		self.state = 'UNKNOWN'
+		self.quality = 'UNKNOWN'
+		self.currentAttrColor = self.attrColors.secondaryColor0
+		self.currentAttrColor = self.attrColors.unknownColor
+		
+	def setState(self, state):
+		if type(state) == pt.DeviceAttribute:
+			state_str = str(state.value)
+		else:
+			state_str = str(state)
+			
+		if state_str == str(pt.DevState.OFF):
+			color = self.attrColors.offColor
+			stateString = 'OFF'
+		elif state_str == str(pt.DevState.ON):
+			color = self.attrColors.onColor
+			stateString = 'ON'
+		elif state_str == str(pt.DevState.FAULT):
+			color = self.attrColors.faultColor
+			stateString = 'FAULT'
+		elif state_str == str(pt.DevState.ALARM):
+			color = self.attrColors.alarmColor
+			stateString = 'ALARM'
+		elif state_str == str(pt.DevState.STANDBY):
+			color = self.attrColors.standbyColor
+			stateString = 'STANDBY'
+		elif state_str == str(pt.DevState.UNKNOWN):
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+		elif state_str == str(pt.DevState.DISABLE):
+			color = self.attrColors.disableColor
+			stateString = 'DISABLE'
+		elif state_str == str(pt.DevState.MOVING):
+			color = self.attrColors.movingColor
+			stateString = 'MOVING'
+		else:
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+			
+		self.state = stateString
+		self.currentAttrColor = color
+		
+		s = str(self.styleSheet())
+		if s != '':
+			i0 = s.find('\ncolor')
+			i1 = s[i0:].find(':')
+			i2 = s[i0:].find(';')
+			sNew = ''.join((s[0:i0+i1+1],' ', color, s[i0+i2:]))
+			self.setStyleSheet(sNew)
+		
+		self.update()		
+		
+	def setQuality(self, quality):
+		if type(quality) == pt.DeviceAttribute:
+			state_str = str(quality.value)
+		else:
+			state_str = str(quality)
+		if state_str == str(pt.AttrQuality.ATTR_VALID):
+			color = self.attrColors.validColor
+			stateString = 'VALID'
+		elif state_str == str(pt.AttrQuality.ATTR_INVALID):
+			color = self.attrColors.invalidColor
+			stateString = 'INVALID'
+		elif state_str == str(pt.AttrQuality.ATTR_ALARM):
+			color = self.attrColors.alarmColor
+			stateString = 'ALARM'
+		elif state_str == str(pt.AttrQuality.ATTR_WARNING):
+			color = self.attrColors.warnColor
+			stateString = 'WARNING'
+		elif state_str == str(pt.AttrQuality.ATTR_CHANGING):
+			color = self.attrColors.changingColor
+			stateString = 'CHANGING'
+		else:
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+			
+		self.quality = stateString
+		self.currentAttrColor = color
+		
+		s = str(self.styleSheet())
+		if s != '':
+			i0 = s.find('\ncolor')
+			i1 = s[i0:].find(':')
+			i2 = s[i0:].find(';')
+			sNew = ''.join((s[0:i0+i1+1],' ', color, s[i0+i2:]))
+			self.setStyleSheet(sNew)
+		
+		self.update()		
+		
+	def setupLayout(self):
+		pass
+
 
 class QTangoTitleBar(QtGui.QWidget):
 	def __init__(self, title='', parent=None):
@@ -266,18 +372,9 @@ class QTangoCommandButton(QtGui.QWidget):
 		font.setPointSize(int(self.sizes.barHeight * 0.5))		
 		cmdButton.setFont(font)
 		
-class QTangoCommandSelection(QtGui.QWidget):
+class QTangoCommandSelection(QTangoAttributeBase):
 	def __init__(self, title, sizes = None, colors = None, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-
-		if colors == None:
-			self.attrColors = QTangoColors()
-		else:
-			self.attrColors = colors
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		self.cmdButtons = OrderedDict()
 		self.title = title
 		self.layout = None
@@ -350,8 +447,17 @@ class QTangoCommandSelection(QtGui.QWidget):
 
 		self.update()
 		
-	def setStatus(self, statusText, state = None):
-		self.statusLabel.setText(statusText)	
+	def setStatus(self, status, state = None):
+		if type(status) == pt.DeviceAttribute:
+			self.startLabel.setQuality(status.quality)
+			self.endLabel.setQuality(status.quality)
+			statusText = str(status.value)
+		else:
+			statusText = status
+		if statusText != None:
+			self.statusLabel.setText(statusText)
+		else:		
+			self.statusLabel.setText('--')
 		self.statusLabel.repaint()
 		
 #		self.update()	
@@ -396,98 +502,6 @@ class QTangoCommandSelection(QtGui.QWidget):
 		
 		self.setupLayout()	
 		
-class QTangoAttributeBase(QtGui.QWidget):
-	def __init__(self, sizes = None, colors = None, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-		if colors == None:
-			self.attrColors = QTangoColors()
-		else:
-			self.attrColors = colors
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes		
-			
-		self.state = 'ON'
-		self.quality = 'VALID'
-		self.currentAttrColor = self.attrColors.secondaryColor0
-		
-	def setState(self, state):
-		state_str = str(state)
-		if state_str == str(pt.DevState.OFF):
-			color = self.attrColors.offColor
-			stateString = 'OFF'
-		elif state_str == str(pt.DevState.ON):
-			color = self.attrColors.onColor
-			stateString = 'ON'
-		elif state_str == str(pt.DevState.FAULT):
-			color = self.attrColors.faultColor
-			stateString = 'FAULT'
-		elif state_str == str(pt.DevState.ALARM):
-			color = self.attrColors.alarmColor
-			stateString = 'ALARM'
-		elif state_str == str(pt.DevState.STANDBY):
-			color = self.attrColors.standbyColor
-			stateString = 'STANDBY'
-		elif state_str == str(pt.DevState.UNKNOWN):
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-		elif state_str == str(pt.DevState.DISABLE):
-			color = self.attrColors.disableColor
-			stateString = 'DISABLE'
-		else:
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-			
-		self.state = stateString
-		self.currentAttrColor = color
-		
-		s = str(self.styleSheet())
-		if s != '':
-			i0 = s.find('\ncolor')
-			i1 = s[i0:].find(':')
-			i2 = s[i0:].find(';')
-			sNew = ''.join((s[0:i0+i1+1],' ', color, s[i0+i2:]))
-			self.setStyleSheet(sNew)
-		
-		self.update()		
-		
-	def setQuality(self, quality):
-		state_str = str(quality)
-		if state_str == str(pt.AttrQuality.ATTR_VALID):
-			color = self.attrColors.validColor
-			stateString = 'VALID'
-		elif state_str == str(pt.AttrQuality.ATTR_INVALID):
-			color = self.attrColors.invalidColor
-			stateString = 'INVALID'
-		elif state_str == str(pt.AttrQuality.ATTR_ALARM):
-			color = self.attrColors.alarmColor
-			stateString = 'ALARM'
-		elif state_str == str(pt.AttrQuality.ATTR_WARNING):
-			color = self.attrColors.warnColor
-			stateString = 'WARNING'
-		elif state_str == str(pt.AttrQuality.ATTR_CHANGING):
-			color = self.attrColors.changingColor
-			stateString = 'CHANGING'
-		else:
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-			
-		self.quality = stateString
-		self.currentAttrColor = color
-		
-		s = str(self.styleSheet())
-		if s != '':
-			i0 = s.find('\ncolor')
-			i1 = s[i0:].find(':')
-			i2 = s[i0:].find(';')
-			sNew = ''.join((s[0:i0+i1+1],' ', color, s[i0+i2:]))
-			self.setStyleSheet(sNew)
-		
-		self.update()		
-		
-	def setupLayout(self):
-		pass
 		
 class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -539,6 +553,54 @@ class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
 		
 		self.update()		
 
+	def setState(self, state):
+		if type(state) == pt.DeviceAttribute:
+			state_str = str(state.value)
+		else:
+			state_str = str(state)
+		
+		if state_str == str(pt.DevState.OFF):
+			color = self.attrColors.offColor
+			stateString = 'OFF'
+		elif state_str == str(pt.DevState.ON):
+			color = self.attrColors.onColor
+			stateString = 'ON'
+		elif state_str == str(pt.DevState.FAULT):
+			color = self.attrColors.faultColor
+			stateString = 'FAULT'
+		elif state_str == str(pt.DevState.ALARM):
+			color = self.attrColors.alarmColor
+			stateString = 'ALARM'
+		elif state_str == str(pt.DevState.STANDBY):
+			color = self.attrColors.standbyColor
+			stateString = 'STANDBY'
+		elif state_str == str(pt.DevState.UNKNOWN):
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+		elif state_str == str(pt.DevState.DISABLE):
+			color = self.attrColors.disableColor
+			stateString = 'DISABLE'
+		elif state_str == str(pt.DevState.MOVING):
+			color = self.attrColors.movingColor
+			stateString = 'MOVING'
+		else:
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+			
+		self.state = stateString
+		self.currentAttrColor = color
+		
+		s = str(self.styleSheet())
+		if s != '':
+			i0 = s.find('\nbackground-color')
+			i1 = s[i0:].find(':')
+			i2 = s[i0:].find(';')
+			sNew = ''.join((s[0:i0+i1+1],' ', color, s[i0+i2:]))
+			self.setStyleSheet(sNew)
+		
+		self.update()		
+		
+
 	def setupLayout(self):				
 		self.setText('')
 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
@@ -546,7 +608,7 @@ class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
  					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
 #					'min-width: 1 px; \n',
 #					'max-width: 1 px; \n',
-					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+					'background-color: ', self.currentAttrColor, ';}'))
 		self.setStyleSheet(st)
 
 class QTangoBooleanLabel(QtGui.QLabel):
@@ -640,12 +702,60 @@ class QTangoEndLabel(QtGui.QLabel, QTangoAttributeBase):
 			self.setStyleSheet(sNew)
 		
 		self.update()		
+	
+	def setState(self, state):
+		if type(state) == pt.DeviceAttribute:
+			state_str = str(state.value)
+		else:
+			state_str = str(state)
+		
+		if state_str == str(pt.DevState.OFF):
+			color = self.attrColors.offColor
+			stateString = 'OFF'
+		elif state_str == str(pt.DevState.ON):
+			color = self.attrColors.onColor
+			stateString = 'ON'
+		elif state_str == str(pt.DevState.FAULT):
+			color = self.attrColors.faultColor
+			stateString = 'FAULT'
+		elif state_str == str(pt.DevState.ALARM):
+			color = self.attrColors.alarmColor
+			stateString = 'ALARM'
+		elif state_str == str(pt.DevState.STANDBY):
+			color = self.attrColors.standbyColor
+			stateString = 'STANDBY'
+		elif state_str == str(pt.DevState.UNKNOWN):
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+		elif state_str == str(pt.DevState.DISABLE):
+			color = self.attrColors.disableColor
+			stateString = 'DISABLE'
+		elif state_str == str(pt.DevState.MOVING):
+			color = self.attrColors.movingColor
+			stateString = 'MOVING'
+		else:
+			color = self.attrColors.unknownColor
+			stateString = 'UNKNOWN'
+			
+		self.state = stateString
+		self.currentAttrColor = color
+		
+		s = str(self.styleSheet())
+		if s != '':
+			i0 = s.find('\nbackground-color')
+			i1 = s[i0:].find(':')
+			i2 = s[i0:].find(';')
+			sNew = ''.join((s[0:i0+i1+1],' ', color, s[i0+i2:]))
+			self.setStyleSheet(sNew)
+		
+		self.update()		
+		
 
 	def setupLayout(self):				
 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
  					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
  					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+					'background-color: ', self.currentAttrColor, ';}'))
 		self.setStyleSheet(st)
 	
 	
@@ -675,6 +785,8 @@ class QTangoAttributeNameLabel(QtGui.QLabel, QTangoAttributeBase):
 		self.setFont(font)
 		self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
 		self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+		
+		
 
 class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -718,7 +830,11 @@ class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 			val = value.value
 		else:
 			val = value
-		QtGui.QDoubleSpinBox.setValue(self,val)
+ 		if val != None:
+ 			QtGui.QDoubleSpinBox.setValue(self,val)
+ 		else:
+ 			QtGui.QDoubleSpinBox.setValue(self,0.0)
+#		QtGui.QDoubleSpinBox.setValue(self,val)
 		
 class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -1087,7 +1203,10 @@ class QTangoHSliderBase(QtGui.QSlider, QTangoAttributeBase):
 	def setValue(self, value):
 		if type(value) == pt.DeviceAttribute:
 			self.setQuality(value.quality)
-			val = value.value
+			if value.value != None:
+				val = 0.0
+			else:
+				val = value.value
 		else:
 			val = value
 		self.attrValue = val
@@ -1130,8 +1249,8 @@ class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		self.warnLow = 0.1
 		
 		self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-		self.setMaximumHeight(self.sizes.barHeight*1.25)
-		self.setMinimumHeight(self.sizes.barHeight*1.25)		
+		self.setMaximumHeight(self.sizes.barHeight*1.0)
+		self.setMinimumHeight(self.sizes.barHeight*1.0)		
 		
 	def paintEvent(self, e):
 		qp = QtGui.QPainter()
@@ -1145,13 +1264,16 @@ class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		h = size.height()
 		
 		startH = h/2.0		# Position of horizontal line
-		lineW = h/8.0		# Width of horizontal line
+		startH = h/6.0		# Position of horizontal line		
+		lineW = h/4.0		# Width of horizontal line
 		arrowW = h/2.5		# Width of arrow
 		writeW = h/8.0
 		
 		# Vertical position of scale text
 		textVertPos = h-h/16.0
 		textVertPos = self.sizes.barHeight*0.5-h/16.0
+		textVertPos = h
+		textVertPos = startH+self.sizes.barHeight*0.5+lineW/2+1
 
 		# Pixel coordinate of current value:		
 		xVal = w*(self.attrValue-self.attrMinimum)/(self.attrMaximum-self.attrMinimum)
@@ -1200,32 +1322,9 @@ class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 
 		colorWarn = QtGui.QColor(self.attrColors.warnColor)
 		penWarn = QtGui.QPen(colorWarn)
-		penWarn.setWidthF(lineW)
 		brushWarn = QtGui.QBrush(colorWarn)
 		
-		qp.setRenderHint(QtGui.QPainter.Antialiasing, False) # No antialiasing when drawing horizontal/vertical lines
-		qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-		qp.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
-		# Draw warning line
-		qp.setPen(penWarn)
-		qp.setBrush(brushWarn)
-		qp.drawLine(0, startH, w, startH)
-		# Draw line		
-		qp.setPen(penAttr)
-		qp.setBrush(brushAttr)
-		qp.drawLine(w*(self.warnLow-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),startH,
-				w*(self.warnHigh-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),startH)
-		# Draw start and end point lines
-		penAttr.setWidthF(1)
-		if self.warnLow > self.attrMinimum:
-			penAttr.setColor(colorWarn)
-		qp.setPen(penAttr)
-		qp.drawLine(0, startH, 0, 0)
-		if self.warnHigh > self.attrMaximum:
-			penAttr.setColor(colorLine)
-			qp.setPen(penAttr)
-		qp.drawLine(w-1, startH, w-1, 0)
-		# Draw arrow
+		# Draw write value arrow
 		qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
 		
 		# Change color of arrow when in warning range
@@ -1240,9 +1339,11 @@ class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		pen.setColor(colorAttr)
 		pen.setWidthF(0)
 		qp.setPen(pen)
+		qp.setBrush(brushAttr)
 		qp.drawPolygon(poly)
 		if self.attrWriteValue != None:
 #			pen.setWidthF(writeW)
+			pen.setWidthF(2)
 			pen.setColor(colorWriteAttr)
 			qp.setPen(pen)
 			xValW = w*(self.attrWriteValue-self.attrMinimum)/(self.attrMaximum-self.attrMinimum)
@@ -1250,22 +1351,64 @@ class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 			polyW = QtGui.QPolygonF([QtCore.QPointF(xValW,startH-lineW/2.0), 
 					QtCore.QPointF(xValW-arrowW/2.0,0),
 					QtCore.QPointF(xValW+arrowW/2.0,0)])
+			polyW = QtGui.QPolygonF([QtCore.QPointF(xValW-arrowW/2.0-4,h),
+					QtCore.QPointF(xValW-4,startH+lineW/2.0-1),
+					QtCore.QPointF(xValW+4,startH+lineW/2.0-1), 					
+					QtCore.QPointF(xValW+arrowW/2.0+4,h)])
 			
-			qp.drawPolygon(polyW)
+			
+			qp.drawPolyline(polyW)
+
+		pen.setColor(colorAttr)
+		pen.setWidthF(2)
+		qp.setPen(pen)
+		qp.drawPolygon(poly)
+		
 		# Draw texts
 #		qp.drawText(textPoint, sVal)
 		# Don't draw the limit texts if the value text is overlapping
 		pen.setColor(colorAttr)
 		qp.setPen(pen)
 		if xVal - arrowW/2 > sMinWidth:
-			qp.drawText(QtCore.QPointF(lineW+1, textVertPos), sMin)
+			qp.drawText(QtCore.QPointF(2, textVertPos), sMin)
 		if textPoint.x() < w-sMaxWidth:
-			qp.drawText(QtCore.QPointF(w-sMaxWidth-lineW, textVertPos), sMax)
+			qp.drawText(QtCore.QPointF(w-sMaxWidth-2, textVertPos), sMax)
+
+		qp.setRenderHint(QtGui.QPainter.Antialiasing, False) # No antialiasing when drawing horizontal/vertical lines
+		qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+		qp.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
+
+		# Draw warning line
+		penWarn.setWidthF(lineW)		
+		qp.setPen(penWarn)
+		qp.setBrush(brushWarn)
+		qp.drawLine(0, startH, w, startH)
+		# Draw line		
+		penAttr = QtGui.QPen(colorLine)
+		penAttr.setWidthF(lineW)
+		brushAttr = QtGui.QBrush(colorLine)
+		qp.setPen(penAttr)
+		qp.setBrush(brushAttr)
+		qp.drawLine(w*(self.warnLow-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),startH,
+				w*(self.warnHigh-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),startH)
+		# Draw start and end point lines
+		penAttr.setWidthF(1)
+		if self.warnLow > self.attrMinimum:
+			penAttr.setColor(colorWarn)
+		qp.setPen(penAttr)
+		qp.drawLine(0, startH, 0, startH+lineW*2)
+		if self.warnHigh > self.attrMaximum:
+			penAttr.setColor(colorLine)
+			qp.setPen(penAttr)
+		qp.drawLine(w-1, startH, w-1, startH+lineW*2)
 
 	def setValue(self, value):
 		if type(value) == pt.DeviceAttribute:
 			self.setQuality(value.quality)
-			val = value.value
+			if value.value != None:
+				val = value.value
+			else:
+				val = 0.0
 		else:
 			val = value
 		self.attrValue = val
@@ -1474,11 +1617,15 @@ class QTangoReadAttributeSlider(QTangoAttributeBase):
 		if type(value) == pt.DeviceAttribute:
 			self.startLabel.setQuality(value.quality)
 			self.endLabel.setQuality(value.quality)
-			val = value.value
+			if value.value != None:
+				val = value.value
+				self.valueSpinbox.setValue(val)
+				self.valueSlider.setValue(val)
+			
 		else:
 			val = value
-		self.valueSpinbox.setValue(val)
-		self.valueSlider.setValue(val)
+			self.valueSpinbox.setValue(val)
+			self.valueSlider.setValue(val)
 		self.update()
 		
 	def setAttributeWarningLimits(self, limits):
@@ -1524,8 +1671,8 @@ class QTangoReadAttributeSlider2(QTangoAttributeBase):
 		
 		self.setMaximumWidth(self.sizes.readAttributeWidth)
 		self.setMinimumWidth(self.sizes.readAttributeWidth)
-		self.setMaximumHeight(self.sizes.barHeight*2.5)
-		self.setMinimumHeight(self.sizes.barHeight*2.5)
+		self.setMaximumHeight(self.sizes.barHeight*2.2)
+		self.setMinimumHeight(self.sizes.barHeight*2.2)
 		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
 	def attributeName(self):
@@ -1541,11 +1688,14 @@ class QTangoReadAttributeSlider2(QTangoAttributeBase):
 		if type(value) == pt.DeviceAttribute:
 			self.startLabel.setQuality(value.quality)
 			self.endLabel.setQuality(value.quality)
-			val = value.value
+			if value.value != None:
+				val = value.value
+				self.valueSpinbox.setValue(val)
+				self.valueSlider.setValue(val)
 		else:
 			val = value
-		self.valueSpinbox.setValue(val)
-		self.valueSlider.setValue(val)
+			self.valueSpinbox.setValue(val)
+			self.valueSlider.setValue(val)
 		self.update()
 		
 	def setAttributeWarningLimits(self, limits):
@@ -1554,17 +1704,9 @@ class QTangoReadAttributeSlider2(QTangoAttributeBase):
 	def setSliderLimits(self, min, max):
 		self.valueSlider.setSliderLimits(min, max)
 
-class QTangoReadAttributeBoolean(QtGui.QWidget):
+class QTangoReadAttributeBoolean(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-		if colors == None:
-			self.attrColors = QTangoColors()
-		else:
-			self.attrColors = colors
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes		
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		self.setupLayout()
 		
 	def setupLayout(self):
@@ -1614,11 +1756,14 @@ class QTangoReadAttributeBoolean(QtGui.QWidget):
 		if type(value) == pt.DeviceAttribute:
 			self.startLabel.setQuality(value.quality)
 			self.endLabel.setQuality(value.quality)
-			val = value.value
+			if value.dim_x>1:
+				val = value.value[0]
+			else:
+				val = value.value
 		else:
 			val = value
 		
-		self.valueBoolean.setBooleanState(value)
+		self.valueBoolean.setBooleanState(val)
 		self.update()
 		
 		
@@ -1700,17 +1845,9 @@ class QTangoReadAttributeTrend(QtGui.QWidget):
 	def setTrendLimits(self, low, high):
 		self.valueTrend.setYRange(low, high)
 		
-class QTangoReadAttributeSpectrum(QtGui.QWidget):
+class QTangoReadAttributeSpectrum(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-		if colors == None:
-			self.attrColors = QTangoColors()
-		else:
-			self.attrColors = colors
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes		
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		self.setupLayout()
 		
 	def setupLayout(self):
@@ -1740,9 +1877,7 @@ class QTangoReadAttributeSpectrum(QtGui.QWidget):
 		self.layout.addLayout(self.layoutGrid)		
 		self.layout.addWidget(self.endLabel)
 		
-#		self.setMaximumWidth(self.sizes.readAttributeWidth)
 		self.setMinimumWidth(self.sizes.readAttributeWidth)
-#		self.setMaximumHeight(self.sizes.barHeight*6)
 		self.setMinimumHeight(self.sizes.barHeight*6)
 		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)		
 
@@ -1755,7 +1890,13 @@ class QTangoReadAttributeSpectrum(QtGui.QWidget):
 		self.nameLabel.setText(aName)
 		self.update()
 		
-	def setSpectrum(self, xData, yData):		
+	def setSpectrum(self, xData, yData):
+		if type(xData) == pt.DeviceAttribute:
+			xData = xData.value
+		if type(yData) == pt.DeviceAttribute:
+			self.startLabel.setQuality(yData.quality)
+			self.endLabel.setQuality(yData.quality)
+			yData = yData.value
 		self.spectrum.setSpectrum(xData, yData)
 				
 	def setXRange(self, low, high):
@@ -1768,18 +1909,12 @@ class QTangoReadAttributeSpectrum(QtGui.QWidget):
 		else:
 			self.spectrum.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 		
-class QTangoWriteAttributeSlider(QtGui.QWidget):
+class QTangoWriteAttributeSlider(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-		if colors == None:
-			self.attrColors = QTangoColors()
-		else:
-			self.attrColors = colors
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes		
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		self.setupLayout()
+		
+		self.writeValueInitialized = False
 		
 	def setupLayout(self):
 		readValueWidth = self.sizes.barWidth
@@ -1831,20 +1966,25 @@ class QTangoWriteAttributeSlider(QtGui.QWidget):
 		
 	def setAttributeValue(self, data):
 		
-		if type(data) == pt._PyTango.DeviceAttribute:
+		if type(data) == pt.DeviceAttribute:
 			self.startLabel.setQuality(data.quality)
 			self.endLabel.setQuality(data.quality)
-			self.valueSpinbox.setValue(data.value)
-			self.valueSlider.setValue(data.value)
-			if data.w_value != self.writeValueSpinbox.value():
-				self.writeValueSpinbox.setColors('primaryColor0', 'secondaryColor1')
-			else:
-				self.writeValueSpinbox.setColors('secondaryColor0', 'backgroundColor')
+			if data.value != None:
+				self.valueSpinbox.setValue(data.value)
+				self.valueSlider.setValue(data.value)
+				if self.writeValueInitialized == False:
+					self.writeValueInitialized = True
+					self.setAttributeWriteValue(data.w_value)
+	
+				if data.w_value != self.writeValueSpinbox.value():
+					self.writeValueSpinbox.setColors('primaryColor0', 'secondaryColor1')
+				else:
+					self.writeValueSpinbox.setColors('secondaryColor0', 'backgroundColor')
 		else:
 			self.valueSpinbox.setValue(data)
 			self.valueSlider.setValue(data)
 		self.update()
-		
+				
 	def setAttributeWriteValue(self, value):
 		self.writeValueSpinbox.setValue(value)
 		self.valueSlider.setWriteValue(value)
@@ -2165,58 +2305,56 @@ class QTangoDeviceStatus(QtGui.QWidget):
 		
 		self.update()
 
-class QTangoDeviceNameStatus(QtGui.QWidget):
+class QTangoDeviceNameStatus(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-		
-		self.attrColors = QTangoColors()
-		if colors == None:
-			self.attrColors = QTangoColors()
-		else:
-			self.attrColors = colors
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes		
-		self.setupLayout()		
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
+		self.setupLayout()
 		
 	def setupLayout(self):
-		self.startLabel = QtGui.QLabel('')
-		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
-					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', self.attrColors.secondaryColor0, ';}'))
-		self.startLabel.setStyleSheet(st)
-		self.endLabel = QtGui.QLabel('')
-		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', self.attrColors.secondaryColor0, ';}'))
-		self.endLabel.setStyleSheet(st)
-
-		self.nameLabel = QtGui.QLabel('Test')
-		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', self.attrColors.backgroundColor, '; \n',
-					'color: ', self.attrColors.secondaryColor0, ';}'))
-		self.nameLabel.setStyleSheet(s)
-	
-		font = self.nameLabel.font()
-		font.setFamily(self.sizes.fontType)
-		font.setStretch(self.sizes.fontStretch)
-		font.setPointSize(int(self.sizes.barHeight * 0.7))
-		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-		self.nameLabel.setFont(font)
-		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)		
-
-
+		readValueWidth = self.sizes.barWidth
+		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2
+		
+		self.startLabel = QTangoStartLabel(self.sizes, self.attrColors)
+		self.endLabel = QTangoEndLabel(self.sizes, self.attrColors)
+		self.nameLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
+		
+# 	def setupLayout(self):
+# 		self.startLabel = QtGui.QLabel('')
+# 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+# 					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+# 		self.startLabel.setStyleSheet(st)
+# 		self.endLabel = QtGui.QLabel('')
+# 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+# 					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+# 		self.endLabel.setStyleSheet(st)
+# 
+# 		self.nameLabel = QtGui.QLabel('Test')
+# 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'background-color: ', self.attrColors.backgroundColor, '; \n',
+# 					'color: ', self.attrColors.secondaryColor0, ';}'))
+# 		self.nameLabel.setStyleSheet(s)
+# 	
+# 		font = self.nameLabel.font()
+# 		font.setFamily(self.sizes.fontType)
+# 		font.setStretch(self.sizes.fontStretch)
+# 		font.setPointSize(int(self.sizes.barHeight * 0.7))
+# 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+# 		self.nameLabel.setFont(font)
+# 		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)		
+# 
+# 
 		layout = QtGui.QHBoxLayout(self)
 		layout.setContentsMargins(0,0,0,0)
 		layout.setMargin(int(self.sizes.barHeight/10))
-		
-#		layout.addSpacerItem(spacerItem)		
+# 		
+# #		layout.addSpacerItem(spacerItem)		
 		layout.addWidget(self.startLabel)
 		layout.addWidget(self.nameLabel)
 		layout.addWidget(self.endLabel)
@@ -2235,47 +2373,50 @@ class QTangoDeviceNameStatus(QtGui.QWidget):
 		self.update()
 				
 	def setState(self, state):
-		state_str = str(state)
-		if state_str == str(pt.DevState.OFF):
-			color = self.attrColors.offColor
-			stateString = 'OFF'
-		elif state_str == str(pt.DevState.ON):
-			color = self.attrColors.onColor
-			stateString = 'ON'
-		elif state_str == str(pt.DevState.FAULT):
-			color = self.attrColors.faultColor
-			stateString = 'FAULT'
-		elif state_str == str(pt.DevState.ALARM):
-			color = self.attrColors.alarmColor
-			stateString = 'ALARM'
-		elif state_str == str(pt.DevState.STANDBY):
-			color = self.attrColors.standbyColor
-			stateString = 'STANDBY'
-		elif state_str == str(pt.DevState.UNKNOWN):
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-		elif state_str == str(pt.DevState.DISABLE):
-			color = self.attrColors.disableColor
-			stateString = 'DISABLE'
-		else:
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
-					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', color, ';}'))
-		self.startLabel.setStyleSheet(s)
-		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', color, ';}'))
-		self.endLabel.setStyleSheet(s)
-		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', self.attrColors.backgroundColor, '; \n',
-					'color: ', color, ';}'))
-		self.nameLabel.setStyleSheet(s)
-		
-		self.update()
+		self.endLabel.setState(state)
+		self.startLabel.setState(state)
+		self.nameLabel.setState(state)
+# 		state_str = str(state)
+# 		if state_str == str(pt.DevState.OFF):
+# 			color = self.attrColors.offColor
+# 			stateString = 'OFF'
+# 		elif state_str == str(pt.DevState.ON):
+# 			color = self.attrColors.onColor
+# 			stateString = 'ON'
+# 		elif state_str == str(pt.DevState.FAULT):
+# 			color = self.attrColors.faultColor
+# 			stateString = 'FAULT'
+# 		elif state_str == str(pt.DevState.ALARM):
+# 			color = self.attrColors.alarmColor
+# 			stateString = 'ALARM'
+# 		elif state_str == str(pt.DevState.STANDBY):
+# 			color = self.attrColors.standbyColor
+# 			stateString = 'STANDBY'
+# 		elif state_str == str(pt.DevState.UNKNOWN):
+# 			color = self.attrColors.unknownColor
+# 			stateString = 'UNKNOWN'
+# 		elif state_str == str(pt.DevState.DISABLE):
+# 			color = self.attrColors.disableColor
+# 			stateString = 'DISABLE'
+# 		else:
+# 			color = self.attrColors.unknownColor
+# 			stateString = 'UNKNOWN'
+# 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+# 					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'background-color: ', color, ';}'))
+# 		self.startLabel.setStyleSheet(s)
+# 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+# 					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'background-color: ', color, ';}'))
+# 		self.endLabel.setStyleSheet(s)
+# 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+# 					'background-color: ', self.attrColors.backgroundColor, '; \n',
+# 					'color: ', color, ';}'))
+# 		self.nameLabel.setStyleSheet(s)
+# 		
+# 		self.update()
