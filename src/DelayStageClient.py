@@ -232,7 +232,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.stopCommands.addCmdButton('Home', self.homeMotor)
 		self.stopCommands.addCmdButton('Stop', self.stopMotor)
 				
-		self.positionWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.positionWidget = qw.QTangoWriteAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
 		self.positionWidget.setAttributeName('Position')
 		self.positionWidget.setAttributeWarningLimits([0, 720])
 		self.positionWidget.setSliderLimits(0, 720)

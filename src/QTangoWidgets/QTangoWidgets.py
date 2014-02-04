@@ -505,18 +505,8 @@ class QTangoCommandSelection(QTangoAttributeBase):
 		
 class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
-#		super(QtGui.QLabel, self).__init__(parent)
-#		super(QTangoAttributeBase, self).__init__(sizes, colors, parent)
- 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
- 		QtGui.QLabel.__init__(self, parent)
-# 		if colors == None:
-# 			self.attrColors = QTangoColors()
-# 		else:
-# 			self.attrColors = colors
-# 		if sizes == None:
-# 			self.sizes = QTangoSizes()
-# 		else:
-# 			self.sizes = sizes
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
+		QtGui.QLabel.__init__(self, parent)
 		self.setupLayout()
 
 	def setQuality(self, quality):
@@ -836,15 +826,126 @@ class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
  			QtGui.QDoubleSpinBox.setValue(self,0.0)
 #		QtGui.QDoubleSpinBox.setValue(self,val)
 		
+class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
+	def __init__(self, sizes = None, colors = None, parent=None):
+		QTangoAttributeBase.__init__(self, sizes, colors, parent)
+		QtGui.QLineEdit.__init__(self, parent)
+
+		self.storedCursorPos = 0
+		self.lastKey = QtCore.Qt.Key_0
+		
+		self.dataValue = 1.0
+		
+		self.setupLayout()
+		
+	def setupLayout(self):
+		s = ''.join(('QLineEdit { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'selection-background-color: ', self.attrColors.secondaryColor0, '; \n',
+            'selection-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 1px; \n',
+            'border-color: ', self.attrColors.secondaryColor0, '; \n',
+            'border-style: solid; \n',
+            'border-radius: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'min-width: ', str(self.sizes.barWidth), 'px; \n',
+            'max-width: ', str(self.sizes.barWidth), 'px; \n',
+            'min-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+            'max-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+            'qproperty-readOnly: 0; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+		self.setFont(font)
+
+		self.setStyleSheet(s)
+		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)	
+
+
+	def setColors(self, attrColorName, backgroundColorName):
+		backgroundColor = self.attrColors.__getattribute__(backgroundColorName)
+		mainColor = self.attrColors.__getattribute__(attrColorName)
+		s = ''.join(('QLineEdit { \n',
+            'background-color: ', backgroundColor, '; \n',
+            'selection-background-color: ', mainColor, '; \n',
+            'selection-color: ', backgroundColor, '; \n',
+            'border-width: 1px; \n',
+            'border-color: ', mainColor, '; \n',
+            'border-style: solid; \n',
+            'border-radius: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'min-width: ', str(self.sizes.barWidth), 'px; \n',
+            'max-width: ', str(self.sizes.barWidth), 'px; \n',
+            'min-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+            'max-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+            'qproperty-readOnly: 0; \n',
+            'color: ', mainColor, ';} \n'))
+		
+		self.setStyleSheet(s)
+		
+	def value(self):
+		return self.dataValue
+	
+	def setValue(self, value):
+		self.dataValue = value
+		self.setText(str(value))
+
+	def keyPressEvent(self, event):
+		# Record keypress to check if it was return in changeStep
+		if type(event) == QtGui.QKeyEvent:
+			self.lastKey = event.key()
+			if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_Down:
+				print 'Upp!'
+				txt = str(self.text())
+				commaPos = txt.find('.')
+				cursorPos = self.cursorPosition()
+				pos = commaPos - cursorPos 
+				print 'pos', pos
+				print 'comma pos', commaPos
+				print 'cursor pos', cursorPos
+				
+			
+				if pos + commaPos - 1 < 0:
+					pos = -(commaPos - 1)
+				elif pos > 0:
+					pos -= 1
+# 		
+# 				print txt, pos
+				if event.key() == QtCore.Qt.Key_Up:
+					stepDir = 1
+				else:
+					stepDir = -1
+				self.dataValue += stepDir * 10**pos
+				
+				self.clear()
+				self.insert(str(self.dataValue))
+# 				self.setText(str(self.dataValue))
+# 				self.setCursorPosition(cursorPos)
+			
+			else:	
+				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
+
+		
 class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QDoubleSpinBox.__init__(self, parent)
-		self.setLocale(QtCore.QLocale(QtCore.QLocale.English))		
+		self.setLocale(QtCore.QLocale(QtCore.QLocale.English))
+
+# 		Setting up event handling:				
 		self.lineEdit().cursorPositionChanged.connect(self.changeStep)
 		self.lineEdit().editingFinished.connect(self.editReady)
 		self.lineEdit().returnPressed.connect(self.editReady)
-		self.valueChanged.connect(self.valueReady)
-		self.editingFinished.connect(self.editReady)		
+		self.setKeyboardTracking(False)
+ 		self.valueChanged.connect(self.valueReady)
+ 		self.editingFinished.connect(self.editReady)
+		
 		self.storedCursorPos = 0
 		self.lastKey = QtCore.Qt.Key_0
 		if colors == None:
@@ -924,7 +1025,7 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 		if type(event) == QtGui.QKeyEvent:
 			self.lastKey = event.key()
 		super(QTangoWriteAttributeSpinBox, self).keyPressEvent(event)
-		
+			
 	def setColors(self, attrColorName, backgroundColorName):
 		backgroundColor = self.attrColors.__getattribute__(backgroundColorName)
 		mainColor = self.attrColors.__getattribute__(attrColorName)
@@ -1926,7 +2027,10 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
 		self.valueSpinbox = QTangoReadAttributeSpinBox(self.sizes, self.attrColors)
 		self.valueSlider = QTangoHSliderBase2(self.sizes, self.attrColors)
 		self.writeValueSpinbox = QTangoWriteAttributeSpinBox(self.sizes, self.attrColors)
-		self.writeValueSpinbox.editingFinished.connect(self.editingFinished)		
+		self.writeValueSpinbox.editingFinished.connect(self.editingFinished)
+		self.writeLabel = QTangoStartLabel(self.sizes, self.attrColors)	
+		self.writeLabel.currentAttrColor = self.attrColors.backgroundColor
+		self.writeLabel.setupLayout()	
 
 		self.layout = QtGui.QHBoxLayout(self)
 		self.layout.setContentsMargins(0,0,0,0)
@@ -1941,8 +2045,9 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
 		self.layoutGrid.setVerticalSpacing(0)		
 		self.layoutGrid.addWidget(self.nameLabel, 0, 0, )
 		self.layoutGrid.addWidget(self.valueSlider, 1, 0)
-		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)
-		self.layoutGrid.addWidget(self.writeValueSpinbox, 1, 1)
+		self.layoutGrid.addWidget(self.valueSpinbox, 0, 2)
+		self.layoutGrid.addWidget(self.writeLabel, 1, 1)
+		self.layoutGrid.addWidget(self.writeValueSpinbox, 1, 2)
 
 		self.layout.addWidget(self.startLabel)		
 		self.layout.addLayout(self.layoutGrid)		
@@ -1977,9 +2082,13 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
 					self.setAttributeWriteValue(data.w_value)
 	
 				if data.w_value != self.writeValueSpinbox.value():
-					self.writeValueSpinbox.setColors('primaryColor0', 'secondaryColor1')
+					if self.writeLabel.currentAttrColor != self.attrColors.secondaryColor0:
+						self.writeLabel.currentAttrColor = self.attrColors.secondaryColor0
+						self.writeLabel.setupLayout()
 				else:
-					self.writeValueSpinbox.setColors('secondaryColor0', 'backgroundColor')
+					if self.writeLabel.currentAttrColor != self.attrColors.backgroundColor:
+						self.writeLabel.currentAttrColor = self.attrColors.backgroundColor
+						self.writeLabel.setupLayout()
 		else:
 			self.valueSpinbox.setValue(data)
 			self.valueSlider.setValue(data)
@@ -2003,6 +2112,7 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
 
 	def getWriteValue(self):
 		return self.writeValueSpinbox.value()
+
 
 class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
