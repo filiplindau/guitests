@@ -180,7 +180,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.setStyleSheet(s)
 		
 		self.frameSizes = qw.QTangoSizes()
-		self.frameSizes.readAttributeWidth = 250
+		self.frameSizes.readAttributeWidth = 300
 		self.frameSizes.writeAttributeWidth = 150
 		self.frameSizes.fontStretch= 80
 		self.frameSizes.fontType = 'Segoe UI'
@@ -188,7 +188,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.attrSizes = qw.QTangoSizes()
 		self.attrSizes.barHeight = 20
 		self.attrSizes.barWidth = 60
-		self.attrSizes.readAttributeWidth = 250
+		self.attrSizes.readAttributeWidth = 300
 		self.attrSizes.writeAttributeWidth = 299
 		self.attrSizes.fontStretch= 80
 		self.attrSizes.fontType = 'Segoe UI'
@@ -233,7 +233,8 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.stopCommands.addCmdButton('Stop', self.stopMotor)
 				
 		self.positionWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
-		self.positionWidget.setAttributeName('Position')
+#		self.positionWidget.setAttributeName('Position', unichr(176))
+		self.positionWidget.setAttributeName('Position', 'deg')
 		self.positionWidget.setAttributeWarningLimits([0, 720])
 		self.positionWidget.setSliderLimits(0, 720)
 		self.positionWidget.writeValueSpinbox.editingFinished.connect(self.writePosition)

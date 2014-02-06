@@ -352,7 +352,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
 		
 		self.laserTempWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
-		self.laserTempWidget.setAttributeName('Pump temperature')
+		self.laserTempWidget.setAttributeName('Pump temperature', 'degC')
 		self.laserTempWidget.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget.setSliderLimits(23, 27)
 
@@ -363,7 +363,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
 
 		self.laserPowerWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
-		self.laserPowerWidget.setAttributeName('Pump power')
+		self.laserPowerWidget.setAttributeName('Pump power', 'W')
 		self.laserPowerWidget.setSliderLimits(0, 6)
 		self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
 #		self.laserPowerWidget.setAttributeWriteValue(5)
@@ -378,11 +378,11 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.onOffCommands.addCmdButton('Off', self.offSpectrometer)
 		self.onOffCommands.addCmdButton('Stop', self.stopSpectrometer)
 		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
-		self.peakWidthWidget.setAttributeName('Spectral width')
+		self.peakWidthWidget.setAttributeName('Spectral width', 'nm')
 		self.peakWidthWidget.setAttributeWarningLimits([7, 20])
 		self.peakWidthWidget.setSliderLimits(0, 15)
-		self.peakEnergyWidget = qw.QTangoReadAttributeSlider(colors = self.colors, sizes = self.attrSizes)
-		self.peakEnergyWidget.setAttributeName('Laser energy')
+		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakEnergyWidget.setAttributeName('Laser energy', 'a.u.')
 		self.peakEnergyWidget.setAttributeWarningLimits([0.02, 1])
 		self.peakEnergyWidget.setSliderLimits(0, 0.04)
 		
