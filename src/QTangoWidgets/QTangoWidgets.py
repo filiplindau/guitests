@@ -793,13 +793,13 @@ class QTangoAttributeUnitLabel(QtGui.QLabel, QTangoAttributeBase):
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.setFont(font)
 		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
-		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
 		
 		unitWidth = QtGui.QFontMetricsF(font).width('mmmm')
 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
- 					'min-width: ', str(int(unitWidth)), 'px; \n',
- 					'max-width: ', str(int(unitWidth)), 'px; \n',
+# 					'min-width: ', str(int(unitWidth)), 'px; \n',
+# 					'max-width: ', str(int(unitWidth)), 'px; \n',
 					'background-color: ', self.attrColors.backgroundColor, '; \n',
 					'color: ', self.attrColors.secondaryColor0, ';}'))
 		self.setStyleSheet(s)

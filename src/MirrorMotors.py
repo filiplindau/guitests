@@ -331,13 +331,13 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.limit1H.setAttributeName('Horizontal limit 1')
 		
 		self.positionHWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
-		self.positionHWidget.setAttributeName('Horizontal pos')
+		self.positionHWidget.setAttributeName('Horizontal pos', 'mm')
 		self.positionHWidget.writeValueSpinbox.editingFinished.connect(self.writePositionH)
 		self.positionHWidget.setAttributeWarningLimits([0, 6])
 		self.positionHWidget.setSliderLimits(0, 6)
 		
 		self.positionVWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
-		self.positionVWidget.setAttributeName('Vertical pos')
+		self.positionVWidget.setAttributeName('Vertical pos', 'mm')
 		self.positionVWidget.writeValueSpinbox.editingFinished.connect(self.writePositionV)
 		self.positionVWidget.setAttributeWarningLimits([0, 6])
 		self.positionVWidget.setSliderLimits(0, 6)
