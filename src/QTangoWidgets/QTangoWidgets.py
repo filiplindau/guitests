@@ -953,20 +953,55 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 		self.setupLayout()
 
 	def setupLayout(self):
+# 		s = ''.join(('QLineEdit { \n',
+#             'background-color: ', self.attrColors.backgroundColor, '; \n',
+#             'selection-background-color: ', self.attrColors.secondaryColor0, '; \n',
+#             'selection-color: ', self.attrColors.backgroundColor, '; \n',
+#             'border-width: 1px; \n',
+#             'border-color: ', self.attrColors.secondaryColor0, '; \n',
+#             'border-style: solid; \n',
+#             'border-radius: 0px; \n',
+#             'padding: 0px; \n',
+#             'margin: 0px; \n',
+#             'min-width: ', str(self.sizes.barWidth), 'px; \n',
+#             'max-width: ', str(self.sizes.barWidth), 'px; \n',
+#             'min-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+#             'max-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+#             'qproperty-readOnly: 0; \n',
+#             'color: ', self.attrColors.secondaryColor0, ';} \n'))
+# 		font = self.font()
+# 		font.setFamily(self.sizes.fontType)
+# 		font.setStretch(self.sizes.fontStretch)
+# 		font.setWeight(self.sizes.fontWeight)
+# 		font.setPointSize(int(self.sizes.barHeight * 0.7))
+# 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+# 		self.setFont(font)
+#
+# 		self.setStyleSheet(s)
+# 		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+# 		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+###############
 		s = ''.join(('QLineEdit { \n',
             'background-color: ', self.attrColors.backgroundColor, '; \n',
-            'selection-background-color: ', self.attrColors.secondaryColor0, '; \n',
+            'selection-background-color: ', self.attrColors.secondaryColor1, '; \n',
             'selection-color: ', self.attrColors.backgroundColor, '; \n',
-            'border-width: 1px; \n',
+#            'border-width: ', str(int(self.sizes.barHeight/10)), 'px; \n',
+			'border-width: ', str(int(1)), 'px; \n',
             'border-color: ', self.attrColors.secondaryColor0, '; \n',
-            'border-style: solid; \n',
+            'border-top-style: solid; \n',
+			'border-bottom-style: solid; \n',
+			'border-left-style: double; \n',
+			'border-right-style: solid; \n',
             'border-radius: 0px; \n',
             'padding: 0px; \n',
             'margin: 0px; \n',
-            'min-width: ', str(self.sizes.barWidth), 'px; \n',
-            'max-width: ', str(self.sizes.barWidth), 'px; \n',
-            'min-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
-            'max-height: ', str(int(self.sizes.barHeight-2)), 'px; \n',
+#            'qproperty-buttonSymbols: UpDownArrows; \n',
+#            'min-width: ', str(int(self.sizes.barHeight)*2.5), 'px; \n',
+            'min-width: ', str(int(self.sizes.barHeight)*1), 'px; \n',
+            'max-width: ', str(int(self.sizes.barHeight)*4), 'px; \n',
+            'min-height: ', str(int(self.sizes.barHeight*1.2)), 'px; \n',
+            'max-height: ', str(int(self.sizes.barHeight*1.2)), 'px; \n',
             'qproperty-readOnly: 0; \n',
             'color: ', self.attrColors.secondaryColor0, ';} \n'))
 		font = self.font()
@@ -978,8 +1013,11 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 		self.setFont(font)
 
 		self.setStyleSheet(s)
-		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
 		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+		self.validatorObject = QtGui.QDoubleValidator()
+		self.validatorObject.setNotation(QtGui.QDoubleValidator.ScientificNotation)
 
 
 	def setColors(self, attrColorName, backgroundColorName):
@@ -1005,11 +1043,15 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 		self.setStyleSheet(s)
 
 	def value(self):
-		return self.dataValue
+		if self.validatorObject.validate(self.text(),0)[0] == QtGui.QValidator.Acceptable:
+			return np.double(self.text())
+		else:
+			return self.dataValue
 
 	def setValue(self, value):
 		self.dataValue = value
-		self.setText(str(value))
+		sVal = "{:.4g}".format((value))
+		self.setText(sVal)
 
 	def keyPressEvent(self, event):
 		# Record keypress to check if it was return in changeStep
@@ -1018,31 +1060,50 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 			if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_Down:
 				print 'Upp!'
 				txt = str(self.text())
+				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
+					self.dataValue = np.double(self.text())
+
 				commaPos = txt.find('.')
+				if commaPos < 0:
+					# Compensate if there is no comma
+					commaPos = txt.__len__()
 				cursorPos = self.cursorPosition()
-				pos = commaPos - cursorPos
-				print 'pos', pos
+				decimalPos = commaPos - cursorPos
+				print 'decimal pos', decimalPos
 				print 'comma pos', commaPos
 				print 'cursor pos', cursorPos
+				print 'Old dataValue: ', self.dataValue
 
 
-				if pos + commaPos - 1 < 0:
-					pos = -(commaPos - 1)
-				elif pos > 0:
-					pos -= 1
+				if decimalPos < 0:
+					print 'New decimal pos ', decimalPos
+					newDecimalPos = decimalPos + 1
+				else:
+					newDecimalPos = decimalPos
 #
 # 				print txt, pos
 				if event.key() == QtCore.Qt.Key_Up:
 					stepDir = 1
 				else:
 					stepDir = -1
-				self.dataValue += stepDir * 10**pos
+				self.dataValue += stepDir * 10**newDecimalPos
+
+				print 'New dataValue: ', self.dataValue
 
 				self.clear()
 				self.insert(str(self.dataValue))
 # 				self.setText(str(self.dataValue))
-# 				self.setCursorPosition(cursorPos)
+				txt = str(self.text())
+				commaPos = txt.find('.')
+				newCursorPos = commaPos - decimalPos
+  				self.setCursorPosition(newCursorPos)
 
+			elif event.key() == QtCore.Qt.Key_Enter:
+				print 'Enter!'
+				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
+					self.dataValue = np.double(self.text())
+				# This fires an editingFinished event
+				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
 			else:
 				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
 
@@ -1180,6 +1241,7 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
 
 		self.setStyleSheet(s)
 
+
 class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QDoubleSpinBox.__init__(self, parent)
@@ -1278,7 +1340,7 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
 #		if self.lastKey == QtCore.Qt.Key_Up:
 			txt = str(self.text())
 			commaPos = txt.find('.')
-			self.storedCursorPos = self.lineEdit().cursorPosition()
+#			self.storedCursorPos = self.lineEdit().cursorPosition()
 			pos = commaPos - self.storedCursorPos + 1
 			print 'pos', pos
 			print 'comma pos', commaPos
@@ -1289,7 +1351,7 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
 				pos -= 1
 
 			print txt, pos
-			self.setSingleStep(10 ** pos)
+#			self.setSingleStep(10 ** pos)
 
 	def keyPressEvent(self, event):
 		# Record keypress to check if it was return in changeStep
@@ -1873,9 +1935,14 @@ class QTangoHSliderBaseCompact(QtGui.QSlider, QTangoAttributeBase):
 		qp.drawLine(QtCore.QPointF(w*(self.warnLow-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),int(startH)),
 				QtCore.QPointF(w*(self.warnHigh-self.attrMinimum)/(self.attrMaximum-self.attrMinimum),int(startH)))
 		# Draw indicator
-		penInd = QtGui.QPen(QtCore.Qt.white)
-		penInd.setWidthF(arrowW)
+		penInd = QtGui.QPen(QtCore.Qt.black)
+		penInd.setWidthF(3*arrowW)
 		brushInd = QtGui.QBrush(QtCore.Qt.white)
+		qp.setPen(penInd)
+		qp.setBrush(brushInd)
+		qp.drawLine(QtCore.QPointF(xVal, startH-lineW/2.0-1), QtCore.QPointF(xVal, startH+lineW/2.0+1))
+		penInd.setWidthF(arrowW)
+		penInd.setColor(QtCore.Qt.white)
 		qp.setPen(penInd)
 		qp.setBrush(brushInd)
 		qp.drawLine(QtCore.QPointF(xVal, startH-lineW/2.0-1), QtCore.QPointF(xVal, startH+lineW/2.0+1))
@@ -1955,9 +2022,14 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		sVal = "{:.4g}".format((self.attrValue))
 		sMin = "{:.4g}".format((self.attrMinimum))
 		sMax = "{:.4g}".format((self.attrMaximum))
+
+		# Width of value text:
 		sValWidth = QtGui.QFontMetricsF(font).width(sVal)
+		# Height of the text:
 		sValHeight = QtGui.QFontMetricsF(font).height()
+		# Width of the min scale text:
 		sMinWidth = QtGui.QFontMetricsF(font).width(sMin)
+		# Width of the max scale text:
 		sMaxWidth = QtGui.QFontMetricsF(font).width(sMax)
 
 
@@ -1983,9 +2055,9 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		# Position to draw text of current value
 		textPoint = QtCore.QPointF(startX+lineW/2+arrowW, yVal+sValHeight*0.3)
 		# Check if text is outside the bounds of the slider
-		if yVal - sValHeight < 0:
-			textPoint.setY(sValHeight)
-		if yVal + sValHeight > h:
+		if yVal - arrowW < 0:
+			textPoint.setY(0.8*sValHeight)
+		if yVal + arrowW > h:
 			textPoint.setY(h-sValHeight*0.2)
 
 
@@ -2020,6 +2092,7 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 					QtCore.QPointF(w-1.0, 2*arrowW)])
 			qp.drawPolyline(arrowPoly)
 		elif yVal - arrowW < 0:
+			# Intermediate position, draw modified arrow
 			arrowPoly = QtGui.QPolygonF([QtCore.QPointF(startX+lineW/2.0, yVal),
 					QtCore.QPointF(startX+lineW/2.0+arrowW, 2*arrowW),
 					QtCore.QPointF(w-1.0, 2*arrowW),
@@ -2034,6 +2107,7 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 					QtCore.QPointF(w-1.0, h-2*arrowW)])
 			qp.drawPolyline(arrowPoly)
 		elif yVal + arrowW > h:
+			# Intermediate position, draw modified arrow
 			arrowPoly = QtGui.QPolygonF([QtCore.QPointF(startX+lineW/2.0, yVal),
 					QtCore.QPointF(startX+lineW/2.0+arrowW, h),
 					QtCore.QPointF(w-1.0, h),
@@ -3344,9 +3418,12 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 		self.writeLabel = QTangoStartLabel(self.sizes, self.attrColors)
 		self.writeLabel.currentAttrColor = self.attrColors.backgroundColor
 		self.writeLabel.setupLayout()
-		self.writeValueSpinbox = QTangoWriteAttributeSpinBox2(self.sizes, self.attrColors)
-		self.writeValueSpinbox.editingFinished.connect(self.editingFinished)
-		self.writeValueSpinbox.setLayoutDirection(QtCore.Qt.RightToLeft)
+# 		self.writeValueSpinbox = QTangoWriteAttributeSpinBox2(self.sizes, self.attrColors)
+# 		self.writeValueSpinbox.editingFinished.connect(self.editingFinished)
+# 		self.writeValueSpinbox.setLayoutDirection(QtCore.Qt.RightToLeft)
+		self.writeValueLineEdit = QTangoWriteAttributeLineEdit(self.sizes, self.attrColors)
+		self.writeValueLineEdit.editingFinished.connect(self.editingFinished)
+		self.writeValueLineEdit.setLayoutDirection(QtCore.Qt.RightToLeft)
 
 		self.vSpacer = QtGui.QSpacerItem(20, self.sizes.barHeight, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
 
@@ -3356,7 +3433,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 		self.layout.setSpacing(self.sizes.barHeight/6.0)
 
 		self.layout.addWidget(self.valueSlider)
-		self.layout.addWidget(self.writeValueSpinbox)
+		self.layout.addWidget(self.writeValueLineEdit)
 		self.layout.addWidget(self.nameLabel)
 
 		self.setMaximumWidth(self.sizes.barWidth*4)
@@ -3386,7 +3463,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 					self.writeValueInitialized = True
 					self.setAttributeWriteValue(data.w_value)
 
-				if data.w_value != self.writeValueSpinbox.value():
+				if data.w_value != self.writeValueLineEdit.value():
 					if self.writeLabel.currentAttrColor != self.attrColors.secondaryColor0:
 						self.writeLabel.currentAttrColor = self.attrColors.secondaryColor0
 						self.writeLabel.setupLayout()
@@ -3398,12 +3475,23 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 			self.valueSlider.setValue(data)
 		self.update()
 
+	def setAttributeWriteValue(self, value):
+		self.writeValueLineEdit.setValue(value)
+		self.valueSlider.setWriteValue(value)
+		self.update()
+
 
 	def setAttributeWarningLimits(self, limits):
 		self.valueSlider.setWarningLimits(limits)
 
 	def setSliderLimits(self, min, max):
 		self.valueSlider.setSliderLimits(min, max)
+
+	def editingFinished(self):
+		if self.writeValueLineEdit.validatorObject.validate(self.writeValueLineEdit.text(), 0)[0] == QtGui.QValidator.Acceptable:
+			self.valueSlider.setWriteValue(np.double(self.writeValueLineEdit.text()))
+		self.update()
+		print 'updating slider to ', self.writeValueLineEdit.text()
 
 	def configureAttribute(self, attrInfo):
 		QTangoAttributeBase.configureAttribute(self, attrInfo)
@@ -3418,6 +3506,9 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 		self.setAttributeWarningLimits((min_warning, max_warning))
 		self.valueSlider.setUnit(self.attrInfo.unit)
 		self.unit = self.attrInfo.unit
+
+	def getWriteValue(self):
+		return self.writeValueLineEdit.value()
 
 class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):

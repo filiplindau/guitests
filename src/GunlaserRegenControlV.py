@@ -276,7 +276,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.leeLaserPercentCurrentWidget.setAttributeName('%Current', '%')
         self.leeLaserPercentCurrentWidget.setAttributeWarningLimits([40, 74])
         self.leeLaserPercentCurrentWidget.setSliderLimits(36, 80)
-        self.leeLaserPercentCurrentWidget.writeValueSpinbox.editingFinished.connect(self.writeLeeLaserPercentCurrent)
+        self.leeLaserPercentCurrentWidget.writeValueLineEdit.editingFinished.connect(self.writeLeeLaserPercentCurrent)
 
         self.kmpcOperationWidget = qw.QTangoCommandSelection('KMPC operation', colors = self.colors, sizes = self.attrSizes)
         self.kmpcOperationWidget.addCmdButton('Off', self.offKMPC)

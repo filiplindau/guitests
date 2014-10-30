@@ -332,14 +332,14 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.laserPowerWidget.setAttributeName('Pump pwr', 'W')
 		self.laserPowerWidget.setSliderLimits(0, 6)
 		self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
-		self.laserPowerWidget.writeValueSpinbox.editingFinished.connect(self.writePumpPower)
+		self.laserPowerWidget.writeValueLineEdit.editingFinished.connect(self.writePumpPower)
 
 		self.attrSizes.readAttributeHeight = 250
 		self.prism1PositionWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
 		self.prism1PositionWidget.setAttributeName('Prism 1', 'steps')
 		self.prism1PositionWidget.setSliderLimits(-500, 500)
 		self.prism1PositionWidget.setAttributeWarningLimits((-500, 500))
-		self.prism1PositionWidget.writeValueSpinbox.editingFinished.connect(self.writePrism1Position)
+		self.prism1PositionWidget.writeValueLineEdit.editingFinished.connect(self.writePrism1Position)
 
 		self.prism1LimitWidget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
 		self.prism1LimitWidget.setAttributeName('Prism1 limit')
@@ -348,7 +348,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.prism2PositionWidget.setAttributeName('Prism 2', 'steps')
 		self.prism2PositionWidget.setSliderLimits(-500, 500)
 		self.prism2PositionWidget.setAttributeWarningLimits((-500, 500))
-		self.prism2PositionWidget.writeValueSpinbox.editingFinished.connect(self.writePrism2Position)
+		self.prism2PositionWidget.writeValueLineEdit.editingFinished.connect(self.writePrism2Position)
 
 		self.prism2LimitWidget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
 		self.prism2LimitWidget.setAttributeName('Prism2 limit')

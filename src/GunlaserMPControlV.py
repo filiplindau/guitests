@@ -284,7 +284,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.leeLaserPercentCurrentWidget.setAttributeName('%Current', '%')
         self.leeLaserPercentCurrentWidget.setAttributeWarningLimits([40, 86])
         self.leeLaserPercentCurrentWidget.setSliderLimits(36, 100)
-        self.leeLaserPercentCurrentWidget.writeValueSpinbox.editingFinished.connect(self.writeLeeLaserPercentCurrent)
+        self.leeLaserPercentCurrentWidget.writeValueLineEdit.editingFinished.connect(self.writeLeeLaserPercentCurrent)
 
         self.ionpumpPressureWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
         self.ionpumpPressureWidget.setAttributeName('Xtal pr', 'mbar')
