@@ -168,7 +168,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #			self.limit1H.setAttributeValue(data)
 
 	def readPeakEnergy(self, data):
-		data.value = data.value * 1086.0
+		data.value = data.value * 6.1
 		self.peakEnergyWidget.setAttributeValue(data)
 
 	def readPeakWidth(self, data):

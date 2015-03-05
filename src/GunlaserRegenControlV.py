@@ -32,6 +32,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['temperature']=pt.DeviceProxy('gunlaser/regen/temperature')
         self.devices['kmpc']=pt.DeviceProxy('gunlaser/regen/kmpc')
         self.devices['crystalcam']=pt.DeviceProxy('gunlaser/regen/crystalcam')
+        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -81,6 +82,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['crystalimage'].attrSignal.connect(self.readCrystalImage)
         self.attributes['crystalimagestate'].attrSignal.connect(self.readCrystalImageState)
 
+        self.attributes['power'] = AttributeClass('measurementdata1', self.devices['redpitaya'], 0.3)
+        self.attributes['power'].attrSignal.connect(self.readLeeLaserPower)
+
         splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
@@ -106,6 +110,9 @@ class TangoDeviceClient(QtGui.QWidget):
         w = self.leeLaserPercentCurrentWidget.getWriteValue()
         self.attributes['leelaserpercentcurrent'].attr_write(w)
         self.guiLock.release()
+
+    def readLeeLaserPower(self, data):
+        self.leeLaserPowerWidget.setAttributeValue(data)
 
     def readLeeLaserState(self, data):
         self.leeLaserName.setState(data)
@@ -278,6 +285,11 @@ class TangoDeviceClient(QtGui.QWidget):
         self.leeLaserPercentCurrentWidget.setSliderLimits(36, 80)
         self.leeLaserPercentCurrentWidget.writeValueLineEdit.editingFinished.connect(self.writeLeeLaserPercentCurrent)
 
+        self.leeLaserPowerWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.leeLaserPowerWidget.setAttributeName('Power', 'W')
+        self.leeLaserPowerWidget.setAttributeWarningLimits([19, 22])
+        self.leeLaserPowerWidget.setSliderLimits(0, 30)
+
         self.kmpcOperationWidget = qw.QTangoCommandSelection('KMPC operation', colors = self.colors, sizes = self.attrSizes)
         self.kmpcOperationWidget.addCmdButton('Off', self.offKMPC)
         self.kmpcOperationWidget.addCmdButton('On', self.onKMPC)
@@ -329,6 +341,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
         sliderLayout.addWidget(self.leeLaserPercentCurrentWidget)
         sliderLayout.addWidget(self.leeLaserCurrentWidget)
+        sliderLayout.addWidget(self.leeLaserPowerWidget)
         sliderLayout.addSpacerItem(spacerItemBar)
 #         sliderLayout.addWidget(self.ionpumpPressureWidget)
 #         sliderLayout.addWidget(self.temperatureWidget)
