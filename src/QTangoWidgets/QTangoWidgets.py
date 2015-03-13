@@ -237,6 +237,9 @@ class QTangoTitleBar(QtGui.QWidget):
 
 #		self.setStyleSheet(s)
 
+	def setName(self, name):
+		self.nameLabel.setText(name)
+
 class QTangoSideBar(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -1005,8 +1008,10 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 			'border-radius: 0px; \n',
 			'padding: 0px; \n',
 			'margin: 0px; \n',
-			'min-width: ', str(int(self.sizes.barHeight)*1), 'px; \n',
-			'max-width: ', str(int(self.sizes.barHeight)*4), 'px; \n',
+# 			'min-width: ', str(int(self.sizes.barHeight)*1), 'px; \n',
+# 			'max-width: ', str(int(self.sizes.barHeight)*4), 'px; \n',
+			'min-width: ', str(int(self.sizes.readAttributeWidth/3)), 'px; \n',
+			'max-width: ', str(int(self.sizes.readAttributeWidth)), 'px; \n',
 			'min-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
 			'max-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
 			'color: ', self.attrColors.backgroundColor, ';} \n',
@@ -1057,6 +1062,14 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 			self.setCurrentIndex(ind)
 		else:
 			self.setCurrentIndex(0)
+
+	def setWidth(self, width):
+		s = str(self.styleSheet())
+		ind0 = s.find('min-width')+11
+		ind1 = s[ind0:].find('px')+ind0
+		s2 = s[0:ind0]+str(width)+s[ind1:]
+		self.setStyleSheet(s2)
+
 
 class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):

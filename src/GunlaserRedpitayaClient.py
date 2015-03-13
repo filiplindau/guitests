@@ -27,8 +27,6 @@ class TangoDeviceClient(QtGui.QWidget):
         app.processEvents()
 
         t0=time.clock()
-        self.devices = {}
-        self.devices['redpitaya']=pt.DeviceProxy(self.deviceName)
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -36,6 +34,47 @@ class TangoDeviceClient(QtGui.QWidget):
 
 
         self.guiLock = threading.Lock()
+
+        self.changeDevice(self.deviceName)
+
+        splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        app.processEvents()
+
+        self.positionOffset = 0.0
+
+#         self.timer = QtCore.QTimer(self)
+#         self.timer.timeout.connect(self.checkDevices)
+#         self.timer.start(100)
+
+
+
+    def checkDevices(self):
+        for a in self.attributes.itervalues():
+            pass
+#            a.attr_read()
+
+    def changeDevice(self, devName):
+        try:
+            for a in self.attributes.itervalues():
+                print 'Stopping', a.name
+                a.stopRead()
+            for a in self.attributes.itervalues():
+                a.readThread.join()
+        except:
+            pass
+
+        self.trigDelayWidget.writeValueInitialized = False
+        self.trigLevelWidget.writeValueInitialized = False
+        self.trigSourceWidget.writeValueInitialized = False
+        self.trigModeWidget.writeValueInitialized = False
+        self.recordLengthWidget.writeValueInitialized = False
+        self.sampleRateWidget.writeValueInitialized = False
+
+        self.deviceName = str(devName)
+        self.title.setName(self.deviceName.upper())
+        self.devices = {}
+        self.devices['redpitaya']=pt.DeviceProxy(self.deviceName)
+
         self.attributes = {}
         self.attributes['timevector'] = AttributeClass('timevector', self.devices['redpitaya'], None)
         self.attributes['waveform1'] = AttributeClass('waveform1', self.devices['redpitaya'], 0.3)
@@ -59,22 +98,6 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['samplerate'].attrSignal.connect(self.readSampleRate)
         self.attributes['state'].attrSignal.connect(self.readState)
 
-
-        splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
-        app.processEvents()
-
-        self.positionOffset = 0.0
-
-#         self.timer = QtCore.QTimer(self)
-#         self.timer.timeout.connect(self.checkDevices)
-#         self.timer.start(100)
-
-
-
-    def checkDevices(self):
-        for a in self.attributes.itervalues():
-            pass
-#            a.attr_read()
 
     def readTimevector(self, data):
         self.timeVector = data.value
@@ -180,18 +203,18 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.frameSizes = qw.QTangoSizes()
         self.frameSizes.barHeight = 20
-        self.frameSizes.barWidth = 18
-        self.frameSizes.readAttributeWidth = 250
+        self.frameSizes.barWidth = 20
+        self.frameSizes.readAttributeWidth = 320
         self.frameSizes.writeAttributeWidth = 150
         self.frameSizes.fontStretch= 80
         self.frameSizes.fontType = 'Segoe UI'
 #        self.frameSizes.fontType = 'Trebuchet MS'
 
         self.attrSizes = qw.QTangoSizes()
-        self.attrSizes.barHeight = 18
-        self.attrSizes.barWidth = 18
-        self.attrSizes.readAttributeWidth = 250
-        self.attrSizes.readAttributeHeight = 250
+        self.attrSizes.barHeight = 20
+        self.attrSizes.barWidth = 20
+        self.attrSizes.readAttributeWidth = 320
+        self.attrSizes.readAttributeHeight = 320
         self.attrSizes.writeAttributeWidth = 299
         self.attrSizes.fontStretch= 80
         self.attrSizes.fontType = 'Segoe UI'
@@ -240,6 +263,20 @@ class TangoDeviceClient(QtGui.QWidget):
         self.setWindowTitle('RedPitaya')
         self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
         self.bottombar = qw.QTangoHorizontalBar()
+
+        self.redpitayaDevices = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
+        s=str(self.redpitayaDevices.writeValueComboBox.styleSheet())
+
+        self.redpitayaDevices.setAttributeName('Device list')
+        db = pt.Database()
+        devNameList = db.get_device_exported_for_class('redpitayads').value_string
+        for devName in devNameList:
+            self.redpitayaDevices.addItem(devName)
+
+        self.redpitayaDevices.writeValueComboBox.setWidth(self.attrSizes.barHeight*10)
+        self.redpitayaDevices.setActivatedMethod(self.changeDevice)
+        self.redpitayaDevices.startLabel.setQuality(pt.AttrQuality.ATTR_VALID)
+        self.redpitayaDevices.endLabel.setQuality(pt.AttrQuality.ATTR_VALID)
 
         self.redpitayaName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
         self.redpitayaName.setAttributeName('Redpitaya')
@@ -294,6 +331,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #        layoutData.addLayout(self.layoutAttributes2)
 #        layoutData.addLayout(self.layoutAttributes3)
 
+        self.layoutAttributes.addWidget(self.redpitayaDevices)
         self.layoutAttributes.addWidget(self.redpitayaName)
         self.layoutAttributes.addWidget(self.redpitayaCommands)
         self.layoutAttributes.addWidget(self.recordLengthWidget)
