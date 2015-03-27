@@ -1,7 +1,7 @@
 '''
-Created on 14 aug 2014
+Created on 27 mar 2015
 
-@author: Filip
+@author: Filip Lindau
 '''
 # -*- coding:utf-8 -*-
 
@@ -16,22 +16,50 @@ import PyTango as pt
 class AttributeClass(QtCore.QObject):
     attrSignal = QtCore.pyqtSignal(pt.device_attribute.DeviceAttribute)
     attrInfoSignal = QtCore.pyqtSignal(pt.AttributeInfoEx)
-    def __init__(self, name, device, interval, slot=None, getInfo = False):
+    def __init__(self, name, device, minInterval=0.0, slot=None, eventType = pt.EventType.CHANGE_EVENT, getInfo = False, rateLimit = False):
         super(AttributeClass, self).__init__()
         self.name = name
         self.device = device
-        self.interval = interval
+        self.interval = minInterval
         self.getInfoFlag = getInfo
         
         if slot != None:
             self.attrSignal.connect(slot)
 
-        self.lastRead = time.time()
+        self.lastRead = 0
+        self.eventType = eventType
+        self.eventId = None
         self.attr = None
-        self.readThread = threading.Thread(name = self.name, target = self.attr_read)
-        self.stopThread = False
+        self.attrLock = threading.Lock()
+        self.signalPending = False
+        self.rateLimit = rateLimit
 
-        self.startRead()
+        if eventType == None:            
+            self.readThread = threading.Thread(name = self.name, target = self.attr_read)
+            self.stopThread = False
+            self.startRead()
+        else:            
+            self.subscribe_event()
+
+    def subscribe_event(self):
+        self.eventId = self.device.subscribe_event(self.name, self.eventType, self.attr_read_event, stateless = True)
+        
+    def unsubscribe_event(self):
+        if self.eventId != None:
+            self.device.unsubscribe_event(self.eventId)
+
+    def attr_read_event(self, event):
+        if event.err == False:
+            t = time.time()
+            if (t-self.lastRead) > self.interval:
+                if self.rateLimit == True:
+                    with self.attrLock:
+                        self.attrSignal.emit(event.attr_value)
+                else:
+                    self.attrSignal.emit(event.attr_value)
+                self.lastRead = t
+
+
 
     def attr_read(self):
         replyReady = True

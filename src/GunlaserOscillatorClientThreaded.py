@@ -70,6 +70,11 @@ class AttributeClass(QtCore.QObject):
 						else:
 							replyReady = True
 							print 'Error reply ', self.name, str(e)
+							self.attr = pt.DeviceAttribute()
+							self.attr.quality = pt.AttrQuality.ATTR_INVALID
+							self.attr.value = None
+							self.attr.w_value = None
+							self.attrSignal.emit(self.attr)
 				
 			if self.interval != None:
 				time.sleep(self.interval)
@@ -352,12 +357,12 @@ class TangoDeviceClient(QtGui.QWidget):
 
 		
 		self.laserTempWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
-		self.laserTempWidget.setAttributeName('Pump temperature', 'degC')
+		self.laserTempWidget.setAttributeName('Pump temperature', u'\u00b0C')
 		self.laserTempWidget.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget.setSliderLimits(23, 27)
 
 		self.laserTempWidget2 = qw.QTangoReadAttributeTrend(colors = self.colors, sizes = self.attrSizes)
-		self.laserTempWidget2.setAttributeName('Pump temperature')
+		self.laserTempWidget2.setAttributeName('Pump temperature', u'\u00b0C')
 		self.laserTempWidget2.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget2.setTrendLimits(23, 27)
 

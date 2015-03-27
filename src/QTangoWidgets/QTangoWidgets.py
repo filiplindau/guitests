@@ -187,7 +187,10 @@ class QTangoAttributeBase(QtGui.QWidget):
 class QTangoTitleBar(QtGui.QWidget):
 	def __init__(self, title='', parent=None):
 		QtGui.QWidget.__init__(self, parent)
-		self.title = title
+		if title == None:
+			self.title = ''
+		else:
+			self.title = title
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -1006,7 +1009,7 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 			'border-left-style: double; \n',
 			'border-right-style: solid; \n',
 			'border-radius: 0px; \n',
-			'padding: 0px; \n',
+			'padding: 1px 0px 1px 3px; \n',
 			'margin: 0px; \n',
 # 			'min-width: ', str(int(self.sizes.barHeight)*1), 'px; \n',
 # 			'max-width: ', str(int(self.sizes.barHeight)*4), 'px; \n',
@@ -1030,7 +1033,7 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
  			'} \n',
 
 			'QComboBox::drop-down { \n',
-			'background-color: ', self.attrColors.secondaryColor0, '; \n',
+			'background-color: ', self.attrColors.secondaryColor0, '; \n',			
 			'color: ', self.attrColors.backgroundColor, '; \n',
  			'} \n',
 
@@ -1049,6 +1052,8 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 		self.setFont(font)
 		self.setStyleSheet(s)
 		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		itemDelegate = QtGui.QStyledItemDelegate()
+		self.setItemDelegate(itemDelegate)
 #		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
 
 	def setValue(self, value):
