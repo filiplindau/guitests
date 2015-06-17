@@ -16,7 +16,7 @@ import PyTango as pt
 class AttributeClass(QtCore.QObject):
     attrSignal = QtCore.pyqtSignal(pt.device_attribute.DeviceAttribute)
     attrInfoSignal = QtCore.pyqtSignal(pt.AttributeInfoEx)
-    def __init__(self, name, device, interval, slot=None, getInfo = False):
+    def __init__(self, name, device, interval, slot=None, getInfo=False):
         super(AttributeClass, self).__init__()
         self.name = name
         self.device = device
@@ -28,7 +28,7 @@ class AttributeClass(QtCore.QObject):
 
         self.lastRead = time.time()
         self.attr = None
-        self.readThread = threading.Thread(name = self.name, target = self.attr_read)
+        self.readThread = threading.Thread(name=self.name, target=self.attr_read)
         self.stopThread = False
 
         self.startRead()
@@ -36,7 +36,7 @@ class AttributeClass(QtCore.QObject):
     def attr_read(self):
         replyReady = True
         while self.stopThread == False:
-            if self.getInfoFlag ==True:
+            if self.getInfoFlag == True:
                 self.getInfoFlag = False
                 try:
                     self.attrInfo = self.device.get_attribute_config(self.name)
@@ -56,7 +56,7 @@ class AttributeClass(QtCore.QObject):
 
             t = time.time()
 
-            if t-self.lastRead > self.interval:
+            if t - self.lastRead > self.interval:
                 self.lastRead = t
                 try:
                     id = self.device.read_attribute_asynch(self.name)
@@ -85,7 +85,7 @@ class AttributeClass(QtCore.QObject):
                         self.attr = self.device.read_attribute_reply(id)
                         replyReady = True
                         self.attrSignal.emit(self.attr)
-                        print 'signal emitted', self.attr.value.shape
+                        #print 'signal emitted', self.attr.value.shape
                         # Read only once if interval = None:
                         if self.interval == None:
                             self.stopThread = True
@@ -128,7 +128,7 @@ class AttributeClass(QtCore.QObject):
                     self.attr.value = None
                     self.attr.w_value = None
                     self.attrSignal.emit(self.attr)
-            if time.time()-finalStartTime > finalTimeout:
+            if time.time() - finalStartTime > finalTimeout:
                 finalTimeoutFlag = True
         if finalTimeoutFlag == False:
             print self.name, '... Thread stopped'
