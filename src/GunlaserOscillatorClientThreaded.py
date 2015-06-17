@@ -21,7 +21,7 @@ class AttributeClass(QtCore.QObject):
 		
 		self.lastRead = time.time()
 		self.attr = None
-		self.readThread = threading.Thread(name = self.name, target = self.attr_read)
+		self.readThread = threading.Thread(name=self.name, target=self.attr_read)
 		self.stopThread = False
 		
 		self.startRead() 
@@ -31,7 +31,7 @@ class AttributeClass(QtCore.QObject):
 		while self.stopThread == False:
 			t = time.time()
 				
-			if t-self.lastRead > self.interval:
+			if t - self.lastRead > self.interval:
 				self.lastRead = t				
 				try:
 					id = self.device.read_attribute_asynch(self.name)
@@ -89,8 +89,8 @@ class AttributeClass(QtCore.QObject):
 		self.readThread.start()
 
 class TangoDeviceClient(QtGui.QWidget):
-	def __init__(self, parent = None):
-		QtGui.QWidget.__init__(self,parent)
+	def __init__(self, parent=None):
+		QtGui.QWidget.__init__(self, parent)
 #		self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 		self.timeVector = None
 		self.xData = None
@@ -98,16 +98,17 @@ class TangoDeviceClient(QtGui.QWidget):
 
 		self.setupLayout()
 
-		splash.showMessage('Initializing devices', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+		splash.showMessage('Initializing devices', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 		
-		t0=time.clock()
+		t0 = time.clock()
 		self.devices = {}
-		self.devices['spectrometer']=pt.DeviceProxy('testfel/gunlaser/osc_spectrometer')
-		self.devices['finesse']=pt.DeviceProxy('testfel/gunlaser/finesse')
-		print time.clock()-t0, ' s'
+#		self.devices['spectrometer']=pt.DeviceProxy('testfel/gunlaser/osc_spectrometer')
+		self.devices['spectrometer'] = pt.DeviceProxy('testfel/gunlaser/spectrometer')
+		self.devices['finesse'] = pt.DeviceProxy('testfel/gunlaser/finesse')
+		print time.clock() - t0, ' s'
 
-		splash.showMessage('Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+		splash.showMessage('Reading startup attributes', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 
 # 		initAttr = 0
@@ -144,7 +145,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.attributes = {}
 		self.attributes['wavelengths'] = AttributeClass('wavelengths', self.devices['spectrometer'], None)
 		self.attributes['peakenergy'] = AttributeClass('peakenergy', self.devices['spectrometer'], 0.3)
-		self.attributes['peakwidth'] = AttributeClass('spectrumwidth', self.devices['spectrometer'], 0.3)
+		self.attributes['peakwidth'] = AttributeClass('peakwidth', self.devices['spectrometer'], 0.3)
 		self.attributes['spectrum'] = AttributeClass('spectrum', self.devices['spectrometer'], 0.3)
 		self.attributes['spectrometerState'] = AttributeClass('state', self.devices['spectrometer'], 0.3)
 		
@@ -168,7 +169,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.attributes['pumpOperationState'].attrSignal.connect(self.readPumpOperationState)
 
 
-		splash.showMessage('Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+		splash.showMessage('Setting up variables', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
 
 # 		self.timer = QtCore.QTimer(self)
@@ -243,7 +244,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		if self.timeVector == None:
 			print 'No time vector'
 		else:
-			self.oscSpectrumPlot.setSpectrum(xData = self.timeVector, yData = data)
+			self.oscSpectrumPlot.setSpectrum(xData=self.timeVector, yData=data)
 			self.oscSpectrumPlot.update()
 		
 	def initSpectrometer(self):
@@ -251,6 +252,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
 	def onSpectrometer(self):
 		self.devices['spectrometer'].command_inout('on')
+		self.devices['spectrometer'].write_attribute('exposuretime', 200)
 
 	def offSpectrometer(self):
 		self.devices['spectrometer'].command_inout('off')
@@ -271,7 +273,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.devices['finesse'].command_inout('close')
 		
 		
-	def setupAttributeLayout(self, attributeList = []):
+	def setupAttributeLayout(self, attributeList=[]):
 		self.attributeQObjects = []
 		for att in attributeList:
 			attQObject = qw.QTangoReadAttributeDouble()
@@ -289,13 +291,13 @@ class TangoDeviceClient(QtGui.QWidget):
 		event.accept()
 		
 	def setupLayout(self):
-		s='QWidget{background-color: #000000; }'
+		s = 'QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 		
 		self.frameSizes = qw.QTangoSizes()
 		self.frameSizes.readAttributeWidth = 300
 		self.frameSizes.writeAttributeWidth = 150
-		self.frameSizes.fontStretch= 80
+		self.frameSizes.fontStretch = 80
 		self.frameSizes.fontType = 'Segoe UI'
 #		self.frameSizes.fontType = 'Trebuchet MS'
 		self.attrSizes = qw.QTangoSizes()
@@ -303,7 +305,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.attrSizes.barWidth = 60
 		self.attrSizes.readAttributeWidth = 300
 		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
+		self.attrSizes.fontStretch = 80
 		self.attrSizes.fontType = 'Segoe UI'
 #		self.attrSizes.fontType = 'Trebuchet MS'
 		
@@ -328,65 +330,65 @@ class TangoDeviceClient(QtGui.QWidget):
 		spacerItemH = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 		
 		layoutData = QtGui.QHBoxLayout()
-		layoutData.setMargin(self.attrSizes.barHeight/2)
-		layoutData.setSpacing(self.attrSizes.barHeight/2)
+		layoutData.setMargin(self.attrSizes.barHeight / 2)
+		layoutData.setSpacing(self.attrSizes.barHeight / 2)
 		self.layoutAttributes = QtGui.QVBoxLayout()
 		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
+		self.layoutAttributes.setSpacing(self.attrSizes.barHeight / 2)
 		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
 		
 		self.title = qw.QTangoTitleBar('Gunlaser oscillator')
-		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar = qw.QTangoSideBar(colors=self.colors, sizes=self.frameSizes)
 		self.bottombar = qw.QTangoHorizontalBar()
 		
-		self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.finesseName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frameSizes)
 		self.finesseName.setAttributeName('Finesse')
 				
-		self.shutterWidget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attrSizes)
+		self.shutterWidget = qw.QTangoCommandSelection('Shutter', colors=self.colors, sizes=self.attrSizes)
 		self.shutterWidget.addCmdButton('Open', self.openFinesseShutter)
 		self.shutterWidget.addCmdButton('Close', self.closeFinesseShutter)
 
-		self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors = self.colors, sizes = self.attrSizes)
+		self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors=self.colors, sizes=self.attrSizes)
 		self.laserOperationWidget.addCmdButton('Start', self.onFinesse)
 		self.laserOperationWidget.addCmdButton('Stop', self.offFinesse)
 
 		
-		self.laserTempWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.laserTempWidget = qw.QTangoReadAttributeSlider2(colors=self.colors, sizes=self.attrSizes)
 		self.laserTempWidget.setAttributeName('Pump temperature', 'degC')
 		self.laserTempWidget.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget.setSliderLimits(23, 27)
 
-		self.laserTempWidget2 = qw.QTangoReadAttributeTrend(colors = self.colors, sizes = self.attrSizes)
+		self.laserTempWidget2 = qw.QTangoReadAttributeTrend(colors=self.colors, sizes=self.attrSizes)
 		self.laserTempWidget2.setAttributeName('Pump temperature')
 		self.laserTempWidget2.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget2.setTrendLimits(23, 27)
 
 
-		self.laserPowerWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.laserPowerWidget = qw.QTangoWriteAttributeSlider(colors=self.colors, sizes=self.attrSizes)
 		self.laserPowerWidget.setAttributeName('Pump power', 'W')
 		self.laserPowerWidget.setSliderLimits(0, 6)
 		self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
 #		self.laserPowerWidget.setAttributeWriteValue(5)
 		self.laserPowerWidget.writeValueSpinbox.editingFinished.connect(self.writePumpPower)
 				
-		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.spectrometerName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frameSizes)
 		self.spectrometerName.setAttributeName('Spectrometer')
 				
-		self.onOffCommands = qw.QTangoCommandSelection('Spectrometer commands', colors = self.colors, sizes = self.attrSizes)
+		self.onOffCommands = qw.QTangoCommandSelection('Spectrometer commands', colors=self.colors, sizes=self.attrSizes)
 		self.onOffCommands.addCmdButton('Init', self.initSpectrometer)
 		self.onOffCommands.addCmdButton('On', self.onSpectrometer)
 		self.onOffCommands.addCmdButton('Off', self.offSpectrometer)
 		self.onOffCommands.addCmdButton('Stop', self.stopSpectrometer)
-		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors=self.colors, sizes=self.attrSizes)
 		self.peakWidthWidget.setAttributeName('Spectral width', 'nm')
 		self.peakWidthWidget.setAttributeWarningLimits([7, 20])
 		self.peakWidthWidget.setSliderLimits(0, 15)
-		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors=self.colors, sizes=self.attrSizes)
 		self.peakEnergyWidget.setAttributeName('Laser energy', 'a.u.')
 		self.peakEnergyWidget.setAttributeWarningLimits([0.02, 1])
-		self.peakEnergyWidget.setSliderLimits(0, 0.04)
+		self.peakEnergyWidget.setSliderLimits(0, 0.1)
 		
-		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors=self.colors, sizes=self.attrSizes)
 		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
 		self.oscSpectrumPlot.setXRange(760, 820)
 		self.oscSpectrumPlot.fixedSize(True)
@@ -420,7 +422,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		layout0.addWidget(self.bottombar)
 		
 #		self.resize(500,800)
-		self.setGeometry(200,100,500,800)
+		self.setGeometry(200, 100, 500, 800)
 		
 		self.update()
 		
@@ -431,7 +433,7 @@ if __name__ == '__main__':
 	splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
 	splash.setMask(splash_pix.mask())
 	splash.show()
-	splash.showMessage('Importing modules', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+	splash.showMessage('Importing modules', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 	app.processEvents()
 
 	import QTangoWidgets.QTangoWidgets as qw
@@ -440,7 +442,7 @@ if __name__ == '__main__':
 	import threading
 	import numpy as np
 
-	splash.showMessage('Starting GUI', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+	splash.showMessage('Starting GUI', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 	app.processEvents()
 	myapp = TangoDeviceClient()
 	myapp.show()
