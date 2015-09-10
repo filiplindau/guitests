@@ -152,6 +152,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.recordLengthWidget.setAttributeValue(data)
 
     def readSampleRate(self, data):
+#        print str(data.value)
         self.sampleRateWidget.setAttributeValue(data)
 
     def writeTrigDelay(self):

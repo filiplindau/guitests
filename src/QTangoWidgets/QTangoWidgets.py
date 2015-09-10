@@ -185,15 +185,21 @@ class QTangoAttributeBase(QtGui.QWidget):
 
 
 class QTangoTitleBar(QtGui.QWidget):
-	def __init__(self, title='', parent=None):
+	def __init__(self, title='', sizes = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		if title == None:
 			self.title = ''
 		else:
 			self.title = title
+		if sizes == None:
+			self.sizes = QTangoSizes()
+		else:
+			self.sizes = sizes
+			
 		self.setupLayout()
 
 	def setupLayout(self):
+		barHeight = self.sizes.barHeight
 		self.startLabel = QtGui.QLabel('')
 		s = ''.join(('QLabel {min-height: ', str(int(barHeight * 1.25)), 'px; \n',
 					'min-width: ', str(int(barHeight * 1.25 / 3)), 'px; \n',
@@ -221,10 +227,14 @@ class QTangoTitleBar(QtGui.QWidget):
 		self.nameLabel.setStyleSheet(s)
 
 		self.nameLabel.setText(self.title.upper())
+
 		font = self.nameLabel.font()
-		font.setFamily('TrebuchetMS')
-		font.setStretch(QtGui.QFont.Condensed)
-		font.setWeight(QtGui.QFont.Light)
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+#		font.setFamily('TrebuchetMS')
+#		font.setStretch(QtGui.QFont.Condensed)
+#		font.setWeight(QtGui.QFont.Light)
 		font.setPointSize(int(barHeight * 1.15))
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.nameLabel.setFont(font)
@@ -2155,7 +2165,7 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 #		font.setStretch(self.sizes.fontStretch)
 
 		# Strings to draw
-		sVal = "{:.4g}".format((self.attrValue))
+		sVal = ''.join(("{:.4g}".format((self.attrValue)), " ", self.unit))
 		sMin = "{:.4g}".format((self.attrMinimum))
 		sMax = "{:.4g}".format((self.attrMaximum))
 
@@ -2978,6 +2988,7 @@ class QTangoReadAttributeSliderV(QTangoReadAttributeSlider2):
 
 	def setupLayout(self):
 		self.nameLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
+#		self.unitLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
 		sizesValue = copy.copy(self.sizes)
 		sizesValue.barHeight *= 1.25
 
@@ -2995,6 +3006,7 @@ class QTangoReadAttributeSliderV(QTangoReadAttributeSlider2):
 
 		self.layout.addWidget(self.valueSlider)
 		self.layout.addWidget(self.nameLabel)
+#		self.layout.addWidget(self.unitLabel)
 
 		self.setMaximumWidth(self.sizes.barWidth*4)
 		self.setMinimumWidth(self.sizes.barWidth*4)
@@ -3012,6 +3024,7 @@ class QTangoReadAttributeSliderV(QTangoReadAttributeSlider2):
 		if aUnit != None:
 			self.valueSlider.setUnit(aUnit)
 			self.unit = aUnit
+#			self.unitLabel.setText(self.unit)
 		self.update()
 
 	def setAttributeValue(self, value):

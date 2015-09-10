@@ -85,7 +85,7 @@ class AttributeClass(QtCore.QObject):
                         self.attr = self.device.read_attribute_reply(id)
                         replyReady = True
                         self.attrSignal.emit(self.attr)
-                        print 'signal emitted', self.attr.value.shape
+                        # print 'signal emitted', self.attr.value.shape
                         # Read only once if interval = None:
                         if self.interval == None:
                             self.stopThread = True
