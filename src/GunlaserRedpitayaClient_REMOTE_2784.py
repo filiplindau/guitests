@@ -13,8 +13,8 @@ import sys
 
 
 class TangoDeviceClient(QtGui.QWidget):
-    def __init__(self, deviceName, parent = None):
-        QtGui.QWidget.__init__(self,parent)
+    def __init__(self, deviceName, parent=None):
+        QtGui.QWidget.__init__(self, parent)
 #        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.timeVector = None
         self.xData = None
@@ -23,13 +23,13 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.setupLayout()
 
-        splash.showMessage('         Initializing devices', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Initializing devices', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
-        t0=time.clock()
-        print time.clock()-t0, ' s'
+        t0 = time.clock()
+        print time.clock() - t0, ' s'
 
-        splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Reading startup attributes', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
 
@@ -37,7 +37,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.changeDevice(self.deviceName)
 
-        splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Setting up variables', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
         self.positionOffset = 0.0
@@ -66,22 +66,22 @@ class TangoDeviceClient(QtGui.QWidget):
         self.trigDelayWidget.writeValueInitialized = False
         self.trigLevelWidget.writeValueInitialized = False
         self.trigSourceWidget.writeValueInitialized = False
-        self.trigModeWidget.writeValueInitialized = False
+        self.trigEdgeWidget.writeValueInitialized = False
         self.recordLengthWidget.writeValueInitialized = False
         self.sampleRateWidget.writeValueInitialized = False
 
         self.deviceName = str(devName)
         self.title.setName(self.deviceName.upper())
         self.devices = {}
-        self.devices['redpitaya']=pt.DeviceProxy(self.deviceName)
+        self.devices['redpitaya'] = pt.DeviceProxy(self.deviceName)
 
         self.attributes = {}
         self.attributes['timevector'] = AttributeClass('timevector', self.devices['redpitaya'], None)
-        self.attributes['waveform1'] = AttributeClass('waveform1', self.devices['redpitaya'], 0.3)
-        self.attributes['waveform2'] = AttributeClass('waveform2', self.devices['redpitaya'], 0.3)
+        self.attributes['waveform1'] = AttributeClass('waveform1', self.devices['redpitaya'], 0.1)
+        self.attributes['waveform2'] = AttributeClass('waveform2', self.devices['redpitaya'], 0.1)
         self.attributes['triggerlevel'] = AttributeClass('triggerlevel', self.devices['redpitaya'], 0.3)
         self.attributes['triggerdelay'] = AttributeClass('triggerdelay', self.devices['redpitaya'], 0.3)
-        self.attributes['triggermode'] = AttributeClass('triggermode', self.devices['redpitaya'], 1.0)
+        self.attributes['triggeredge'] = AttributeClass('triggeredge', self.devices['redpitaya'], 1.0)
         self.attributes['triggersource'] = AttributeClass('triggersource', self.devices['redpitaya'], 1.0)
         self.attributes['recordlength'] = AttributeClass('recordlength', self.devices['redpitaya'], 0.3)
         self.attributes['samplerate'] = AttributeClass('samplerate', self.devices['redpitaya'], 0.3)
@@ -92,7 +92,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['waveform2'].attrSignal.connect(self.readWaveform2)
         self.attributes['triggerlevel'].attrSignal.connect(self.readTrigLevel)
         self.attributes['triggerdelay'].attrSignal.connect(self.readTrigDelay)
-        self.attributes['triggermode'].attrSignal.connect(self.readTrigMode)
+        self.attributes['triggeredge'].attrSignal.connect(self.readTrigEdge)
         self.attributes['triggersource'].attrSignal.connect(self.readTrigSource)
         self.attributes['recordlength'].attrSignal.connect(self.readRecordLength)
         self.attributes['samplerate'].attrSignal.connect(self.readSampleRate)
@@ -107,7 +107,7 @@ class TangoDeviceClient(QtGui.QWidget):
             self.attributes['timevector'] = AttributeClass('timevector', self.devices['redpitaya'], None)
             self.attributes['timevector'].attrSignal.connect(self.readTimevector)
         else:
-            self.waveformPlot.setSpectrum(xData = self.timeVector, yData = data, index=0)
+            self.waveformPlot.setSpectrum(xData=self.timeVector, yData=data, index=0)
             self.waveformPlot.update()
 
     def readWaveform2(self, data):
@@ -115,7 +115,7 @@ class TangoDeviceClient(QtGui.QWidget):
             self.attributes['timevector'] = AttributeClass('timevector', self.devices['redpitaya'], None)
             self.attributes['timevector'].attrSignal.connect(self.readTimevector)
         else:
-            self.waveformPlot.setSpectrum(xData = self.timeVector, yData = data, index=1)
+            self.waveformPlot.setSpectrum(xData=self.timeVector, yData=data, index=1)
             self.waveformPlot.update()
 
     def initRedpitaya(self):
@@ -142,8 +142,8 @@ class TangoDeviceClient(QtGui.QWidget):
     def readTrigDelay(self, data):
         self.trigDelayWidget.setAttributeValue(data)
 
-    def readTrigMode(self, data):
-        self.trigModeWidget.setAttributeValue(data)
+    def readTrigEdge(self, data):
+        self.trigEdgeWidget.setAttributeValue(data)
 
     def readTrigSource(self, data):
         self.trigSourceWidget.setAttributeValue(data)
@@ -152,7 +152,6 @@ class TangoDeviceClient(QtGui.QWidget):
         self.recordLengthWidget.setAttributeValue(data)
 
     def readSampleRate(self, data):
-#        print str(data.value)
         self.sampleRateWidget.setAttributeValue(data)
 
     def writeTrigDelay(self):
@@ -170,9 +169,9 @@ class TangoDeviceClient(QtGui.QWidget):
             w = self.sampleRateWidget.getWriteValue()
             self.attributes['samplerate'].attr_write(w)
 
-    def writeTrigMode(self, text):
+    def writeTrigEdge(self, text):
         with self.guiLock:
-            self.attributes['triggermode'].attr_write(str(text))
+            self.attributes['triggeredge'].attr_write(str(text))
             print text
 
     def writeTrigSource(self, text):
@@ -180,7 +179,7 @@ class TangoDeviceClient(QtGui.QWidget):
             self.attributes['triggersource'].attr_write(str(text))
             print text
 
-    def setupAttributeLayout(self, attributeList = []):
+    def setupAttributeLayout(self, attributeList=[]):
         self.attributeQObjects = []
         for att in attributeList:
             attQObject = qw.QTangoReadAttributeDouble()
@@ -199,7 +198,7 @@ class TangoDeviceClient(QtGui.QWidget):
         event.accept()
 
     def setupLayout(self):
-        s='QWidget{background-color: #000000; }'
+        s = 'QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
 
         self.frameSizes = qw.QTangoSizes()
@@ -207,7 +206,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.frameSizes.barWidth = 20
         self.frameSizes.readAttributeWidth = 320
         self.frameSizes.writeAttributeWidth = 150
-        self.frameSizes.fontStretch= 80
+        self.frameSizes.fontStretch = 80
         self.frameSizes.fontType = 'Segoe UI'
 #        self.frameSizes.fontType = 'Trebuchet MS'
 
@@ -217,7 +216,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attrSizes.readAttributeWidth = 320
         self.attrSizes.readAttributeHeight = 320
         self.attrSizes.writeAttributeWidth = 299
-        self.attrSizes.fontStretch= 80
+        self.attrSizes.fontStretch = 80
         self.attrSizes.fontType = 'Segoe UI'
 #        self.attrSizes.fontType = 'Trebuchet MS'
 
@@ -278,52 +277,63 @@ class TangoDeviceClient(QtGui.QWidget):
         self.redpitayaDevices.writeValueComboBox.setCurrentIndex(ind)
         self.redpitayaDevices.writeValueComboBox.blockSignals(False)
 
-        self.redpitayaDevices.writeValueComboBox.setWidth(self.attrSizes.barHeight*10)
+        self.redpitayaDevices.writeValueComboBox.setWidth(self.attrSizes.barHeight * 10)
         self.redpitayaDevices.setActivatedMethod(self.changeDevice)
         self.redpitayaDevices.startLabel.setQuality(pt.AttrQuality.ATTR_VALID)
         self.redpitayaDevices.endLabel.setQuality(pt.AttrQuality.ATTR_VALID)
 
-        self.redpitayaName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+        self.redpitayaName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frameSizes)
         self.redpitayaName.setAttributeName('Redpitaya')
-        self.redpitayaCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attrSizes)
+        self.redpitayaCommands = qw.QTangoCommandSelection('Commands', colors=self.colors, sizes=self.attrSizes)
         self.redpitayaCommands.addCmdButton('Init', self.initRedpitaya)
         self.redpitayaCommands.addCmdButton('Start', self.startRedpitaya)
         self.redpitayaCommands.addCmdButton('Stop', self.stopRedpitaya)
 
-        self.trigLevelWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.trigLevelWidget = qw.QTangoWriteAttributeDouble(colors=self.colors, sizes=self.attrSizes)
         self.trigLevelWidget.setAttributeName('Trigger level', 'V')
         self.trigLevelWidget.writeValueLineEdit.returnPressed.connect(self.writeTrigLevel)
 
-        self.trigDelayWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.trigDelayWidget = qw.QTangoWriteAttributeDouble(colors=self.colors, sizes=self.attrSizes)
         self.trigDelayWidget.setAttributeName('Trigger delay', 'us')
         self.trigDelayWidget.writeValueLineEdit.returnPressed.connect(self.writeTrigDelay)
 
-        self.trigModeWidget = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
-        self.trigModeWidget.setAttributeName('Trigger mode')
-        self.trigModeWidget.addItem('NORMAL')
-        self.trigModeWidget.addItem('AUTO')
-        self.trigModeWidget.setActivatedMethod(self.writeTrigMode)
+        self.trigEdgeWidget = qw.QTangoWriteAttributeComboBox(colors=self.colors, sizes=self.attrSizes)
+        self.trigEdgeWidget.setAttributeName('Trigger edge')
+        self.trigEdgeWidget.addItem('POSITIVE')
+        self.trigEdgeWidget.addItem('NEGATIVE')
+        self.trigEdgeWidget.setActivatedMethod(self.writeTrigEdge)
 
-        self.trigSourceWidget = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
+        self.trigSourceWidget = qw.QTangoWriteAttributeComboBox(colors=self.colors, sizes=self.attrSizes)
         self.trigSourceWidget.setAttributeName('Trigger source')
         self.trigSourceWidget.addItem('CHANNEL1')
         self.trigSourceWidget.addItem('CHANNEL2')
         self.trigSourceWidget.addItem('EXTERNAL')
         self.trigSourceWidget.setActivatedMethod(self.writeTrigSource)
 
-        self.recordLengthWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.recordLengthWidget = qw.QTangoWriteAttributeDouble(colors=self.colors, sizes=self.attrSizes)
         self.recordLengthWidget.setAttributeName('Record length', 'samples')
         self.recordLengthWidget.writeValueLineEdit.returnPressed.connect(self.writeRecordLength)
 
-        self.sampleRateWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.sampleRateWidget = qw.QTangoWriteAttributeDouble(colors=self.colors, sizes=self.attrSizes)
         self.sampleRateWidget.setAttributeName('Sample rate', 'samples')
         self.sampleRateWidget.writeValueLineEdit.returnPressed.connect(self.writeSampleRate)
 
-        self.waveformPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+        self.waveformPlot = qw.QTangoReadAttributeSpectrum(colors=self.colors, sizes=self.attrSizes)
         self.waveformPlot.setAttributeName('Waveform')
         self.waveformPlot.spectrum.addPlot(self.colors.secondaryColor1)
 #        self.waveformPlot.setXRange(700, 900)
         self.waveformPlot.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        
+#        pi = self.waveformPlot.spectrum.getPlotItem()
+#        pi.addLegend()        
+#        pi.legend.addItem(self.waveformPlot.spectrum.spectrumCurves[0], 'Waveform1')
+#        pi.legend.addItem(self.waveformPlot.spectrum.spectrumCurves[1], 'Waveform2')
+        self.waveformPlot.spectrum.setCurveName(0, 'Waveform 1')
+        self.waveformPlot.spectrum.setCurveName(1, 'Waveform 2')
+        self.waveformPlot.spectrum.showLegend(True)
+        
+        
+        
 
         self.attrSizes.readAttributeHeight = 250
 
@@ -343,7 +353,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layoutAttributes.addWidget(self.sampleRateWidget)
         self.layoutAttributes.addWidget(self.trigLevelWidget)
         self.layoutAttributes.addWidget(self.trigDelayWidget)
-        self.layoutAttributes.addWidget(self.trigModeWidget)
+        self.layoutAttributes.addWidget(self.trigEdgeWidget)
         self.layoutAttributes.addWidget(self.trigSourceWidget)
         layoutData.addWidget(self.waveformPlot)
 
@@ -357,7 +367,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #        layout0.addWidget(self.bottombar)
 
 #        self.resize(500,800)
-        self.setGeometry(200,100,800,400)
+        self.setGeometry(200, 100, 800, 400)
 
         self.update()
 
@@ -368,7 +378,7 @@ if __name__ == '__main__':
     splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
-    splash.showMessage('         Importing modules', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color = QtGui.QColor('#66cbff'))
+    splash.showMessage('         Importing modules', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color=QtGui.QColor('#66cbff'))
     app.processEvents()
 
     import QTangoWidgets.QTangoWidgets as qw
@@ -378,9 +388,9 @@ if __name__ == '__main__':
     import threading
     import numpy as np
 
-    splash.showMessage('         Starting GUI', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color = QtGui.QColor('#66cbff'))
+    splash.showMessage('         Starting GUI', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color=QtGui.QColor('#66cbff'))
     app.processEvents()
-    myapp = TangoDeviceClient('gunlaser/devices/redpitaya0')
+    myapp = TangoDeviceClient('testfel/gunlaser/redpitaya1')
     myapp.show()
     splash.finish(myapp)
     sys.exit(app.exec_())

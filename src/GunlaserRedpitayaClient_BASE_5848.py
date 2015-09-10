@@ -152,7 +152,6 @@ class TangoDeviceClient(QtGui.QWidget):
         self.recordLengthWidget.setAttributeValue(data)
 
     def readSampleRate(self, data):
-#        print str(data.value)
         self.sampleRateWidget.setAttributeValue(data)
 
     def writeTrigDelay(self):
@@ -239,15 +238,15 @@ class TangoDeviceClient(QtGui.QWidget):
         layout2.setSpacing(0)
         layout2.setContentsMargins(-1, 0, 0, 0)
         spacerItemV = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
-        spacerItemBar = QtGui.QSpacerItem(self.frameSizes.barWidth, self.frameSizes.barHeight + 8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        spacerItemBar = QtGui.QSpacerItem(self.frameSizes.barWidth, self.frameSizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         spacerItemH = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
         layoutData = QtGui.QHBoxLayout()
-        layoutData.setMargin(self.attrSizes.barHeight / 2)
-        layoutData.setSpacing(self.attrSizes.barHeight * 2)
+        layoutData.setMargin(self.attrSizes.barHeight/2)
+        layoutData.setSpacing(self.attrSizes.barHeight*2)
         self.layoutAttributes = QtGui.QVBoxLayout()
         self.layoutAttributes.setMargin(0)
-        self.layoutAttributes.setSpacing(self.attrSizes.barHeight / 2)
+        self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
         self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
 
 #         self.layoutAttributes2 = QtGui.QVBoxLayout()
@@ -262,21 +261,17 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.title = qw.QTangoTitleBar(self.deviceName)
         self.setWindowTitle('RedPitaya')
-        self.sidebar = qw.QTangoSideBar(colors=self.colors, sizes=self.frameSizes)
+        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
-        self.redpitayaDevices = qw.QTangoWriteAttributeComboBox(colors=self.colors, sizes=self.attrSizes)
-        s = str(self.redpitayaDevices.writeValueComboBox.styleSheet())
+        self.redpitayaDevices = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
+        s=str(self.redpitayaDevices.writeValueComboBox.styleSheet())
 
         self.redpitayaDevices.setAttributeName('Device list')
         db = pt.Database()
         devNameList = db.get_device_exported_for_class('redpitayads').value_string
         for devName in devNameList:
             self.redpitayaDevices.addItem(devName)
-        self.redpitayaDevices.writeValueComboBox.blockSignals(True)
-        ind = self.redpitayaDevices.writeValueComboBox.findText(self.deviceName)
-        self.redpitayaDevices.writeValueComboBox.setCurrentIndex(ind)
-        self.redpitayaDevices.writeValueComboBox.blockSignals(False)
 
         self.redpitayaDevices.writeValueComboBox.setWidth(self.attrSizes.barHeight*10)
         self.redpitayaDevices.setActivatedMethod(self.changeDevice)
