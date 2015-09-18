@@ -322,6 +322,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.waveformPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
         self.waveformPlot.setAttributeName('Waveform')
         self.waveformPlot.spectrum.addPlot(self.colors.secondaryColor1)
+        self.waveformPlot.spectrum.setCurveName(0, 'Waveform 1')
+        self.waveformPlot.spectrum.setCurveName(1, 'Waveform 2')
+        self.waveformPlot.spectrum.showLegend(True)
 #        self.waveformPlot.setXRange(700, 900)
         self.waveformPlot.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
