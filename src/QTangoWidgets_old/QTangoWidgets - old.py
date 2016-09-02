@@ -53,7 +53,6 @@ class QTangoColors(object):
 		self.unknownColor = '#45616f'
 		self.disableColor = '#ff00ff'
 		self.movingColor = '#feff99'
-		self.runningColor = '#feff99'
 
 		self.validColor = self.secondaryColor0
 		self.invalidColor = self.unknownColor
@@ -155,9 +154,6 @@ class QTangoAttributeBase(QtGui.QWidget):
 		elif state_str == str(pt.DevState.MOVING):
 			color = self.attrColors.movingColor
 			stateString = 'MOVING'
-		elif state_str == str(pt.DevState.RUNNING):
-			color = self.attrColors.runningColor
-			stateString = 'RUNNING'
 		else:
 			color = self.attrColors.unknownColor
 			stateString = 'UNKNOWN'
@@ -223,21 +219,15 @@ class QTangoAttributeBase(QtGui.QWidget):
 
 
 class QTangoTitleBar(QtGui.QWidget):
-	def __init__(self, title='', sizes = None, parent=None):
+	def __init__(self, title='', parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		if title == None:
 			self.title = ''
 		else:
 			self.title = title
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes
-			
 		self.setupLayout()
 
 	def setupLayout(self):
-		barHeight = self.sizes.barHeight
 		self.startLabel = QtGui.QLabel('')
 		s = ''.join(('QLabel {min-height: ', str(int(barHeight * 1.25)), 'px; \n',
 					'min-width: ', str(int(barHeight * 1.25 / 3)), 'px; \n',
@@ -266,12 +256,9 @@ class QTangoTitleBar(QtGui.QWidget):
 
 		self.nameLabel.setText(self.title.upper())
 		font = self.nameLabel.font()
-		font.setFamily(self.sizes.fontType)
-		font.setStretch(self.sizes.fontStretch)
-		font.setWeight(self.sizes.fontWeight)
-#		font.setFamily('TrebuchetMS')
-#		font.setStretch(QtGui.QFont.Condensed)
-#		font.setWeight(QtGui.QFont.Light)
+		font.setFamily('TrebuchetMS')
+		font.setStretch(QtGui.QFont.Condensed)
+		font.setWeight(QtGui.QFont.Light)
 		font.setPointSize(int(barHeight * 1.15))
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.nameLabel.setFont(font)
@@ -706,9 +693,6 @@ class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
 		elif state_str == str(pt.DevState.MOVING):
 			color = self.attrColors.movingColor
 			stateString = 'MOVING'
-		elif state_str == str(pt.DevState.RUNNING):
-			color = self.attrColors.runningColor
-			stateString = 'RUNNING'
 		else:
 			color = self.attrColors.unknownColor
 			stateString = 'UNKNOWN'
@@ -859,9 +843,6 @@ class QTangoEndLabel(QtGui.QLabel, QTangoAttributeBase):
 		elif state_str == str(pt.DevState.MOVING):
 			color = self.attrColors.movingColor
 			stateString = 'MOVING'
-		elif state_str == str(pt.DevState.RUNNING):
-			color = self.attrColors.runningColor
-			stateString = 'RUNNING'
 		else:
 			color = self.attrColors.unknownColor
 			stateString = 'UNKNOWN'
@@ -1153,12 +1134,7 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 
 
 class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
-	''' A line edit for input of values to a tango attribute. Will emit a signal newValueSignal
-	when enter is pressed.
-	'''
-	newValueSignal = QtCore.pyqtSignal()
-	
-	def __init__(self, sizes=None, colors=None, parent=None):
+	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		QtGui.QLineEdit.__init__(self, parent)
 
@@ -1313,13 +1289,12 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 				txt = str(self.text())
 				commaPos = txt.find('.')
 				newCursorPos = commaPos - decimalPos
-				self.setCursorPosition(newCursorPos)
+  				self.setCursorPosition(newCursorPos)
 
-			elif event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]:
+			elif event.key() == QtCore.Qt.Key_Enter:
 				print 'Enter!'
 				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
-					self.dataValue = np.double(self.text())				
-				self.newValueSignal.emit()
+					self.dataValue = np.double(self.text())
 				# This fires an editingFinished event
 				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
 			else:
@@ -2237,12 +2212,9 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 #		font.setStretch(self.sizes.fontStretch)
 
 		# Strings to draw
-		sVal = ''.join(("{:.4g}".format((self.attrValue)), " ", self.unit))
-		sMin = "{:.4g}".format((self.attrMinimum))
-		sMax = "{:.4g}".format((self.attrMaximum))		
-#		sVal = "{:.3g}".format((self.attrValue))
-#		sMin = "{:.3g}".format((self.attrMinimum))
-#		sMax = "{:.3g}".format((self.attrMaximum))
+		sVal = "{:.3g}".format((self.attrValue))
+		sMin = "{:.3g}".format((self.attrMinimum))
+		sMax = "{:.3g}".format((self.attrMaximum))
 
 		# Width of value text:
 		sValWidth = QtGui.QFontMetricsF(font).width(sVal)
@@ -2593,7 +2565,6 @@ class QTangoSpectrumBase(pg.PlotWidget):
 		else:
 			self.sizes = sizes
 
-		self.legend = None
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -2601,15 +2572,13 @@ class QTangoSpectrumBase(pg.PlotWidget):
 		pi=self.getPlotItem()
 		pi.hideAxis('left')
 		pi.showAxis('right', True)
-		pi.showGrid(True, True, 0.2)
 		axLeft = pi.getAxis('right')
 		axLeft.setPen(self.attrColors.secondaryColor0)
 		axBottom = pi.getAxis('bottom')
 		axBottom.setPen(self.attrColors.secondaryColor0)
 
 		self.spectrumCurves = [self.plot()]
-		self.spectrumNames = ['']
-		self.spectrumCurves[0].setPen(self.attrColors.secondaryColor0, width=2.0)
+		self.spectrumCurves[0].setPen(self.attrColors.secondaryColor0, width = 2.0)
 #		self.spectrumCurve.setDownsampling(True, True, 'subsample')
 
 		self.useOpenGL(True)
@@ -2621,30 +2590,11 @@ class QTangoSpectrumBase(pg.PlotWidget):
 	def setSpectrum(self, xData, yData, index = 0):
 		self.spectrumCurves[index].setData(y = yData, x = xData, antialias = False)
 		self.update()
-		
-	def showLegend(self, state):
-		pi = self.getPlotItem()
-		if state == True:
-			if self.legend == None:
-				self.legend = pi.addLegend()
-				for ind, cur in enumerate(self.spectrumCurves):
-					self.legend.addItem(cur, self.spectrumNames[ind])
-		else:
-			if self.legend != None:
-				self.legend.scene().removeItem(self.legend)
-				self.legend = None
-		
-	def setCurveName(self, index, name):
-		self.spectrumNames[index] = name
-		if self.legend != None:
-			self.legend.removeItem(name)
-			self.legend.addItem(self.spectrumCurves[index], self.spectrumNames[index])
-		
-	def addPlot(self, color, name=''):
+
+	def addPlot(self, color):
 		p = self.plot()
 		p.setPen(color, width = 2.0)
 		self.spectrumCurves.append(p)
-		self.spectrumNames.append(name)
 
 class QTangoImageWithHistBase(pg.ImageView):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -2717,21 +2667,9 @@ class QTangoImageBase(pg.GraphicsView):
 		self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
 
-	def setImage(self, image):
-		if image is not None:
-			if type(image) == pt.DeviceAttribute:
-				data = image.value
-				if image.quality == pt.AttrQuality.ATTR_VALID:
-					gradEditor = pg.GradientEditorItem()
-					gradEditor.loadPreset('flame')
-					self.lut = gradEditor.getLookupTable(256)
-				else:
-					gradEditor = pg.GradientEditorItem()
-					gradEditor.loadPreset('gray')
-					self.lut = gradEditor.getLookupTable(8)
-			else:
-				data = image
-			self.image.setImage(np.transpose(data), autoLevels=False, lut=self.lut, autoDownSample=True)
+	def setImage(self, data):
+		if data is not None:
+			self.image.setImage(np.transpose(data), autoLevels = False, lut = self.lut, autoDownSample = True)
 			self.update()
 
 class QTangoReadAttributeSlider(QTangoAttributeBase):
@@ -3838,16 +3776,8 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 		self.layout.setMargin(int(self.sizes.barHeight/10))
 		self.layout.setSpacing(self.sizes.barHeight/6.0)
 
-		layout2 = QtGui.QHBoxLayout()
-		layout2.setContentsMargins(0, 0, 0, 0)
-		layout2.setMargin(int(self.sizes.barHeight / 10))
-		layout2.setSpacing(self.sizes.barHeight / 6.0)
-		layout2.addWidget(self.writeLabel)
-		layout2.addWidget(self.writeValueLineEdit)
-
 		self.layout.addWidget(self.valueSlider)
-		self.layout.addLayout(layout2)
-#		self.layout.addWidget(self.writeValueLineEdit)
+		self.layout.addWidget(self.writeValueLineEdit)
 		self.layout.addWidget(self.nameLabel)
 
 		self.setMaximumWidth(self.sizes.barWidth*4)

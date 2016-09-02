@@ -36,6 +36,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['redpitaya1']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
         self.devices['mpLee']=pt.DeviceProxy('gunlaser/mp/leelaser')
         self.devices['redpitaya4']=pt.DeviceProxy('gunlaser/devices/redpitaya4')
+        self.devices['halcyon']=pt.DeviceProxy('gunlaser/oscillator/halcyon')
+        self.devices['regenTemp']=pt.DeviceProxy('gunlaser/regen/temperature')
+        self.devices['mpTemp']=pt.DeviceProxy('gunlaser/mp/temperature')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -45,36 +48,56 @@ class TangoDeviceClient(QtGui.QWidget):
         self.guiLock = threading.Lock()
         self.attributes = {}
         self.attributes['finessePower'] = AttributeClass('power', self.devices['finesse'], 0.3)
+        self.attributes['finesseTemperature'] = AttributeClass('lasertemperature', self.devices['finesse'], 0.3)
         self.attributes['finesseState'] = AttributeClass('state', self.devices['finesse'], 0.3)
         self.attributes['finesseShutterState'] = AttributeClass('shutterstate', self.devices['finesse'], 0.3)
         self.attributes['finesseOperationState'] = AttributeClass('laseroperationstate', self.devices['finesse'], 0.3)
         self.attributes['peakwidth'] = AttributeClass('peakwidth', self.devices['spectrometer'], 0.3)
         self.attributes['oscPower'] = AttributeClass('measurementdata1', self.devices['redpitaya0'], 0.3)
+        self.attributes['wavelengths'] = AttributeClass('wavelengthsROI', self.devices['spectrometer'], None)
+        self.attributes['spectrum'] = AttributeClass('spectrumROI', self.devices['spectrometer'], 0.3)
+        self.attributes['halcyonState'] = AttributeClass('state', self.devices['halcyon'], 0.3)
+        self.attributes['halcyonPiezoVoltage'] = AttributeClass('piezovoltage', self.devices['halcyon'], 0.3)
+        self.attributes['halcyonErrorFrequency'] = AttributeClass('errorfrequency', self.devices['halcyon'], 0.3)
         
         self.attributes['finessePower'].attrSignal.connect(self.readFinessePower)
+        self.attributes['finesseTemperature'].attrSignal.connect(self.readFinesseTemperature)
         self.attributes['finesseState'].attrSignal.connect(self.readFinesseState)
         self.attributes['finesseShutterState'].attrSignal.connect(self.readFinesseShutterState)
         self.attributes['finesseOperationState'].attrSignal.connect(self.readFinesseOperationState)
         self.attributes['peakwidth'].attrSignal.connect(self.readPeakWidth)
         self.attributes['oscPower'].attrSignal.connect(self.readOscillatorPower)
+        self.attributes['spectrum'].attrSignal.connect(self.readSpectrum)
+        self.attributes['wavelengths'].attrSignal.connect(self.readWavelengths)
+        self.attributes['halcyonState'].attrSignal.connect(self.readHalcyonState)
+        self.attributes['halcyonPiezoVoltage'].attrSignal.connect(self.readPiezoVoltage)
+        self.attributes['halcyonErrorFrequency'].attrSignal.connect(self.readErrorFrequency)
         
         self.attributes['regenState'] = AttributeClass('state', self.devices['regenLee'], 0.3)
         self.attributes['regenShutterState'] = AttributeClass('shutterstate', self.devices['regenLee'], 0.3)
         self.attributes['regenOperationState'] = AttributeClass('laserstate', self.devices['regenLee'], 0.3)
         self.attributes['regenLeePower'] = AttributeClass('measurementdata1', self.devices['redpitaya4'], 0.3)
+        self.attributes['regenLeePercentcurrent'] = AttributeClass('percentcurrent', self.devices['regenLee'], 0.3)
+        self.attributes['regenCrystalTemp'] = AttributeClass('temperature', self.devices['regenTemp'], 0.3)
         self.attributes['mpState'] = AttributeClass('state', self.devices['mpLee'], 0.3)
         self.attributes['mpShutterState'] = AttributeClass('shutterstate', self.devices['mpLee'], 0.3)
         self.attributes['mpOperationState'] = AttributeClass('laserstate', self.devices['mpLee'], 0.3)
         self.attributes['mpLeePower'] = AttributeClass('measurementdata2', self.devices['redpitaya4'], 0.3)
+        self.attributes['mpLeePercentcurrent'] = AttributeClass('percentcurrent', self.devices['mpLee'], 0.3)
+        self.attributes['mpCrystalTemp'] = AttributeClass('temperature', self.devices['mpTemp'], 0.3)
 
         self.attributes['regenState'].attrSignal.connect(self.readRegenState)
         self.attributes['regenShutterState'].attrSignal.connect(self.readRegenShutterState)
         self.attributes['regenOperationState'].attrSignal.connect(self.readRegenOperationState)
         self.attributes['regenLeePower'].attrSignal.connect(self.readRegenLeePower)
+        self.attributes['regenLeePercentcurrent'].attrSignal.connect(self.readRegenLeePercentCurrent)
+        self.attributes['regenCrystalTemp'].attrSignal.connect(self.readRegenCrystalTemp)
         self.attributes['mpState'].attrSignal.connect(self.readMPState)
         self.attributes['mpShutterState'].attrSignal.connect(self.readMPShutterState)
         self.attributes['mpOperationState'].attrSignal.connect(self.readMPOperationState)
         self.attributes['mpLeePower'].attrSignal.connect(self.readMPLeePower)
+        self.attributes['mpLeePercentcurrent'].attrSignal.connect(self.readMPLeePercentCurrent)
+        self.attributes['mpCrystalTemp'].attrSignal.connect(self.readMPCrystalTemp)
         
     def readFinesseState(self, data):
         self.finesseName.setState(data)
@@ -89,6 +112,9 @@ class TangoDeviceClient(QtGui.QWidget):
 #        print 'readPump', data.value
         self.laserPowerWidget.setAttributeValue(data)
 
+    def readFinesseTemperature(self, data):
+        self.finesseTempWidget.setAttributeValue(data)
+
     def readRegenState(self, data):
         self.regenLeeName.setState(data)
 
@@ -101,6 +127,12 @@ class TangoDeviceClient(QtGui.QWidget):
     def readRegenLeePower(self, data):
         data.value = data.value*1e3
         self.regenLeePowerWidget.setAttributeValue(data)
+
+    def readRegenLeePercentCurrent(self, data):
+        self.regenLeePercentCurrentWidget.setAttributeValue(data)
+
+    def readRegenCrystalTemp(self, data):
+        self.regenTempWidget.setAttributeValue(data)
         
     def readMPState(self, data):
         self.mpLeeName.setState(data)
@@ -114,6 +146,12 @@ class TangoDeviceClient(QtGui.QWidget):
     def readMPLeePower(self, data):
         data.value = data.value*1e3
         self.mpLeePowerWidget.setAttributeValue(data)
+
+    def readMPLeePercentCurrent(self, data):
+        self.mpLeePercentCurrentWidget.setAttributeValue(data)
+
+    def readMPCrystalTemp(self, data):
+        self.mpTempWidget.setAttributeValue(data)
         
     def readOscillatorPower(self, data):
         data.value = data.value*1e3
@@ -122,6 +160,29 @@ class TangoDeviceClient(QtGui.QWidget):
 
     def readPeakWidth(self, data):
         self.peakWidthWidget.setAttributeValue(data)
+
+    def readHalcyonState(self, data):
+        self.halcyonName.setState(data)
+
+    def readPiezoVoltage(self, data):
+        self.piezoVoltageWidget.setAttributeValue(data)
+
+    def readErrorFrequency(self, data):
+        self.errorFrequencyWidget.setAttributeValue(data)
+
+    def readWavelengths(self, data):
+        try:
+            print 'time vector read: ', data.value.shape[0]
+        except:
+            pass
+        self.timeVector = data.value
+
+    def readSpectrum(self, data):
+        if self.timeVector == None:
+            print 'No time vector'
+        else:
+            self.oscSpectrumPlot.setSpectrum(xData = self.timeVector, yData = data)
+            self.oscSpectrumPlot.update()
 
     def closeEvent(self, event):
 #         for device in self.devices.itervalues():
@@ -225,6 +286,11 @@ class TangoDeviceClient(QtGui.QWidget):
         self.laserPowerWidget.setSliderLimits(0, 7)
         self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
 
+        self.finesseTempWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.finesseTempWidget.setAttributeName('Temp', ''.join((unichr(0x00b0),'C')))
+        self.finesseTempWidget.setAttributeWarningLimits([25, 27])
+        self.finesseTempWidget.setSliderLimits(23, 28)
+
 
 ######################
 # Spectrometer widgets
@@ -240,6 +306,28 @@ class TangoDeviceClient(QtGui.QWidget):
         self.peakEnergyWidget.setAttributeName('Oscillator', 'mW')
         self.peakEnergyWidget.setAttributeWarningLimits([150, 800])
         self.peakEnergyWidget.setSliderLimits(50, 250)
+        self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+        self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
+        self.oscSpectrumPlot.setXRange(700, 900)
+        self.oscSpectrumPlot.setMinimumWidth(600)
+        self.oscSpectrumPlot.setMaximumWidth(600)
+        self.oscSpectrumPlot.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
+######################
+# Halcyon widgets
+        self.halcyonName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.attrSizes)
+        self.halcyonName.setAttributeName('Halcyon')
+
+        self.errorFrequencyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.errorFrequencyWidget.setAttributeName('f err', 'kHz')
+        self.errorFrequencyWidget.setSliderLimits(-1, 10000)
+        self.errorFrequencyWidget.setAttributeWarningLimits([-1, 100000])
+
+        self.piezoVoltageWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.piezoVoltageWidget.setAttributeName('Piezo', '%')
+        self.piezoVoltageWidget.setSliderLimits(0, 100)
+        self.piezoVoltageWidget.setAttributeWarningLimits([30, 70])
+
 
 ######################
 # Regen widgets
@@ -257,6 +345,16 @@ class TangoDeviceClient(QtGui.QWidget):
         self.regenLeePowerWidget.setSliderLimits(0, 30)
         self.regenLeePowerWidget.setAttributeWarningLimits([10, 20])
 
+        self.regenLeePercentCurrentWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.regenLeePercentCurrentWidget.setAttributeName('Current', '%')
+        self.regenLeePercentCurrentWidget.setAttributeWarningLimits([40, 74])
+        self.regenLeePercentCurrentWidget.setSliderLimits(36, 90)
+
+        self.regenTempWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.regenTempWidget.setAttributeName('Crystal temp', 'degC')
+        self.regenTempWidget.setAttributeWarningLimits([-280, -170])
+        self.regenTempWidget.setSliderLimits(-270, 30)
+
 ######################
 # mp widgets
 #
@@ -273,6 +371,16 @@ class TangoDeviceClient(QtGui.QWidget):
         self.mpLeePowerWidget.setSliderLimits(0, 30)
         self.mpLeePowerWidget.setAttributeWarningLimits([10, 25])
 
+        self.mpLeePercentCurrentWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.mpLeePercentCurrentWidget.setAttributeName('Current', '%')
+        self.mpLeePercentCurrentWidget.setAttributeWarningLimits([50, 86])
+        self.mpLeePercentCurrentWidget.setSliderLimits(36, 90)
+
+        self.mpTempWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.mpTempWidget.setAttributeName('Crystal temp', 'degC')
+        self.mpTempWidget.setAttributeWarningLimits([-280, -170])
+        self.mpTempWidget.setSliderLimits(-270, 30)
+
 ############################
 # Setting up layout
 #
@@ -286,8 +394,12 @@ class TangoDeviceClient(QtGui.QWidget):
 
         layoutSlidersOsc = QtGui.QHBoxLayout()
         layoutSlidersOsc.addWidget(self.laserPowerWidget)
+        layoutSlidersOsc.addWidget(self.finesseTempWidget)
         layoutSlidersOsc.addWidget(self.peakEnergyWidget)
         layoutSlidersOsc.addWidget(self.peakWidthWidget)
+        
+        layoutSpectrumOsc = QtGui.QHBoxLayout()
+        layoutSpectrumOsc.addWidget(self.oscSpectrumPlot)
 
         self.layoutAttributesOsc.addWidget(self.finesseName)
         self.layoutAttributesOsc.addWidget(self.shutterWidget)
@@ -295,9 +407,16 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layoutAttributesOsc.addSpacerItem(QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
         self.layoutAttributesOsc.addLayout(layoutSlidersOsc)
         self.layoutAttributesOsc.addSpacerItem(spacerItemV)
+        self.layoutAttributesOsc.addLayout(layoutSpectrumOsc)
 
         layoutSlidersRegen = QtGui.QHBoxLayout()
+        layoutSlidersRegen.addWidget(self.regenLeePercentCurrentWidget)
         layoutSlidersRegen.addWidget(self.regenLeePowerWidget)
+        layoutSlidersRegen.addWidget(self.regenTempWidget)
+        
+        layoutHalcyonData = QtGui.QHBoxLayout()
+        layoutHalcyonData.addWidget(self.piezoVoltageWidget)
+        layoutHalcyonData.addWidget(self.errorFrequencyWidget)
 
         self.layoutAttributesRegen.addWidget(self.regenLeeName)
         self.layoutAttributesRegen.addWidget(self.regenShutterWidget)
@@ -305,9 +424,13 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layoutAttributesRegen.addSpacerItem(QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
         self.layoutAttributesRegen.addLayout(layoutSlidersRegen)
         self.layoutAttributesRegen.addSpacerItem(spacerItemV)
+        self.layoutAttributesRegen.addWidget(self.halcyonName)
+        self.layoutAttributesRegen.addLayout(layoutHalcyonData)
 
         layoutSlidersMP = QtGui.QHBoxLayout()
+        layoutSlidersMP.addWidget(self.mpLeePercentCurrentWidget)
         layoutSlidersMP.addWidget(self.mpLeePowerWidget)
+        layoutSlidersMP.addWidget(self.mpTempWidget)
 
         self.layoutAttributesMP.addWidget(self.mpLeeName)
         self.layoutAttributesMP.addWidget(self.mpShutterWidget)

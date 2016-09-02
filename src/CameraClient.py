@@ -16,7 +16,7 @@ class TangoDeviceClient(QtGui.QWidget):
         QtGui.QWidget.__init__(self,parent)
 #        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
-        self.devName = 'gunlaser/regen/cam0'
+        self.devName = 'gunlaser/cameras/cam0'
 
         self.setupLayout()
 
@@ -36,7 +36,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.attributes['shutter'] = AttributeClass('shutter', self.devices['camera'], 0.3)
         self.attributes['gain'] = AttributeClass('gain', self.devices['camera'], 0.3)
-        self.attributes['image'] = AttributeClass('image', self.devices['camera'], 1.0)
+        self.attributes['image'] = AttributeClass('image', self.devices['camera'], 0.3)
         self.attributes['state'] = AttributeClass('state', self.devices['camera'], 0.3)
 
         self.attributes['shutter'].attrSignal.connect(self.readShutter)
@@ -96,8 +96,8 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attrSizes = qw.QTangoSizes()
         self.attrSizes.barHeight = 20
         self.attrSizes.barWidth = 20
-        self.attrSizes.readAttributeWidth = 200
-        self.attrSizes.writeAttributeWidth = 299
+        self.attrSizes.readAttributeWidth = 300
+        self.attrSizes.writeAttributeWidth = 300
         self.attrSizes.fontStretch= 80
         self.attrSizes.fontType = 'Segoe UI'
 #        self.attrSizes.fontType = 'Trebuchet MS'
