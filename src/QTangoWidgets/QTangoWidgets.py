@@ -1166,6 +1166,7 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 		self.lastKey = QtCore.Qt.Key_0
 
 		self.dataValue = 1.0
+		self.dataFormat = "{:.4g}"
 
 		self.setupLayout()
 
@@ -1267,7 +1268,7 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 
 	def setValue(self, value):
 		self.dataValue = value
-		sVal = "{:.4g}".format((value))
+		sVal = self.dataFormat.format((value))
 		self.setText(sVal)
 
 	def keyPressEvent(self, event):
@@ -1276,44 +1277,86 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 			self.lastKey = event.key()
 			if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_Down:
 				print 'Upp!'
-				txt = str(self.text())
+				txt = str(self.text()).lower()
 				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
 					self.dataValue = np.double(self.text())
 
 				commaPos = txt.find('.')
+				expPos = txt.find('e')
 				if commaPos < 0:
 					# Compensate if there is no comma
-					commaPos = txt.__len__()
+					if expPos < 0:
+						# No exponent
+						commaPos = txt.__len__()
+					else:
+						commaPos = expPos
 				cursorPos = self.cursorPosition()
-				decimalPos = commaPos - cursorPos
-				print 'decimal pos', decimalPos
+				cursorDecimalPos = commaPos - cursorPos
+				print 'decimal pos', cursorDecimalPos
 				print 'comma pos', commaPos
 				print 'cursor pos', cursorPos
+				print 'exp pos', expPos
 				print 'Old dataValue: ', self.dataValue
 
-
-				if decimalPos < 0:
-					print 'New decimal pos ', decimalPos
-					newDecimalPos = decimalPos + 1
+				# Compensate for the length of the comma character if we are to left of the comma
+				if cursorDecimalPos < 0:
+					print 'New decimal pos ', cursorDecimalPos
+					newDecimalPos = cursorDecimalPos + 1
 				else:
-					newDecimalPos = decimalPos
-#
+					newDecimalPos = cursorDecimalPos
+
+
+				if cursorPos <= expPos or expPos < 0:
+					# We are adjusting decimal value
 # 				print txt, pos
-				if event.key() == QtCore.Qt.Key_Up:
-					stepDir = 1
+					# Find exponent value:
+					if expPos > 0:
+						expValue = float(txt[expPos+1:])
+					else:
+						expValue = 0
+					if event.key() == QtCore.Qt.Key_Up:
+						stepDir = 1
+					else:
+						stepDir = -1
+					self.dataValue += stepDir * 10**(expValue + newDecimalPos)
+					print 'New decimal pos', newDecimalPos	
+					print "Step ", stepDir * 10**newDecimalPos
+					print 'New decimal dataValue: ', self.dataValue
+	
+					
+					txt = self.dataFormat.format(self.dataValue)
+					newCommaPos = txt.find('.')
+					if newCommaPos < 0:
+						# There is no comma (integer)
+						newCommaPos = txt.__len__()
+						txt += '.'
+					if cursorDecimalPos < 0:
+						newCursorPos = newCommaPos - cursorDecimalPos + 1
+					else:
+						newCursorPos = newCommaPos - cursorDecimalPos
+					print "newCursorPosition: ", newCursorPos
+					# Check if the new number was truncated due to trailing zeros being removed
+					if newCursorPos > txt.__len__()-1: 
+						print "Adding ", newCursorPos - txt.__len__() - 1, " zeros"
+						txt += '0' * (newCursorPos - txt.__len__() - 1)
+					self.clear()
+					self.insert(txt)	
+					self.setCursorPosition(newCursorPos)
+					
 				else:
-					stepDir = -1
-				self.dataValue += stepDir * 10**newDecimalPos
-
-				print 'New dataValue: ', self.dataValue
-
-				self.clear()
-				self.insert(str(self.dataValue))
-# 				self.setText(str(self.dataValue))
-				txt = str(self.text())
-				commaPos = txt.find('.')
-				newCursorPos = commaPos - decimalPos
-				self.setCursorPosition(newCursorPos)
+					# We are adjusting exponent value
+					print "Adjusting exponent"
+					cursorExpPos = txt.__len__() - cursorPos
+					print "cursorExpPos ", cursorExpPos
+					if event.key() == QtCore.Qt.Key_Up:
+						self.dataValue *= 10**(cursorExpPos+1)
+					else:
+						self.dataValue /= 10**(cursorExpPos+1)
+					
+					print 'New decimal dataValue: ', self.dataValue
+					txt = self.dataFormat.format(self.dataValue)	
+					self.clear()
+					self.insert(txt)	
 
 			elif event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]:
 				print 'Enter!'
@@ -1322,6 +1365,32 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 				self.newValueSignal.emit()
 				# This fires an editingFinished event
 				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
+				
+			elif event.key() in [QtCore.Qt.Key_Right]:
+				# This is to add another zero if we press right while at the right edge of the field
+				cursorPos = self.cursorPosition()
+				txt = str(self.text()).lower()
+				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
+					self.dataValue = np.double(self.text())
+				print "cursorPos ", cursorPos
+				print "txt.__len__", txt.__len__()
+				if cursorPos == txt.__len__():
+					# We are at the right edge so add a zero if it is a decimal number
+					commaPos = txt.find('.')
+					expPos = txt.find('e')
+					if expPos < 0:
+						# There is no exponent, so ok to add zero
+						if commaPos < 0:
+							# Compensate if there is no comma
+							txt += '.'
+							commaPos = txt.__len__()
+						txt += '0'
+						self.clear()
+						self.insert(txt)
+				else:
+					# We were not at the right edge, so process normally
+					super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
+				
 			else:
 				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
 
