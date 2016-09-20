@@ -31,8 +31,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['ionpump']=pt.DeviceProxy('gunlaser/regen/ionpump')
         self.devices['temperature']=pt.DeviceProxy('gunlaser/regen/temperature')
         self.devices['kmpc']=pt.DeviceProxy('gunlaser/regen/kmpc')
-        self.devices['crystalcam']=pt.DeviceProxy('gunlaser/regen/crystalcam')
-        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
+        self.devices['crystalcam']=pt.DeviceProxy('gunlaser/regen/crystal_camera')
+        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya4')
+#        self.devices['redpitayapowermeter']=pt.DeviceProxy('gunlaser/devices/redpitayapowermeter')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -58,8 +59,8 @@ class TangoDeviceClient(QtGui.QWidget):
         app.processEvents()
 
 # KMPC
-        self.attributes['kmpcvoltage'] = AttributeClass('voltage', self.devices['kmpc'], 0.3, True)
-        self.attributes['kmpcstate'] = AttributeClass('state', self.devices['kmpc'], 0.3, True)
+        self.attributes['kmpcvoltage'] = AttributeClass('voltage', self.devices['kmpc'], 0.3)
+        self.attributes['kmpcstate'] = AttributeClass('state', self.devices['kmpc'], 0.3)
 
         self.attributes['kmpcvoltage'].attrSignal.connect(self.readKmpcVoltage)
         self.attributes['kmpcvoltage'].attrInfoSignal.connect(self.configureKmpcVoltage)
@@ -77,13 +78,15 @@ class TangoDeviceClient(QtGui.QWidget):
 
 # Crystal camera
         self.attributes['crystalimage'] = AttributeClass('image', self.devices['crystalcam'], 0.5)
-        self.attributes['crystalimagestate'] = AttributeClass('state', self.devices['crystalcam'], 0.3, True)
+        self.attributes['crystalimagestate'] = AttributeClass('state', self.devices['crystalcam'], 0.3)
 
         self.attributes['crystalimage'].attrSignal.connect(self.readCrystalImage)
         self.attributes['crystalimagestate'].attrSignal.connect(self.readCrystalImageState)
 
-        self.attributes['power'] = AttributeClass('measurementdata1', self.devices['redpitaya'], 0.3)
-        self.attributes['power'].attrSignal.connect(self.readLeeLaserPower)
+        self.attributes['pumpenergy'] = AttributeClass('measurementdata1', self.devices['redpitaya'], 0.3)
+        self.attributes['pumpenergy'].attrSignal.connect(self.readLeeLaserPower)
+
+#        self.devices['redpitaya'].write_attribute('measurementstring1','5.22e-3*(w1[0:250]-w1[500:600].mean()).sum()')
 
         splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
@@ -112,6 +115,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.guiLock.release()
 
     def readLeeLaserPower(self, data):
+        data.value = data.value*1000 # Convert from J to mJ
         self.leeLaserPowerWidget.setAttributeValue(data)
 
     def readLeeLaserState(self, data):
@@ -179,8 +183,10 @@ class TangoDeviceClient(QtGui.QWidget):
     def startCrystalCamera(self):
         self.devices['crystalcam'].command_inout('start')
 
+
     def stopCrystalCamera(self):
         self.devices['crystalcam'].command_inout('stop')
+
 
     def closeEvent(self, event):
 #         for device in self.devices.itervalues():
@@ -286,8 +292,8 @@ class TangoDeviceClient(QtGui.QWidget):
         self.leeLaserPercentCurrentWidget.writeValueLineEdit.editingFinished.connect(self.writeLeeLaserPercentCurrent)
 
         self.leeLaserPowerWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-        self.leeLaserPowerWidget.setAttributeName('Power', 'W')
-        self.leeLaserPowerWidget.setAttributeWarningLimits([19, 22])
+        self.leeLaserPowerWidget.setAttributeName('Energy', 'mJ')
+        self.leeLaserPowerWidget.setAttributeWarningLimits([15, 18])
         self.leeLaserPowerWidget.setSliderLimits(0, 30)
 
         self.kmpcOperationWidget = qw.QTangoCommandSelection('KMPC operation', colors = self.colors, sizes = self.attrSizes)

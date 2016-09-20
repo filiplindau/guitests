@@ -25,7 +25,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		app.processEvents()
 
 		self.devices = {}
-		self.devices['spectrometer']=pt.DeviceProxy('gunlaser/oscillator/spectrometer')
+		self.devices['spectrometer']=pt.DeviceProxy('gunlaser/devices/spectrometer_diag')
 
 		splash.showMessage('Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()

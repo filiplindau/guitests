@@ -28,6 +28,7 @@ class TangoDeviceClient(QtGui.QWidget):
         t0=time.clock()
         self.devices = {}
         self.devices['waveplate']=pt.DeviceProxy('gunlaser/mp/waveplate')
+        self.devices['redpitaya2']=pt.DeviceProxy('gunlaser/devices/redpitaya2')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -38,9 +39,14 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes = {}
         self.attributes['position'] = AttributeClass('position', self.devices['waveplate'], 0.3)
         self.attributes['waveplateState'] = AttributeClass('state', self.devices['waveplate'], 0.3)
+        self.attributes['energyir'] = AttributeClass('measurementdata2', self.devices['redpitaya2'], 0.3)
+
+        self.devices['redpitaya2'].write_attribute('measurementstring2', '5.22e-3*(w2[40:90]-w2[500:600].mean()).sum()')
 
         self.attributes['position'].attrSignal.connect(self.readPosition)
         self.attributes['waveplateState'].attrSignal.connect(self.readWaveplateState)
+        self.attributes['energyir'].attrSignal.connect(self.readEnergyIR)
+
 
 
         splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -62,8 +68,8 @@ class TangoDeviceClient(QtGui.QWidget):
     def readPosition(self, data):
         self.positionWidget.setAttributeValue(data)
 
-        data.value = 100*np.cos(2*data.value*np.pi/180.0)**4
-        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**4
+        data.value = 100*np.cos(2*data.value*np.pi/180.0)**3
+        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**3
         self.energyWidget.setAttributeValue(data)
 
     def writePosition(self):
@@ -75,7 +81,7 @@ class TangoDeviceClient(QtGui.QWidget):
             energy = 100
         elif energy < 0:
             energy = 0
-        w = np.arccos((energy/100.0)**0.25)*90/np.pi
+        w = np.arccos((energy/100.0)**0.33)*90/np.pi
         self.attributes['position'].attr_write(w)
         self.guiLock.release()
 
@@ -83,6 +89,10 @@ class TangoDeviceClient(QtGui.QWidget):
         self.waveplateName.setState(data)
         data.value = ''
         self.waveplateWidget.setStatus(data)
+
+    def readEnergyIR(self, data):
+        data.value = 1000 * data.value
+        self.energyIRWidget.setAttributeValue(data)
 
 
     def initWaveplate(self):
@@ -195,11 +205,20 @@ class TangoDeviceClient(QtGui.QWidget):
         self.positionWidget.setSliderLimits(0, 50)
 
         self.energyWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-        self.energyWidget.setAttributeName('Energy', '%')
+        self.energyWidget.setAttributeName('Energy UV', '%')
         self.energyWidget.setSliderLimits(0, 100)
         self.energyWidget.setAttributeWarningLimits([-1, 110])
         self.energyWidget.writeValueLineEdit.editingFinished.connect(self.writePosition)
 
+        self.energyIRWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.energyIRWidget.setAttributeName('Energy IR', 'mJ')
+        self.energyIRWidget.setAttributeWarningLimits([0, 15])
+        self.energyIRWidget.setSliderLimits(0, 10)
+
+        self.energyUVWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.energyUVWidget.setAttributeName('Energy UV', 'uJ')
+        self.energyUVWidget.setAttributeWarningLimits([0, 500])
+        self.energyUVWidget.setSliderLimits(0, 200)
 
 
         layout2.addWidget(self.title)
@@ -216,6 +235,8 @@ class TangoDeviceClient(QtGui.QWidget):
         layoutSliders = QtGui.QHBoxLayout()
         layoutSliders.addWidget(self.energyWidget)
         layoutSliders.addWidget(self.positionWidget)
+        layoutSliders.addWidget(self.energyIRWidget)
+        layoutSliders.addWidget(self.energyUVWidget)
         self.layoutAttributes.addLayout(layoutSliders)
 #        self.layoutAttributes2.addSpacerItem(spacerItemV)
 

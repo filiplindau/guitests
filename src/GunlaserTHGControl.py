@@ -53,7 +53,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['cameraState'] = AttributeClass('state', self.devices['camera'], 0.3)
         self.attributes['image'].attrSignal.connect(self.readImage)
         self.attributes['cameraState'].attrSignal.connect(self.readCameraState)
-        
+
         self.devices['camera'].command_inout('start')
 
 
@@ -76,8 +76,10 @@ class TangoDeviceClient(QtGui.QWidget):
     def readWPPosition(self, data):
         self.positionWidget.setAttributeValue(data)
 
-        data.value = 100*np.cos(2*data.value*np.pi/180.0)**4
-        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**4
+#        data.value = 100*np.cos(2*data.value*np.pi/180.0)**4
+#        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**4
+        data.value = 100*np.cos(2*data.value*np.pi/180.0)**3
+        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**3
         self.energyWidget.setAttributeValue(data)
 
     def writePosition(self):
@@ -89,7 +91,8 @@ class TangoDeviceClient(QtGui.QWidget):
             energy = 100
         elif energy < 0:
             energy = 0
-        w = np.arccos((energy/100.0)**0.25)*90/np.pi
+#        w = np.arccos((energy/100.0)**0.25)*90/np.pi
+        w = np.arccos((energy/100.0)**0.33)*90/np.pi
         self.attributes['wp_position'].attr_write(w)
         self.guiLock.release()
 
@@ -278,7 +281,7 @@ class TangoDeviceClient(QtGui.QWidget):
         layoutSliders2.addWidget(self.positionXWidget)
         layoutSliders2.addWidget(self.positionYWidget)
         self.layoutAttributes2.addSpacerItem(spacerItemV)
-        self.layoutAttributes2.addLayout(layoutSliders2)        
+        self.layoutAttributes2.addLayout(layoutSliders2)
 
         self.layoutAttributes3.addWidget(self.cameraName)
         self.layoutAttributes3.addWidget(self.cameraWidget)

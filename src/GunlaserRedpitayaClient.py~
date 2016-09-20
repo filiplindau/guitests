@@ -20,6 +20,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.xData = None
         self.xDataTemp = None
         self.deviceName = deviceName
+	self.enumerateDevices()
 
         self.setupLayout()
 
@@ -53,7 +54,7 @@ class TangoDeviceClient(QtGui.QWidget):
             pass
 #            a.attr_read()
 
-    def changeDevice(self, devName):
+    def changeDevice(self, devName=None):
         try:
             for a in self.attributes.itervalues():
                 print 'Stopping', a.name
@@ -70,7 +71,10 @@ class TangoDeviceClient(QtGui.QWidget):
         self.recordLengthWidget.writeValueInitialized = False
         self.sampleRateWidget.writeValueInitialized = False
 
-        self.deviceName = str(devName)
+	if devName == None:
+		self.deviceName = self.devNameList[0]
+	else:        
+		self.deviceName = str(devName)
         self.title.setName(self.deviceName.upper())
         self.devices = {}
         self.devices['redpitaya']=pt.DeviceProxy(self.deviceName)
@@ -197,6 +201,11 @@ class TangoDeviceClient(QtGui.QWidget):
             a.readThread.join()
         event.accept()
 
+    def enumerateDevices(self):
+        db = pt.Database()
+        self.devNameList = db.get_device_exported_for_class('redpitayads').value_string
+
+
     def setupLayout(self):
         s='QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
@@ -268,9 +277,7 @@ class TangoDeviceClient(QtGui.QWidget):
         s=str(self.redpitayaDevices.writeValueComboBox.styleSheet())
 
         self.redpitayaDevices.setAttributeName('Device list')
-        db = pt.Database()
-        devNameList = db.get_device_exported_for_class('redpitayads').value_string
-        for devName in devNameList:
+        for devName in self.devNameList:
             self.redpitayaDevices.addItem(devName)
 
         self.redpitayaDevices.writeValueComboBox.setWidth(self.attrSizes.barHeight*10)
@@ -375,7 +382,7 @@ if __name__ == '__main__':
 
     splash.showMessage('         Starting GUI', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color = QtGui.QColor('#66cbff'))
     app.processEvents()
-    myapp = TangoDeviceClient('gunlaser/devices/redpitaya0')
+    myapp = TangoDeviceClient(None)
     myapp.show()
     splash.finish(myapp)
     sys.exit(app.exec_())

@@ -1331,14 +1331,14 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 						newCommaPos = txt.__len__()
 						txt += '.'
 					if cursorDecimalPos < 0:
-						newCursorPos = newCommaPos - cursorDecimalPos + 1
+						newCursorPos = newCommaPos - cursorDecimalPos 
 					else:
 						newCursorPos = newCommaPos - cursorDecimalPos
 					print "newCursorPosition: ", newCursorPos
 					# Check if the new number was truncated due to trailing zeros being removed
 					if newCursorPos > txt.__len__()-1: 
-						print "Adding ", newCursorPos - txt.__len__() - 1, " zeros"
-						txt += '0' * (newCursorPos - txt.__len__() - 1)
+						print "Adding ", newCursorPos - txt.__len__() , " zeros"
+						txt += '0' * (newCursorPos - txt.__len__() )
 					self.clear()
 					self.insert(txt)	
 					self.setCursorPosition(newCursorPos)
@@ -3947,7 +3947,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 					self.writeValueInitialized = True
 					self.setAttributeWriteValue(data.w_value)
 
-				if data.w_value != self.writeValueLineEdit.value():
+				if np.abs((data.w_value - self.writeValueLineEdit.value()) / data.w_value) > 0.0001:
 					if self.writeLabel.currentAttrColor != self.attrColors.secondaryColor0:
 						self.writeLabel.currentAttrColor = self.attrColors.secondaryColor0
 						self.writeLabel.setupLayout()

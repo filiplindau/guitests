@@ -33,8 +33,8 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['finesse']=pt.DeviceProxy('gunlaser/oscillator/finesse')
         self.devices['prism1']=pt.DeviceProxy('gunlaser/oscillator/prism1')
         self.devices['prism2']=pt.DeviceProxy('gunlaser/oscillator/prism2')
-        self.devices['picomotor']=pt.DeviceProxy('gunlaser/oscillator/picomotor')
-        self.devices['halcyon']=pt.DeviceProxy('gunlaser/oscillator/halcyon')
+        self.devices['picomotor']=pt.DeviceProxy('gunlaser/devices/picomotor-0')
+        self.devices['halcyon']=pt.DeviceProxy('gunlaser/oscillator/halcyon_raspberry')
         self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya0')
         print time.clock()-t0, ' s'
 
@@ -85,6 +85,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['halcyonPicomotorPosition'] = AttributeClass('picomotorposition', self.devices['halcyon'], 0.3)
         self.attributes['halcyonPicomotorPosition'].attrSignal.connect(self.readPicomotorPosition)
         self.attributes['halcyonFollow'] = AttributeClass('picomotorfollow', self.devices['halcyon'], 0.5)
+        self.attributes['halcyonFollow'].attrSignal.connect(self.readPicomotorFollow)
         self.attributes['halcyonModelocked'] = AttributeClass('modelocked', self.devices['halcyon'], 0.3)
         self.attributes['halcyonModelocked'].attrSignal.connect(self.readModelocked)
         self.attributes['halcyonJitter'] = AttributeClass('jitter', self.devices['halcyon'], 0.3)
@@ -192,7 +193,8 @@ class TangoDeviceClient(QtGui.QWidget):
 #            self.limit1H.setAttributeValue(data)
 
     def readRedpitayaPower(self, data):
-        data.value = (data.value*1.1889 + 13.5e-3) * 1000
+#        data.value = (data.value*1.1889 + 13.5e-3) * 1000
+        data.value = (data.value) * 1000
         self.peakEnergyWidget.setAttributeValue(data)
 
     def readPeakEnergy(self, data):
@@ -247,6 +249,17 @@ class TangoDeviceClient(QtGui.QWidget):
         with self.guiLock:
             w = self.picomotorWidget.getWriteValue()
             self.attributes['halcyonPicomotorPosition'].attr_write(w)
+
+    def readPicomotorFollow(self, data):
+        self.trackCommands.setStatus(data)
+
+    def trackPicomotor(self):
+        with self.guiLock:
+            self.attributes['halcyonFollow'].attr_write(True)
+
+    def stopPicomotor(self):
+        with self.guiLock:
+            self.attributes['halcyonFollow'].attr_write(False)
 
     def readErrorFrequency(self, data):
         self.errorFrequencyWidget.setAttributeValue(data)
@@ -324,10 +337,10 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.attrSizes = qw.QTangoSizes()
         self.attrSizes.barHeight = 22
-        self.attrSizes.barWidth = 18
-        self.attrSizes.readAttributeWidth = 300
+        self.attrSizes.barWidth = 23
+        self.attrSizes.readAttributeWidth = 320
         self.attrSizes.readAttributeHeight = 250
-        self.attrSizes.writeAttributeWidth = 299
+        self.attrSizes.writeAttributeWidth = 320
         self.attrSizes.fontStretch= 80
         self.attrSizes.fontType = 'Segoe UI'
 #        self.attrSizes.fontType = 'Trebuchet MS'
@@ -442,9 +455,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.peakWidthWidget.setAttributeWarningLimits([35, 100])
         self.peakWidthWidget.setSliderLimits(0, 70)
         self.peakEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-        self.peakEnergyWidget.setAttributeName('Osc pwr', 'a.u.')
-        self.peakEnergyWidget.setAttributeWarningLimits([350, 800])
-        self.peakEnergyWidget.setSliderLimits(100, 450)
+        self.peakEnergyWidget.setAttributeName('Osc pwr', 'mW')
+        self.peakEnergyWidget.setAttributeWarningLimits([150, 800])
+        self.peakEnergyWidget.setSliderLimits(50, 250)
         self.peakWavelengthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
         self.peakWavelengthWidget.setAttributeName(''.join((unichr(0x03bb),' peak')), 'nm')
         self.peakWavelengthWidget.setAttributeWarningLimits([780, 810])
@@ -468,7 +481,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.jitterWidget.setAttributeWarningLimits([-1, 500])
 
         self.errorFrequencyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-        self.errorFrequencyWidget.setAttributeName('f err', 'kHz')
+        self.errorFrequencyWidget.setAttributeName('f err', 'Hz')
         self.errorFrequencyWidget.setSliderLimits(-1, 10000)
         self.errorFrequencyWidget.setAttributeWarningLimits([-1, 100000])
 
@@ -480,6 +493,10 @@ class TangoDeviceClient(QtGui.QWidget):
         self.picomotorWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
         self.picomotorWidget.setAttributeName('Picomotor', 'steps')
         self.picomotorWidget.writeValueLineEdit.returnPressed.connect(self.writePicomotorPosition)
+
+        self.trackCommands = qw.QTangoCommandSelection('Track picomotor', colors = self.colors, sizes = self.attrSizes)
+        self.trackCommands.addCmdButton('Track', self.trackPicomotor)
+        self.trackCommands.addCmdButton('Stop', self.stopPicomotor)
 
         self.errorTrace = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
         self.errorTrace.setAttributeName('Error trace')
@@ -516,6 +533,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layoutAttributes2.addWidget(self.modelockedWidget)
         self.layoutAttributes2.addLayout(layoutSliders)
         self.layoutAttributes2.addWidget(self.picomotorWidget)
+        self.layoutAttributes2.addWidget(self.trackCommands)
         self.layoutAttributes2.addWidget(self.errorTrace)
 #        self.layoutAttributes2.addSpacerItem(spacerItemV)
 
@@ -538,7 +556,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #        layout0.addWidget(self.bottombar)
 
 #        self.resize(500,800)
-        self.setGeometry(200,100,1600,300)
+        self.setGeometry(100,100,1800,300)
 
         self.update()
 

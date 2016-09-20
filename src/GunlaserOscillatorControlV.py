@@ -368,7 +368,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.peakWidthWidget.setAttributeWarningLimits([35, 100])
 		self.peakWidthWidget.setSliderLimits(0, 70)
 		self.peakEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-		self.peakEnergyWidget.setAttributeName('Osc pwr', 'a.u.')
+		self.peakEnergyWidget.setAttributeName('Osc pwr', 'mW')
 		self.peakEnergyWidget.setAttributeWarningLimits([350, 800])
 		self.peakEnergyWidget.setSliderLimits(100, 450)
 		self.peakWavelengthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)

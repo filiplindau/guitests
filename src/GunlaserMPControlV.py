@@ -30,7 +30,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['leelaser']=pt.DeviceProxy('gunlaser/mp/leelaser')
         self.devices['ionpump']=pt.DeviceProxy('gunlaser/mp/ionpump')
         self.devices['temperature']=pt.DeviceProxy('gunlaser/mp/temperature')
-        self.devices['spectrometer']=pt.DeviceProxy('gunlaser/mp/spectrometer')
+#        self.devices['spectrometer']=pt.DeviceProxy('gunlaser/mp/spectrometer')
+        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya4')
+        self.devices['redpitaya2']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -45,13 +47,16 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['leelaserstate'] = AttributeClass('state', self.devices['leelaser'], 0.3)
         self.attributes['leelasershutterstate'] = AttributeClass('shutterstate', self.devices['leelaser'], 0.3)
         self.attributes['leelaseroperationstate'] = AttributeClass('laserstate', self.devices['leelaser'], 0.3)
+        self.attributes['leelaserenergy'] = AttributeClass('measurementdata2', self.devices['redpitaya'], 0.3)
 
         self.attributes['leelasercurrent'].attrSignal.connect(self.readLeeLaserCurrent)
         self.attributes['leelaserpercentcurrent'].attrSignal.connect(self.readLeeLaserPercentCurrent)
         self.attributes['leelasershutterstate'].attrSignal.connect(self.readLeeLaserShutterState)
         self.attributes['leelaserstate'].attrSignal.connect(self.readLeeLaserState)
         self.attributes['leelaseroperationstate'].attrSignal.connect(self.readLeeLaserOperationState)
+        self.attributes['leelaserenergy'].attrSignal.connect(self.readLeeLaserEnergy)
 
+#        self.devices['redpitaya'].write_attribute('measurementstring2','22.0e-3*(w2[0:120]-w2[500:600].mean()).sum()')
 
 # Ionpump
         self.attributes['ionpumppressure'] = AttributeClass('pressure', self.devices['ionpump'], 0.3)
@@ -64,17 +69,19 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['crystaltemperature'].attrSignal.connect(self.readCrystalTemperature)
 
 # Spectrometer
-        self.attributes['wavelengths'] = AttributeClass('wavelengthsROI', self.devices['spectrometer'], None)
-        self.attributes['peakenergy'] = AttributeClass('peakenergy', self.devices['spectrometer'], 0.3)
-        self.attributes['peakwidth'] = AttributeClass('peakwidth', self.devices['spectrometer'], 0.3)
-        self.attributes['spectrum'] = AttributeClass('spectrumROI', self.devices['spectrometer'], 0.3)
-        self.attributes['spectrometerState'] = AttributeClass('state', self.devices['spectrometer'], 0.3)
+#        self.attributes['wavelengths'] = AttributeClass('wavelengthsROI', self.devices['spectrometer'], None)
+        self.attributes['peakenergy'] = AttributeClass('measurementdata1', self.devices['redpitaya2'], 0.3)
+#        self.attributes['peakwidth'] = AttributeClass('peakwidth', self.devices['spectrometer'], 0.3)
+#        self.attributes['spectrum'] = AttributeClass('spectrumROI', self.devices['spectrometer'], 0.3)
+#        self.attributes['spectrometerState'] = AttributeClass('state', self.devices['spectrometer'], 0.3)
 
-        self.attributes['peakenergy'].attrSignal.connect(self.readPeakEnergy)
-        self.attributes['peakwidth'].attrSignal.connect(self.readPeakWidth)
-        self.attributes['spectrum'].attrSignal.connect(self.readSpectrum)
-        self.attributes['wavelengths'].attrSignal.connect(self.readWavelengths)
-        self.attributes['spectrometerState'].attrSignal.connect(self.readSpectrometerState)
+#        self.attributes['peakenergy'].attrSignal.connect(self.readPeakEnergy)
+#        self.attributes['peakwidth'].attrSignal.connect(self.readPeakWidth)
+#        self.attributes['spectrum'].attrSignal.connect(self.readSpectrum)
+#        self.attributes['wavelengths'].attrSignal.connect(self.readWavelengths)
+#        self.attributes['spectrometerState'].attrSignal.connect(self.readSpectrometerState)
+
+        self.devices['redpitaya2'].write_attribute('measurementstring1','3.87e-3*(w1[40:70]-w1[500:600].mean()).sum()')
 
         splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
@@ -111,6 +118,10 @@ class TangoDeviceClient(QtGui.QWidget):
     def readLeeLaserOperationState(self, data):
         self.leeLaserOperationStateWidget.setStatus(data)
 
+    def readLeeLaserEnergy(self, data):
+        data.value = 1000*data.value        # Convert to mJ
+        self.leeLaserEnergyWidget.setAttributeValue(data)
+
     def readIonpumpPressure(self, data):
         self.ionpumpPressureWidget.setAttributeValue(data)
 
@@ -123,6 +134,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.onOffCommands.setStatus(data)
 
     def readPeakEnergy(self, data):
+        data.value = data.value*1e3     # Convert to mJ
         self.peakEnergyWidget.setAttributeValue(data)
 
     def readPeakWidth(self, data):
@@ -135,7 +147,7 @@ class TangoDeviceClient(QtGui.QWidget):
     def writeExposure(self):
         self.guiLock.acquire()
         w = self.exposureWidget.getWriteValue()
-        self.attributes['exposure'].attr_write(w)
+#        self.attributes['exposure'].attr_write(w)
         self.guiLock.release()
 
     def readWavelengths(self, data):
@@ -153,16 +165,20 @@ class TangoDeviceClient(QtGui.QWidget):
             self.spectrometerPlot.update()
 
     def initSpectrometer(self):
-        self.devices['spectrometer'].command_inout('init')
+#        self.devices['spectrometer'].command_inout('init')
+        pass
 
     def onSpectrometer(self):
-        self.devices['spectrometer'].command_inout('on')
+#        self.devices['spectrometer'].command_inout('on')
+        pass
 
     def offSpectrometer(self):
-        self.devices['spectrometer'].command_inout('off')
+#        self.devices['spectrometer'].command_inout('off')
+        pass
 
     def stopSpectrometer(self):
-        self.devices['spectrometer'].command_inout('stop')
+#        self.devices['spectrometer'].command_inout('stop')
+        pass
 
     def setupAttributeLayout(self, attributeList = []):
         self.attributeQObjects = []
@@ -286,6 +302,11 @@ class TangoDeviceClient(QtGui.QWidget):
         self.leeLaserPercentCurrentWidget.setSliderLimits(36, 100)
         self.leeLaserPercentCurrentWidget.writeValueLineEdit.editingFinished.connect(self.writeLeeLaserPercentCurrent)
 
+        self.leeLaserEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.leeLaserEnergyWidget.setAttributeName('Energy', 'mJ')
+        self.leeLaserEnergyWidget.setAttributeWarningLimits([20, 25])
+        self.leeLaserEnergyWidget.setSliderLimits(0, 35)
+
         self.ionpumpPressureWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
         self.ionpumpPressureWidget.setAttributeName('Xtal pr', 'mbar')
         self.ionpumpPressureWidget.setAttributeWarningLimits([0, 5e-7])
@@ -306,12 +327,12 @@ class TangoDeviceClient(QtGui.QWidget):
         self.onOffCommands.addCmdButton('Stop', self.stopSpectrometer)
         self.peakWidthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
         self.peakWidthWidget.setAttributeName(''.join((unichr(0x0394),unichr(0x03bb), ' FWHM')), 'nm')
-        self.peakWidthWidget.setAttributeWarningLimits([35, 100])
-        self.peakWidthWidget.setSliderLimits(0, 70)
+        self.peakWidthWidget.setAttributeWarningLimits([18, 100])
+        self.peakWidthWidget.setSliderLimits(0, 30)
         self.peakEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-        self.peakEnergyWidget.setAttributeName('MP power', 'a.u.')
-        self.peakEnergyWidget.setAttributeWarningLimits([0.5, 5])
-        self.peakEnergyWidget.setSliderLimits(0, 2)
+        self.peakEnergyWidget.setAttributeName('MP energy', 'mJ')
+        self.peakEnergyWidget.setAttributeWarningLimits([9, 11])
+        self.peakEnergyWidget.setSliderLimits(0, 15)
 
         self.spectrometerPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
         self.spectrometerPlot.setAttributeName('Compressed spectrum')
@@ -338,6 +359,7 @@ class TangoDeviceClient(QtGui.QWidget):
         sliderLayout = QtGui.QHBoxLayout()
         sliderLayout.addWidget(self.leeLaserPercentCurrentWidget)
         sliderLayout.addWidget(self.leeLaserCurrentWidget)
+        sliderLayout.addWidget(self.leeLaserEnergyWidget)
         sliderLayout.addSpacerItem(spacerItemBar)
         sliderLayout.addWidget(self.ionpumpPressureWidget)
         sliderLayout.addWidget(self.temperatureWidget)
