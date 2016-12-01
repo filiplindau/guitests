@@ -29,6 +29,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices = {}
         self.devices['waveplate']=pt.DeviceProxy('gunlaser/mp/waveplate')
         self.devices['camera']=pt.DeviceProxy('gunlaser/thg/camera')
+        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya3')
         self.devices['mirror_x']=pt.DeviceProxy('gunlaser/thg/mirror_x')
         self.devices['mirror_y']=pt.DeviceProxy('gunlaser/thg/mirror_y')
         print time.clock()-t0, ' s'
@@ -53,6 +54,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['cameraState'] = AttributeClass('state', self.devices['camera'], 0.3)
         self.attributes['image'].attrSignal.connect(self.readImage)
         self.attributes['cameraState'].attrSignal.connect(self.readCameraState)
+
+        self.attributes['energy'] = AttributeClass('measurementdata1', self.devices['redpitaya'], 0.3)
+        self.attributes['energy'].attrSignal.connect(self.readEnergy)
 
         self.devices['camera'].command_inout('start')
 
@@ -100,6 +104,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.waveplateName.setState(data)
         data.value = ''
         self.waveplateWidget.setStatus(data)
+
+    def readEnergy(self, data):
+        self.photodiodeEnergyWidget.setAttributeValue(data)
 
     def readXPosition(self, data):
         self.positionXWidget.setAttributeValue(data)
@@ -244,6 +251,11 @@ class TangoDeviceClient(QtGui.QWidget):
         self.energyWidget.setAttributeWarningLimits([-1, 110])
         self.energyWidget.writeValueLineEdit.newValueSignal.connect(self.writePosition)
 
+        self.photodiodeEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.photodiodeEnergyWidget.setAttributeName('Energy', 'uJ')
+        self.photodiodeEnergyWidget.setAttributeWarningLimits([-10, 1000])
+        self.photodiodeEnergyWidget.setSliderLimits(0, 800)
+
         self.positionXWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
         self.positionXWidget.setAttributeName('x pos', 'mm')
         self.positionXWidget.setSliderLimits(-10, 25)
@@ -274,6 +286,7 @@ class TangoDeviceClient(QtGui.QWidget):
         layoutSliders = QtGui.QHBoxLayout()
         layoutSliders.addWidget(self.energyWidget)
         layoutSliders.addWidget(self.positionWidget)
+        layoutSliders.addWidget(self.photodiodeEnergyWidget)
         self.layoutAttributes.addLayout(layoutSliders)
 #        self.layoutAttributes2.addSpacerItem(spacerItemV)
 

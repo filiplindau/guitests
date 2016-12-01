@@ -227,7 +227,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #        self.frameSizes.fontType = 'Trebuchet MS'
         self.attrSizes = qw.QTangoSizes()
         self.attrSizes.barHeight = 22
-        self.attrSizes.barWidth = 18
+        self.attrSizes.barWidth = 23
         self.attrSizes.readAttributeHeight = 250
         self.attrSizes.readAttributeWidth = 250
         self.attrSizes.writeAttributeWidth = 250
