@@ -952,6 +952,7 @@ class QTangoAttributeNameLabel(QtGui.QLabel, QTangoAttributeBase):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		QtGui.QLabel.__init__(self, parent)
 		self.name_text = ''
+		self.currentAttrColor = self.attrColors.secondaryColor0
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -1037,6 +1038,7 @@ class QTangoAttributeUnitLabel(QtGui.QLabel, QTangoAttributeBase):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		QtGui.QLabel.__init__(self, parent)
 		self.unit_text = ''
+		self.currentAttrColor = self.attrColors.secondaryColor0
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -4256,6 +4258,9 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 						self.writeLabel.setupLayout()
 		else:
 			self.valueSlider.setValue(data)
+			self.unitLabel.setQuality(data.quality)
+			self.valueSpinbox.setQuality(data.quality)
+			self.nameLabel.setQuality(data.quality)
 		self.update()
 
 	def setAttributeWriteValue(self, value):
