@@ -289,7 +289,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.leeLaserPercentCurrentWidget.setAttributeName('%Current', '%')
         self.leeLaserPercentCurrentWidget.setAttributeWarningLimits([40, 74])
         self.leeLaserPercentCurrentWidget.setSliderLimits(36, 80)
-        self.leeLaserPercentCurrentWidget.newValueSignal.editingFinished.connect(self.writeLeeLaserPercentCurrent)
+        self.leeLaserPercentCurrentWidget.writeValueLineEdit.newValueSignal.connect(self.writeLeeLaserPercentCurrent)
 
         self.leeLaserPowerWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
         self.leeLaserPowerWidget.setAttributeName('Energy', 'mJ')
