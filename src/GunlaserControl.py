@@ -74,6 +74,8 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['halcyon_error_frequency'].attrSignal.connect(self.read_error_frequency)
         self.attributes['halcyon_sampletime'] = AttributeClass('sampletime', self.devices['halcyon'], None)
         self.attributes['halcyon_sampletime'].attrSignal.connect(self.read_halcyon_sampletime)
+        self.attributes['halcyon_picomotor'] = AttributeClass('picomotorposition', self.devices['halcyon'], 0.3)
+        self.attributes['halcyon_picomotor'].attrSignal.connect(self.read_halcyon_picomotor)
 
         # Regen Lee
         self.attributes['regen_lee_current'] = AttributeClass('percentcurrent', self.devices['regen_lee'], 0.3)
@@ -145,6 +147,13 @@ class TangoDeviceClient(QtGui.QWidget):
 
     def read_error_frequency(self, data):
         self.error_frequency_widget.setAttributeValue(data)
+    
+    def read_halcyon_picomotor(self, data):
+        self.picomotor_widget.setAttributeValue(data)
+        
+    def write_picomotor_position(self):
+        w = self.picomotor_widget.getWriteValue()
+        self.attributes['halcyon_picomotor'].attr_write(w)
         
     def read_error_trace(self, data):
         if self.error_sampletime is None:
@@ -365,6 +374,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.error_trace_widget.spectrum.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.error_trace_widget.setMaximumHeight(150)
         self.error_trace_widget.setMinimumHeight(150)
+        self.picomotor_widget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.picomotor_widget.setAttributeName('Picomotor', 'steps')
+        self.picomotor_widget.writeValueLineEdit.newValueSignal.connect(self.write_picomotor_position)
 
         self.regen_lee_name = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
         self.regen_lee_name.setAttributeName('Regen LeeLaser')
@@ -421,6 +433,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layoutAttributes2.addWidget(self.oscillator_power_widget)
         self.layoutAttributes2.addWidget(self.oscillator_peak_width_widget)
         self.layoutAttributes2.addWidget(self.error_frequency_widget)
+        self.layoutAttributes2.addWidget(self.picomotor_widget)
         self.layoutAttributes2.addSpacerItem(spacerItemBar)
         self.layoutAttributes2.addWidget(self.regen_current_widget)
         self.layoutAttributes2.addWidget(self.regen_temp_widget)
