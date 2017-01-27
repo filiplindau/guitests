@@ -252,7 +252,7 @@ class TangoDeviceClient(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 			
 	def closeEvent(self, event):
 # 		for device in self.devices.itervalues():
@@ -269,20 +269,20 @@ class TangoDeviceClient(QtGui.QWidget):
 		
 		w = 250
 		
-		self.frameSizes = qw.QTangoSizes()
-		self.frameSizes.readAttributeWidth = w
-		self.frameSizes.writeAttributeWidth = 299
-		self.frameSizes.fontStretch= 80
-		self.frameSizes.fontType = 'Segoe UI'
-#		self.frameSizes.fontType = 'Trebuchet MS'
-		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 20
-		self.attrSizes.barWidth = 60
-		self.attrSizes.readAttributeWidth = w
-		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
-#		self.attrSizes.fontType = 'Trebuchet MS'
+		self.frame_sizes = qw.QTangoSizes()
+		self.frame_sizes.readAttributeWidth = w
+		self.frame_sizes.writeAttributeWidth = 299
+		self.frame_sizes.fontStretch= 80
+		self.frame_sizes.fontType = 'Segoe UI'
+#		self.frame_sizes.fontType = 'Trebuchet MS'
+		self.attr_sizes = qw.QTangoSizes()
+		self.attr_sizes.barHeight = 20
+		self.attr_sizes.barWidth = 60
+		self.attr_sizes.readAttributeWidth = w
+		self.attr_sizes.writeAttributeWidth = 299
+		self.attr_sizes.fontStretch= 80
+		self.attr_sizes.fontType = 'Segoe UI'
+#		self.attr_sizes.fontType = 'Trebuchet MS'
 		
 		
 		self.colors = qw.QTangoColors()
@@ -303,46 +303,46 @@ class TangoDeviceClient(QtGui.QWidget):
 		layout2.setContentsMargins(-1, 0, 0, 0)
 		spacerItemV = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
 		spacerItemH = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
-		spacerItemV_bar = QtGui.QSpacerItem(self.attrSizes.barHeight, self.attrSizes.barHeight, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+		spacerItemV_bar = QtGui.QSpacerItem(self.attr_sizes.barHeight, self.attr_sizes.barHeight, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 		
 		layoutData = QtGui.QHBoxLayout()
-		layoutData.setMargin(self.attrSizes.barHeight/2)
-		layoutData.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		layoutData.setMargin(self.attr_sizes.barHeight/2)
+		layoutData.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 		
 		self.title = qw.QTangoTitleBar('Mirror motors')
-		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
 #  		self.sidebar.addCmdButton('Init', self.initSpectrometer)
 		self.bottombar = qw.QTangoHorizontalBar()
-		self.hName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.hName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.hName.setAttributeName('Horizontal')
-		self.vName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.vName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.vName.setAttributeName('Vertical')
 				
-		self.onOffCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attrSizes)
+		self.onOffCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attr_sizes)
 		self.onOffCommands.addCmdButton('Home', self.homeMotors)
 		self.onOffCommands.addCmdButton('Stop', self.stopMotors)
 		
-		self.limit0V = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.limit0V = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit0V.setAttributeName('Vertical limit 0')
-		self.limit1V = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.limit1V = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit1V.setAttributeName('Vertical limit 1')
 
-		self.limit0H = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.limit0H = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit0H.setAttributeName('Horizontal limit 0')
-		self.limit1H = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.limit1H = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit1H.setAttributeName('Horizontal limit 1')
 		
-		self.positionHWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.positionHWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attr_sizes)
 		self.positionHWidget.setAttributeName('Horizontal pos', 'mm')
 		self.positionHWidget.writeValueSpinbox.editingFinished.connect(self.writePositionH)
 		self.positionHWidget.setAttributeWarningLimits([0, 6])
 		self.positionHWidget.setSliderLimits(0, 6)
 		
-		self.positionVWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.positionVWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attr_sizes)
 		self.positionVWidget.setAttributeName('Vertical pos', 'mm')
 		self.positionVWidget.writeValueSpinbox.editingFinished.connect(self.writePositionV)
 		self.positionVWidget.setAttributeWarningLimits([0, 6])
@@ -350,20 +350,20 @@ class TangoDeviceClient(QtGui.QWidget):
 			
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 		layoutData.addSpacerItem(spacerItemH)
 						
-		self.layoutAttributes.addWidget(self.hName)
-		self.layoutAttributes.addWidget(self.vName)
-		self.layoutAttributes.addWidget(self.onOffCommands)
-		self.layoutAttributes.addSpacerItem(spacerItemV)
-		self.layoutAttributes.addWidget(self.limit0H)
-		self.layoutAttributes.addWidget(self.limit1H)
-		self.layoutAttributes.addWidget(self.positionHWidget)
-		self.layoutAttributes.addSpacerItem(spacerItemV_bar)
-		self.layoutAttributes.addWidget(self.limit0V)
-		self.layoutAttributes.addWidget(self.limit1V)
-		self.layoutAttributes.addWidget(self.positionVWidget)
+		self.layout_attributes.addWidget(self.hName)
+		self.layout_attributes.addWidget(self.vName)
+		self.layout_attributes.addWidget(self.onOffCommands)
+		self.layout_attributes.addSpacerItem(spacerItemV)
+		self.layout_attributes.addWidget(self.limit0H)
+		self.layout_attributes.addWidget(self.limit1H)
+		self.layout_attributes.addWidget(self.positionHWidget)
+		self.layout_attributes.addSpacerItem(spacerItemV_bar)
+		self.layout_attributes.addWidget(self.limit0V)
+		self.layout_attributes.addWidget(self.limit1V)
+		self.layout_attributes.addWidget(self.positionVWidget)
 		
 		layout1.addWidget(self.sidebar)
 		layout1.addLayout(layout2)

@@ -250,7 +250,7 @@ class TangoDeviceClient(QtGui.QWidget):
             attQObject = qw.QTangoReadAttributeDouble()
             attQObject.setAttributeName(att.name)
             self.attributeQObjects.append(attQObject)
-            self.layoutAttributes.addWidget(attQObject)
+            self.layout_attributes.addWidget(attQObject)
 
     def closeEvent(self, event):
 #         for device in self.devices.itervalues():
@@ -269,22 +269,22 @@ class TangoDeviceClient(QtGui.QWidget):
         s='QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
 
-        self.frameSizes = qw.QTangoSizes()
-        self.frameSizes.readAttributeWidth = 300
-        self.frameSizes.writeAttributeWidth = 150
-        self.frameSizes.barHeight = 30
-        self.frameSizes.barWidth = 20
-        self.frameSizes.fontStretch= 80
-        self.frameSizes.fontType = 'Segoe UI'
-#        self.frameSizes.fontType = 'Trebuchet MS'
-        self.attrSizes = qw.QTangoSizes()
-        self.attrSizes.barHeight = 20
-        self.attrSizes.barWidth = 20
-        self.attrSizes.readAttributeWidth = 300
-        self.attrSizes.writeAttributeWidth = 299
-        self.attrSizes.fontStretch= 80
-        self.attrSizes.fontType = 'Segoe UI'
-#        self.attrSizes.fontType = 'Trebuchet MS'
+        self.frame_sizes = qw.QTangoSizes()
+        self.frame_sizes.readAttributeWidth = 300
+        self.frame_sizes.writeAttributeWidth = 150
+        self.frame_sizes.barHeight = 30
+        self.frame_sizes.barWidth = 20
+        self.frame_sizes.fontStretch= 80
+        self.frame_sizes.fontType = 'Segoe UI'
+#        self.frame_sizes.fontType = 'Trebuchet MS'
+        self.attr_sizes = qw.QTangoSizes()
+        self.attr_sizes.barHeight = 20
+        self.attr_sizes.barWidth = 20
+        self.attr_sizes.readAttributeWidth = 300
+        self.attr_sizes.writeAttributeWidth = 299
+        self.attr_sizes.fontStretch= 80
+        self.attr_sizes.fontType = 'Segoe UI'
+#        self.attr_sizes.fontType = 'Trebuchet MS'
 
 
         self.colors = qw.QTangoColors()
@@ -307,54 +307,54 @@ class TangoDeviceClient(QtGui.QWidget):
         spacerItemH = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
         layoutData = QtGui.QHBoxLayout()
-        layoutData.setMargin(self.attrSizes.barHeight/2)
-        layoutData.setSpacing(self.attrSizes.barHeight/2)
-        self.layoutAttributes = QtGui.QVBoxLayout()
-        self.layoutAttributes.setMargin(0)
-        self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-        self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+        layoutData.setMargin(self.attr_sizes.barHeight/2)
+        layoutData.setSpacing(self.attr_sizes.barHeight/2)
+        self.layout_attributes = QtGui.QVBoxLayout()
+        self.layout_attributes.setMargin(0)
+        self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+        self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
         self.title = qw.QTangoTitleBar('Multipass')
         self.setWindowTitle('Multipass')
         self.title.startLabel.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-#        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+#        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
-        self.leeLaserName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+        self.leeLaserName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
         self.leeLaserName.setAttributeName('LeeLaser')
 
-        self.leeLaserShutterWidget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attrSizes)
+        self.leeLaserShutterWidget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
 
-        self.leeLaserCurrentWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+        self.leeLaserCurrentWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
         self.leeLaserCurrentWidget.setAttributeName('LeeLaser current', 'A')
         self.leeLaserCurrentWidget.setAttributeWarningLimits([25, 27])
         self.leeLaserCurrentWidget.setSliderLimits(6, 30)
 
-        self.leeLaserPercentCurrentWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+        self.leeLaserPercentCurrentWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
         self.leeLaserPercentCurrentWidget.setAttributeName('LeeLaser percent current', '%')
         self.leeLaserPercentCurrentWidget.setAttributeWarningLimits([70, 73])
         self.leeLaserPercentCurrentWidget.setSliderLimits(30, 100)
 
-        self.ionpumpPressureWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+        self.ionpumpPressureWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
         self.ionpumpPressureWidget.setAttributeName('Crystal pressure', 'mBar')
         self.ionpumpPressureWidget.setAttributeWarningLimits([0, 5e-7])
         self.ionpumpPressureWidget.setSliderLimits(0, 1e-7)
 
-        self.temperatureWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+        self.temperatureWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
         self.temperatureWidget.setAttributeName('Crystal temp', 'degC')
         self.temperatureWidget.setAttributeWarningLimits([-280, -170])
         self.temperatureWidget.setSliderLimits(-270, 30)
 
-        self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+        self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
         self.peakWidthWidget.setAttributeName('Spectral width', 'nm')
         self.peakWidthWidget.setAttributeWarningLimits([30, 100])
         self.peakWidthWidget.setSliderLimits(0, 70)
-        self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+        self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
         self.peakEnergyWidget.setAttributeName('Laser energy', 'a.u.')
         self.peakEnergyWidget.setAttributeWarningLimits([10, 30])
         self.peakEnergyWidget.setSliderLimits(0, 20)
 
-        self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+        self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
         self.oscSpectrumPlot.setAttributeName('Compressed spectrum')
         self.oscSpectrumPlot.setXRange(700, 900)
         self.oscSpectrumPlot.fixedSize(True)
@@ -362,24 +362,24 @@ class TangoDeviceClient(QtGui.QWidget):
 
         layout2.addWidget(self.title)
         layout2.addLayout(layoutData)
-        layoutData.addLayout(self.layoutAttributes)
+        layoutData.addLayout(self.layout_attributes)
         layoutData.addSpacerItem(spacerItemH)
 
-        self.layoutAttributes.addWidget(self.leeLaserName)
-#        self.layoutAttributes.addWidget(self.spectrometerName)
-        self.layoutAttributes.addSpacerItem(spacerItemV)
-        self.layoutAttributes.addWidget(self.leeLaserShutterWidget)
-        self.layoutAttributes.addWidget(self.leeLaserCurrentWidget)
-        self.layoutAttributes.addWidget(self.leeLaserPercentCurrentWidget)
+        self.layout_attributes.addWidget(self.leeLaserName)
+#        self.layout_attributes.addWidget(self.spectrometerName)
+        self.layout_attributes.addSpacerItem(spacerItemV)
+        self.layout_attributes.addWidget(self.leeLaserShutterWidget)
+        self.layout_attributes.addWidget(self.leeLaserCurrentWidget)
+        self.layout_attributes.addWidget(self.leeLaserPercentCurrentWidget)
 
-        self.layoutAttributes.addSpacerItem(spacerItemV)
-        self.layoutAttributes.addWidget(self.ionpumpPressureWidget)
-        self.layoutAttributes.addWidget(self.temperatureWidget)
+        self.layout_attributes.addSpacerItem(spacerItemV)
+        self.layout_attributes.addWidget(self.ionpumpPressureWidget)
+        self.layout_attributes.addWidget(self.temperatureWidget)
 
-        self.layoutAttributes.addSpacerItem(spacerItemV)
-        self.layoutAttributes.addWidget(self.peakWidthWidget)
-        self.layoutAttributes.addWidget(self.peakEnergyWidget)
-        self.layoutAttributes.addWidget(self.oscSpectrumPlot)
+        self.layout_attributes.addSpacerItem(spacerItemV)
+        self.layout_attributes.addWidget(self.peakWidthWidget)
+        self.layout_attributes.addWidget(self.peakEnergyWidget)
+        self.layout_attributes.addWidget(self.oscSpectrumPlot)
 
 
 #        layout1.addWidget(self.sidebar)

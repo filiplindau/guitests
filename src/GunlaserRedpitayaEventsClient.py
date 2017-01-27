@@ -209,7 +209,7 @@ class TangoDeviceClient(QtGui.QWidget):
             attQObject = qw.QTangoReadAttributeDouble()
             attQObject.setAttributeName(att.name)
             self.attributeQObjects.append(attQObject)
-            self.layoutAttributes.addWidget(attQObject)
+            self.layout_attributes.addWidget(attQObject)
 
     def closeEvent(self, event):
         try:
@@ -230,24 +230,24 @@ class TangoDeviceClient(QtGui.QWidget):
         s='QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
 
-        self.frameSizes = qw.QTangoSizes()
-        self.frameSizes.barHeight = 20
-        self.frameSizes.barWidth = 20
-        self.frameSizes.readAttributeWidth = 320
-        self.frameSizes.writeAttributeWidth = 150
-        self.frameSizes.fontStretch= 80
-        self.frameSizes.fontType = 'Segoe UI'
-#        self.frameSizes.fontType = 'Trebuchet MS'
+        self.frame_sizes = qw.QTangoSizes()
+        self.frame_sizes.barHeight = 20
+        self.frame_sizes.barWidth = 20
+        self.frame_sizes.readAttributeWidth = 320
+        self.frame_sizes.writeAttributeWidth = 150
+        self.frame_sizes.fontStretch= 80
+        self.frame_sizes.fontType = 'Segoe UI'
+#        self.frame_sizes.fontType = 'Trebuchet MS'
 
-        self.attrSizes = qw.QTangoSizes()
-        self.attrSizes.barHeight = 20
-        self.attrSizes.barWidth = 20
-        self.attrSizes.readAttributeWidth = 320
-        self.attrSizes.readAttributeHeight = 320
-        self.attrSizes.writeAttributeWidth = 299
-        self.attrSizes.fontStretch= 80
-        self.attrSizes.fontType = 'Segoe UI'
-#        self.attrSizes.fontType = 'Trebuchet MS'
+        self.attr_sizes = qw.QTangoSizes()
+        self.attr_sizes.barHeight = 20
+        self.attr_sizes.barWidth = 20
+        self.attr_sizes.readAttributeWidth = 320
+        self.attr_sizes.readAttributeHeight = 320
+        self.attr_sizes.writeAttributeWidth = 299
+        self.attr_sizes.fontStretch= 80
+        self.attr_sizes.fontType = 'Segoe UI'
+#        self.attr_sizes.fontType = 'Trebuchet MS'
 
 
         self.colors = qw.QTangoColors()
@@ -267,34 +267,34 @@ class TangoDeviceClient(QtGui.QWidget):
         layout2.setSpacing(0)
         layout2.setContentsMargins(-1, 0, 0, 0)
         spacerItemV = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
-        spacerItemBar = QtGui.QSpacerItem(self.frameSizes.barWidth, self.frameSizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        spacerItemBar = QtGui.QSpacerItem(self.frame_sizes.barWidth, self.frame_sizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         spacerItemH = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
         layoutData = QtGui.QHBoxLayout()
-        layoutData.setMargin(self.attrSizes.barHeight/2)
-        layoutData.setSpacing(self.attrSizes.barHeight*2)
-        self.layoutAttributes = QtGui.QVBoxLayout()
-        self.layoutAttributes.setMargin(0)
-        self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-        self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+        layoutData.setMargin(self.attr_sizes.barHeight/2)
+        layoutData.setSpacing(self.attr_sizes.barHeight*2)
+        self.layout_attributes = QtGui.QVBoxLayout()
+        self.layout_attributes.setMargin(0)
+        self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+        self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
 #         self.layoutAttributes2 = QtGui.QVBoxLayout()
 #         self.layoutAttributes2.setMargin(0)
-#         self.layoutAttributes2.setSpacing(self.attrSizes.barHeight/2)
+#         self.layoutAttributes2.setSpacing(self.attr_sizes.barHeight/2)
 #         self.layoutAttributes2.setContentsMargins(0, 0, 0, 0)
 #
 #         self.layoutAttributes3 = QtGui.QVBoxLayout()
 #         self.layoutAttributes3.setMargin(0)
-#         self.layoutAttributes3.setSpacing(self.attrSizes.barHeight/2)
+#         self.layoutAttributes3.setSpacing(self.attr_sizes.barHeight/2)
 #         self.layoutAttributes3.setContentsMargins(0, 0, 0, 0)
 
         self.title = qw.QTangoTitleBar(self.deviceName)
         self.setWindowTitle('RedPitaya')
-        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
 
-        self.redpitayaDevices = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
+        self.redpitayaDevices = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attr_sizes)
         s=str(self.redpitayaDevices.writeValueComboBox.styleSheet())
 
         self.redpitayaDevices.setAttributeName('Device list')
@@ -303,77 +303,77 @@ class TangoDeviceClient(QtGui.QWidget):
         for devName in devNameList:
             self.redpitayaDevices.addItem(devName)
 
-        self.redpitayaDevices.writeValueComboBox.setWidth(self.attrSizes.barHeight*10)
+        self.redpitayaDevices.writeValueComboBox.setWidth(self.attr_sizes.barHeight*10)
         self.redpitayaDevices.setActivatedMethod(self.changeDevice)
         self.redpitayaDevices.startLabel.setQuality(pt.AttrQuality.ATTR_VALID)
         self.redpitayaDevices.endLabel.setQuality(pt.AttrQuality.ATTR_VALID)
 
 
-        self.redpitayaName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+        self.redpitayaName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
         self.redpitayaName.setAttributeName('Redpitaya')
-        self.redpitayaCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attrSizes)
+        self.redpitayaCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attr_sizes)
         self.redpitayaCommands.addCmdButton('Init', self.initRedpitaya)
         self.redpitayaCommands.addCmdButton('Start', self.startRedpitaya)
         self.redpitayaCommands.addCmdButton('Stop', self.stopRedpitaya)
 
-        self.trigLevelWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.trigLevelWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
         self.trigLevelWidget.setAttributeName('Trigger level', 'V')
         self.trigLevelWidget.writeValueLineEdit.returnPressed.connect(self.writeTrigLevel)
 
-        self.trigDelayWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.trigDelayWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
         self.trigDelayWidget.setAttributeName('Trigger delay', 'us')
         self.trigDelayWidget.writeValueLineEdit.returnPressed.connect(self.writeTrigDelay)
 
-        self.trigModeWidget = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
+        self.trigModeWidget = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attr_sizes)
         self.trigModeWidget.setAttributeName('Trigger mode')
         self.trigModeWidget.addItem('NORMAL')
         self.trigModeWidget.addItem('AUTO')
         self.trigModeWidget.setActivatedMethod(self.writeTrigMode)
 
-        self.trigSourceWidget = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attrSizes)
+        self.trigSourceWidget = qw.QTangoWriteAttributeComboBox(colors = self.colors, sizes = self.attr_sizes)
         self.trigSourceWidget.setAttributeName('Trigger source')
         self.trigSourceWidget.addItem('CHANNEL1')
         self.trigSourceWidget.addItem('CHANNEL2')
         self.trigSourceWidget.addItem('EXTERNAL')
         self.trigSourceWidget.setActivatedMethod(self.writeTrigSource)
 
-        self.recordLengthWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.recordLengthWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
         self.recordLengthWidget.setAttributeName('Record length', 'samples')
         self.recordLengthWidget.writeValueLineEdit.returnPressed.connect(self.writeRecordLength)
 
-        self.sampleRateWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attrSizes)
+        self.sampleRateWidget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
         self.sampleRateWidget.setAttributeName('Sample rate', 'samples')
         self.sampleRateWidget.writeValueLineEdit.returnPressed.connect(self.writeSampleRate)
 
-        self.waveformPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+        self.waveformPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
         self.waveformPlot.setAttributeName('Waveform')
         self.waveformPlot.spectrum.addPlot(self.colors.secondaryColor1)
 #        self.waveformPlot.setXRange(700, 900)
         self.waveformPlot.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-        self.attrSizes.readAttributeHeight = 250
+        self.attr_sizes.readAttributeHeight = 250
 
 
 
         layout2.addWidget(self.title)
         layout2.addLayout(layoutData)
-        layoutData.addLayout(self.layoutAttributes)
+        layoutData.addLayout(self.layout_attributes)
 #        layoutData.addSpacerItem(spacerItemH)
 #        layoutData.addLayout(self.layoutAttributes2)
 #        layoutData.addLayout(self.layoutAttributes3)
 
-        self.layoutAttributes.addWidget(self.redpitayaDevices)
-        self.layoutAttributes.addWidget(self.redpitayaName)
-        self.layoutAttributes.addWidget(self.redpitayaCommands)
-        self.layoutAttributes.addWidget(self.recordLengthWidget)
-        self.layoutAttributes.addWidget(self.sampleRateWidget)
-        self.layoutAttributes.addWidget(self.trigLevelWidget)
-        self.layoutAttributes.addWidget(self.trigDelayWidget)
-        self.layoutAttributes.addWidget(self.trigModeWidget)
-        self.layoutAttributes.addWidget(self.trigSourceWidget)
+        self.layout_attributes.addWidget(self.redpitayaDevices)
+        self.layout_attributes.addWidget(self.redpitayaName)
+        self.layout_attributes.addWidget(self.redpitayaCommands)
+        self.layout_attributes.addWidget(self.recordLengthWidget)
+        self.layout_attributes.addWidget(self.sampleRateWidget)
+        self.layout_attributes.addWidget(self.trigLevelWidget)
+        self.layout_attributes.addWidget(self.trigDelayWidget)
+        self.layout_attributes.addWidget(self.trigModeWidget)
+        self.layout_attributes.addWidget(self.trigSourceWidget)
         layoutData.addWidget(self.waveformPlot)
 
-        self.layoutAttributes.addSpacerItem(spacerItemV)
+        self.layout_attributes.addSpacerItem(spacerItemV)
 
 
 

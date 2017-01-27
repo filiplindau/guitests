@@ -36,21 +36,21 @@ class ButtonTest(QtGui.QWidget):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 		
-		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 18
-		self.attrSizes.barWidth = 42
-		self.attrSizes.readAttributeWidth = 240
-		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
+		self.attr_sizes = qw.QTangoSizes()
+		self.attr_sizes.barHeight = 18
+		self.attr_sizes.barWidth = 42
+		self.attr_sizes.readAttributeWidth = 240
+		self.attr_sizes.writeAttributeWidth = 299
+		self.attr_sizes.fontStretch= 80
+		self.attr_sizes.fontType = 'Segoe UI'
 		
 		
-		self.buttonWidget = qw.QTangoCommandSelection('Test', sizes = self.attrSizes)
+		self.buttonWidget = qw.QTangoCommandSelection('Test', sizes = self.attr_sizes)
 		self.buttonWidget.addCmdButton('Change', self.buttonFunction)
 		self.buttonWidget.addCmdButton('B2', self.buttonFunction)
 		
 #		self.sliderWidget = qw.QTangoHSliderBase()
-		self.sliderWidget = qw.QTangoReadAttributeSlider(sizes = self.attrSizes)
+		self.sliderWidget = qw.QTangoReadAttributeSlider(sizes = self.attr_sizes)
 		self.sliderWidget.setAttributeWarningLimits(0.25, 0.9)
 		self.sliderWidget.setSliderLimits(0.2, 0.8)
 		self.sliderWidget.setAttributeValue(0.9)

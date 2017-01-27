@@ -215,7 +215,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.finesseName.setState(data)
 
 	def readPumpShutterState(self, data):
-		self.shutterWidget.setStatus(data)
+		self.shutter_widget.setStatus(data)
 
 	def readPumpOperationState(self, data):
 		self.laserOperationWidget.setStatus(data)
@@ -282,7 +282,7 @@ class TangoDeviceClient(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 			
 	def closeEvent(self, event):
 # 		for device in self.devices.itervalues():
@@ -297,20 +297,20 @@ class TangoDeviceClient(QtGui.QWidget):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 		
-		self.frameSizes = qw.QTangoSizes()
-		self.frameSizes.readAttributeWidth = 300
-		self.frameSizes.writeAttributeWidth = 150
-		self.frameSizes.fontStretch= 80
-		self.frameSizes.fontType = 'Segoe UI'
-#		self.frameSizes.fontType = 'Trebuchet MS'
-		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 20
-		self.attrSizes.barWidth = 60
-		self.attrSizes.readAttributeWidth = 300
-		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
-#		self.attrSizes.fontType = 'Trebuchet MS'
+		self.frame_sizes = qw.QTangoSizes()
+		self.frame_sizes.readAttributeWidth = 300
+		self.frame_sizes.writeAttributeWidth = 150
+		self.frame_sizes.fontStretch= 80
+		self.frame_sizes.fontType = 'Segoe UI'
+#		self.frame_sizes.fontType = 'Trebuchet MS'
+		self.attr_sizes = qw.QTangoSizes()
+		self.attr_sizes.barHeight = 20
+		self.attr_sizes.barWidth = 60
+		self.attr_sizes.readAttributeWidth = 300
+		self.attr_sizes.writeAttributeWidth = 299
+		self.attr_sizes.fontStretch= 80
+		self.attr_sizes.fontType = 'Segoe UI'
+#		self.attr_sizes.fontType = 'Trebuchet MS'
 		
 		
 		self.colors = qw.QTangoColors()
@@ -333,65 +333,65 @@ class TangoDeviceClient(QtGui.QWidget):
 		spacerItemH = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 		
 		layoutData = QtGui.QHBoxLayout()
-		layoutData.setMargin(self.attrSizes.barHeight/2)
-		layoutData.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		layoutData.setMargin(self.attr_sizes.barHeight/2)
+		layoutData.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 		
 		self.title = qw.QTangoTitleBar('Gunlaser oscillator')
-		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
 		self.bottombar = qw.QTangoHorizontalBar()
 		
-		self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.finesseName.setAttributeName('Finesse')
 				
-		self.shutterWidget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attrSizes)
-		self.shutterWidget.addCmdButton('Open', self.openFinesseShutter)
-		self.shutterWidget.addCmdButton('Close', self.closeFinesseShutter)
+		self.shutter_widget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+		self.shutter_widget.addCmdButton('Open', self.openFinesseShutter)
+		self.shutter_widget.addCmdButton('Close', self.closeFinesseShutter)
 
-		self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors = self.colors, sizes = self.attrSizes)
+		self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors = self.colors, sizes = self.attr_sizes)
 		self.laserOperationWidget.addCmdButton('Start', self.onFinesse)
 		self.laserOperationWidget.addCmdButton('Stop', self.offFinesse)
 
 		
-		self.laserTempWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.laserTempWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
 		self.laserTempWidget.setAttributeName('Pump temperature', u'\u00b0C')
 		self.laserTempWidget.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget.setSliderLimits(23, 27)
 
-		self.laserTempWidget2 = qw.QTangoReadAttributeTrend(colors = self.colors, sizes = self.attrSizes)
+		self.laserTempWidget2 = qw.QTangoReadAttributeTrend(colors = self.colors, sizes = self.attr_sizes)
 		self.laserTempWidget2.setAttributeName('Pump temperature', u'\u00b0C')
 		self.laserTempWidget2.setAttributeWarningLimits([25, 26])
 		self.laserTempWidget2.setTrendLimits(23, 27)
 
 
-		self.laserPowerWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.laserPowerWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attr_sizes)
 		self.laserPowerWidget.setAttributeName('Pump power', 'W')
 		self.laserPowerWidget.setSliderLimits(0, 6)
 		self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
 #		self.laserPowerWidget.setAttributeWriteValue(5)
 		self.laserPowerWidget.writeValueSpinbox.editingFinished.connect(self.writePumpPower)
 				
-		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.spectrometerName.setAttributeName('Spectrometer')
 				
-		self.onOffCommands = qw.QTangoCommandSelection('Spectrometer commands', colors = self.colors, sizes = self.attrSizes)
+		self.onOffCommands = qw.QTangoCommandSelection('Spectrometer commands', colors = self.colors, sizes = self.attr_sizes)
 		self.onOffCommands.addCmdButton('Init', self.initSpectrometer)
 		self.onOffCommands.addCmdButton('On', self.onSpectrometer)
 		self.onOffCommands.addCmdButton('Off', self.offSpectrometer)
 		self.onOffCommands.addCmdButton('Stop', self.stopSpectrometer)
-		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
 		self.peakWidthWidget.setAttributeName('Spectral width', 'nm')
 		self.peakWidthWidget.setAttributeWarningLimits([7, 20])
 		self.peakWidthWidget.setSliderLimits(0, 15)
-		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
 		self.peakEnergyWidget.setAttributeName('Laser energy', 'a.u.')
 		self.peakEnergyWidget.setAttributeWarningLimits([0.02, 1])
 		self.peakEnergyWidget.setSliderLimits(0, 0.04)
 		
-		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
 		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
 		self.oscSpectrumPlot.setXRange(760, 820)
 		self.oscSpectrumPlot.fixedSize(True)
@@ -399,24 +399,24 @@ class TangoDeviceClient(QtGui.QWidget):
 				
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 		layoutData.addSpacerItem(spacerItemH)
 						
-		self.layoutAttributes.addWidget(self.finesseName)
-		self.layoutAttributes.addWidget(self.spectrometerName)
-		self.layoutAttributes.addSpacerItem(spacerItemV)
-		self.layoutAttributes.addWidget(self.shutterWidget)
-		self.layoutAttributes.addWidget(self.laserOperationWidget)
-		self.layoutAttributes.addWidget(self.laserPowerWidget)
-		self.layoutAttributes.addWidget(self.laserTempWidget)
-		self.layoutAttributes.addWidget(self.laserTempWidget2)
-#		self.layoutAttributes.addWidget(self.laserTempTrend)
+		self.layout_attributes.addWidget(self.finesseName)
+		self.layout_attributes.addWidget(self.spectrometerName)
+		self.layout_attributes.addSpacerItem(spacerItemV)
+		self.layout_attributes.addWidget(self.shutter_widget)
+		self.layout_attributes.addWidget(self.laserOperationWidget)
+		self.layout_attributes.addWidget(self.laserPowerWidget)
+		self.layout_attributes.addWidget(self.laserTempWidget)
+		self.layout_attributes.addWidget(self.laserTempWidget2)
+#		self.layout_attributes.addWidget(self.laserTempTrend)
 
-		self.layoutAttributes.addSpacerItem(spacerItemV)		
-		self.layoutAttributes.addWidget(self.onOffCommands)		
-		self.layoutAttributes.addWidget(self.peakWidthWidget)
-		self.layoutAttributes.addWidget(self.peakEnergyWidget)
-		self.layoutAttributes.addWidget(self.oscSpectrumPlot)
+		self.layout_attributes.addSpacerItem(spacerItemV)		
+		self.layout_attributes.addWidget(self.onOffCommands)		
+		self.layout_attributes.addWidget(self.peakWidthWidget)
+		self.layout_attributes.addWidget(self.peakEnergyWidget)
+		self.layout_attributes.addWidget(self.oscSpectrumPlot)
 		
 		
 		layout1.addWidget(self.sidebar)

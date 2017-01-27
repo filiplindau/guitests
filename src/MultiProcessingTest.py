@@ -194,7 +194,7 @@ class TangoDeviceClientTest(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 			
 	def closeEvent(self, event):
 		for device in self.devices:
@@ -225,10 +225,10 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		layoutData = QtGui.QHBoxLayout()
 		layoutData.setMargin(3)
 		layoutData.setSpacing(0)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(0)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(0)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 		
 		self.title = qw.QTangoTitleBar('Thorlabs motors')
 		self.sidebar = qw.QTangoSideBar('Test')
@@ -237,9 +237,9 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		layout2.addWidget(self.title)
 		layout2.addSpacerItem(spacerItemV)
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 		layoutData.addSpacerItem(spacerItemH)
-		self.layoutAttributes.addWidget(self.deviceStatus)
+		self.layout_attributes.addWidget(self.deviceStatus)
 		self.deviceStatus.setStatus(pt.DevState.DISABLE,'Connecting to device')
 		layout1.addWidget(self.sidebar)
 		layout1.addLayout(layout2)

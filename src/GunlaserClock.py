@@ -32,19 +32,19 @@ class TangoDeviceClient(QtGui.QWidget):
         s='QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
 
-        self.frameSizes = qw.QTangoSizes()
-        self.frameSizes.readAttributeWidth = 300
-        self.frameSizes.writeAttributeWidth = 150
-        self.frameSizes.fontStretch= 80
-        self.frameSizes.fontType = 'Segoe UI'
+        self.frame_sizes = qw.QTangoSizes()
+        self.frame_sizes.readAttributeWidth = 300
+        self.frame_sizes.writeAttributeWidth = 150
+        self.frame_sizes.fontStretch= 80
+        self.frame_sizes.fontType = 'Segoe UI'
 
-        self.attrSizes = qw.QTangoSizes()
-        self.attrSizes.barHeight = 20
-        self.attrSizes.barWidth = 20
-        self.attrSizes.readAttributeWidth = 400
-        self.attrSizes.writeAttributeWidth = 299
-        self.attrSizes.fontStretch= 80
-        self.attrSizes.fontType = 'Segoe UI'
+        self.attr_sizes = qw.QTangoSizes()
+        self.attr_sizes.barHeight = 20
+        self.attr_sizes.barWidth = 20
+        self.attr_sizes.readAttributeWidth = 400
+        self.attr_sizes.writeAttributeWidth = 299
+        self.attr_sizes.fontStretch= 80
+        self.attr_sizes.fontType = 'Segoe UI'
 
         self.clockSizes = qw.QTangoSizes()
         self.clockSizes.barHeight = 70
@@ -75,15 +75,15 @@ class TangoDeviceClient(QtGui.QWidget):
         spacerItemH = QtGui.QSpacerItem(2, 2, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
         layoutData = QtGui.QHBoxLayout()
-#        layoutData.setMargin(self.attrSizes.barHeight/2)
+#        layoutData.setMargin(self.attr_sizes.barHeight/2)
         layoutData.setMargin(0)
-        layoutData.setSpacing(self.attrSizes.barHeight/2)
+        layoutData.setSpacing(self.attr_sizes.barHeight/2)
         layoutData.setContentsMargins(0, 15, 0, 0)
 
-        self.layoutAttributes = QtGui.QVBoxLayout()
-        self.layoutAttributes.setMargin(0)
-        self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-        self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+        self.layout_attributes = QtGui.QVBoxLayout()
+        self.layout_attributes.setMargin(0)
+        self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+        self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
         self.title = qw.QTangoTitleBar('TIME')
         self.setWindowTitle('Clock')
@@ -93,17 +93,17 @@ class TangoDeviceClient(QtGui.QWidget):
         self.timeWidget.startLabel.setQuality('ATTR_VALID')
         self.timeWidget.endLabel.setQuality('ATTR_VALID')
 #        self.timeWidget.nameLabel.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.dateWidget = qw.QTangoCommandSelection('', colors = self.colors, sizes = self.attrSizes)
+        self.dateWidget = qw.QTangoCommandSelection('', colors = self.colors, sizes = self.attr_sizes)
         self.dateWidget.startLabel.setQuality('ATTR_VALID')
         self.dateWidget.endLabel.setQuality('ATTR_VALID')
 
-        self.layoutAttributes.addWidget(self.timeWidget)
-        self.layoutAttributes.addWidget(self.dateWidget)
-        self.layoutAttributes.addSpacerItem(spacerItemV)
+        self.layout_attributes.addWidget(self.timeWidget)
+        self.layout_attributes.addWidget(self.dateWidget)
+        self.layout_attributes.addSpacerItem(spacerItemV)
 
         layout2.addWidget(self.title)
         layout2.addLayout(layoutData)
-        layoutData.addLayout(self.layoutAttributes)
+        layoutData.addLayout(self.layout_attributes)
         layoutData.addSpacerItem(spacerItemH)
 
         layout0.addLayout(layout2)

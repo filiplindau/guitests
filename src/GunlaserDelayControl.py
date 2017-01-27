@@ -83,7 +83,7 @@ class TangoDeviceClient(QtGui.QWidget):
             attQObject = qw.QTangoReadAttributeDouble()
             attQObject.setAttributeName(att.name)
             self.attributeQObjects.append(attQObject)
-            self.layoutAttributes.addWidget(attQObject)
+            self.layout_attributes.addWidget(attQObject)
 
     def closeEvent(self, event):
 #         for device in self.devices.itervalues():
@@ -99,24 +99,24 @@ class TangoDeviceClient(QtGui.QWidget):
         s='QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
 
-        self.frameSizes = qw.QTangoSizes()
-        self.frameSizes.barHeight = 20
-        self.frameSizes.barWidth = 18
-        self.frameSizes.readAttributeWidth = 250
-        self.frameSizes.writeAttributeWidth = 150
-        self.frameSizes.fontStretch= 80
-        self.frameSizes.fontType = 'Segoe UI'
-#        self.frameSizes.fontType = 'Trebuchet MS'
+        self.frame_sizes = qw.QTangoSizes()
+        self.frame_sizes.barHeight = 20
+        self.frame_sizes.barWidth = 18
+        self.frame_sizes.readAttributeWidth = 250
+        self.frame_sizes.writeAttributeWidth = 150
+        self.frame_sizes.fontStretch= 80
+        self.frame_sizes.fontType = 'Segoe UI'
+#        self.frame_sizes.fontType = 'Trebuchet MS'
 
-        self.attrSizes = qw.QTangoSizes()
-        self.attrSizes.barHeight = 22
-        self.attrSizes.barWidth = 18
-        self.attrSizes.readAttributeWidth = 250
-        self.attrSizes.readAttributeHeight = 250
-        self.attrSizes.writeAttributeWidth = 299
-        self.attrSizes.fontStretch= 80
-        self.attrSizes.fontType = 'Segoe UI'
-#        self.attrSizes.fontType = 'Trebuchet MS'
+        self.attr_sizes = qw.QTangoSizes()
+        self.attr_sizes.barHeight = 22
+        self.attr_sizes.barWidth = 18
+        self.attr_sizes.readAttributeWidth = 250
+        self.attr_sizes.readAttributeHeight = 250
+        self.attr_sizes.writeAttributeWidth = 299
+        self.attr_sizes.fontStretch= 80
+        self.attr_sizes.fontType = 'Segoe UI'
+#        self.attr_sizes.fontType = 'Trebuchet MS'
 
 
         self.colors = qw.QTangoColors()
@@ -136,42 +136,42 @@ class TangoDeviceClient(QtGui.QWidget):
         layout2.setSpacing(0)
         layout2.setContentsMargins(-1, 0, 0, 0)
         spacerItemV = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
-        spacerItemBar = QtGui.QSpacerItem(self.frameSizes.barWidth, self.frameSizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        spacerItemBar = QtGui.QSpacerItem(self.frame_sizes.barWidth, self.frame_sizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         spacerItemH = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
         layoutData = QtGui.QHBoxLayout()
-        layoutData.setMargin(self.attrSizes.barHeight/2)
-        layoutData.setSpacing(self.attrSizes.barHeight*2)
-        self.layoutAttributes = QtGui.QVBoxLayout()
-        self.layoutAttributes.setMargin(0)
-        self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-        self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+        layoutData.setMargin(self.attr_sizes.barHeight/2)
+        layoutData.setSpacing(self.attr_sizes.barHeight*2)
+        self.layout_attributes = QtGui.QVBoxLayout()
+        self.layout_attributes.setMargin(0)
+        self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+        self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
 #         self.layoutAttributes2 = QtGui.QVBoxLayout()
 #         self.layoutAttributes2.setMargin(0)
-#         self.layoutAttributes2.setSpacing(self.attrSizes.barHeight/2)
+#         self.layoutAttributes2.setSpacing(self.attr_sizes.barHeight/2)
 #         self.layoutAttributes2.setContentsMargins(0, 0, 0, 0)
 #
 #         self.layoutAttributes3 = QtGui.QVBoxLayout()
 #         self.layoutAttributes3.setMargin(0)
-#         self.layoutAttributes3.setSpacing(self.attrSizes.barHeight/2)
+#         self.layoutAttributes3.setSpacing(self.attr_sizes.barHeight/2)
 #         self.layoutAttributes3.setContentsMargins(0, 0, 0, 0)
 
         self.title = qw.QTangoTitleBar('Delay control')
         self.setWindowTitle('Delay control')
-        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
-        self.dgName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+        self.dgName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
         self.dgName.setAttributeName('Delay generator')
 
-        self.attrSizes.readAttributeHeight = 250
-        self.positionWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.attr_sizes.readAttributeHeight = 250
+        self.positionWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
         self.positionWidget.setAttributeName('Pos', 'deg')
         self.positionWidget.setAttributeWarningLimits([-10, 370])
         self.positionWidget.setSliderLimits(0, 50)
 
-        self.energyWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+        self.energyWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
         self.energyWidget.setAttributeName('Energy', '%')
         self.energyWidget.setSliderLimits(0, 100)
         self.energyWidget.setAttributeWarningLimits([-1, 110])
@@ -181,18 +181,18 @@ class TangoDeviceClient(QtGui.QWidget):
 
         layout2.addWidget(self.title)
         layout2.addLayout(layoutData)
-        layoutData.addLayout(self.layoutAttributes)
+        layoutData.addLayout(self.layout_attributes)
 #        layoutData.addSpacerItem(spacerItemH)
 #        layoutData.addLayout(self.layoutAttributes2)
 #        layoutData.addLayout(self.layoutAttributes3)
 
-        self.layoutAttributes.addWidget(self.waveplateName)
-        self.layoutAttributes.addSpacerItem(spacerItemV)
+        self.layout_attributes.addWidget(self.waveplateName)
+        self.layout_attributes.addSpacerItem(spacerItemV)
 
         layoutSliders = QtGui.QHBoxLayout()
         layoutSliders.addWidget(self.energyWidget)
         layoutSliders.addWidget(self.positionWidget)
-        self.layoutAttributes.addLayout(layoutSliders)
+        self.layout_attributes.addLayout(layoutSliders)
 #        self.layoutAttributes2.addSpacerItem(spacerItemV)
 
 

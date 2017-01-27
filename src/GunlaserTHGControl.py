@@ -1,5 +1,5 @@
 '''
-Created on 23 okt 2014
+Created on 30 Aug 2016
 
 @author: Filip Lindau
 '''
@@ -28,7 +28,10 @@ class TangoDeviceClient(QtGui.QWidget):
         t0=time.clock()
         self.devices = {}
         self.devices['waveplate']=pt.DeviceProxy('gunlaser/mp/waveplate')
-        self.devices['redpitaya2']=pt.DeviceProxy('gunlaser/devices/redpitaya2')
+        self.devices['camera']=pt.DeviceProxy('gunlaser/thg/camera')
+        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya3')
+        self.devices['mirror_x']=pt.DeviceProxy('gunlaser/thg/mirror_x')
+        self.devices['mirror_y']=pt.DeviceProxy('gunlaser/thg/mirror_y')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -37,16 +40,25 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.guiLock = threading.Lock()
         self.attributes = {}
-        self.attributes['position'] = AttributeClass('position', self.devices['waveplate'], 0.3)
+        self.attributes['wp_position'] = AttributeClass('position', self.devices['waveplate'], 0.3)
         self.attributes['waveplateState'] = AttributeClass('state', self.devices['waveplate'], 0.3)
-        self.attributes['energyir'] = AttributeClass('measurementdata2', self.devices['redpitaya2'], 0.3)
-
-        self.devices['redpitaya2'].write_attribute('measurementstring2', '5.22e-3*(w2[40:90]-w2[500:600].mean()).sum()')
-
-        self.attributes['position'].attrSignal.connect(self.readPosition)
+        self.attributes['wp_position'].attrSignal.connect(self.readWPPosition)
         self.attributes['waveplateState'].attrSignal.connect(self.readWaveplateState)
-        self.attributes['energyir'].attrSignal.connect(self.readEnergyIR)
 
+        self.attributes['x_position'] = AttributeClass('position', self.devices['mirror_x'], 0.3)
+        self.attributes['x_position'].attrSignal.connect(self.readXPosition)
+        self.attributes['y_position'] = AttributeClass('position', self.devices['mirror_y'], 0.3)
+        self.attributes['y_position'].attrSignal.connect(self.readYPosition)
+
+        self.attributes['image'] = AttributeClass('image', self.devices['camera'], 0.3)
+        self.attributes['cameraState'] = AttributeClass('state', self.devices['camera'], 0.3)
+        self.attributes['image'].attrSignal.connect(self.readImage)
+        self.attributes['cameraState'].attrSignal.connect(self.readCameraState)
+
+        self.attributes['energy'] = AttributeClass('measurementdata1', self.devices['redpitaya'], 0.3)
+        self.attributes['energy'].attrSignal.connect(self.readEnergy)
+
+        self.devices['camera'].command_inout('start')
 
 
         splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -65,9 +77,11 @@ class TangoDeviceClient(QtGui.QWidget):
             pass
 #            a.attr_read()
 
-    def readPosition(self, data):
+    def readWPPosition(self, data):
         self.positionWidget.setAttributeValue(data)
 
+#        data.value = 100*np.cos(2*data.value*np.pi/180.0)**4
+#        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**4
         data.value = 100*np.cos(2*data.value*np.pi/180.0)**3
         data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**3
         self.energyWidget.setAttributeValue(data)
@@ -81,8 +95,9 @@ class TangoDeviceClient(QtGui.QWidget):
             energy = 100
         elif energy < 0:
             energy = 0
+#        w = np.arccos((energy/100.0)**0.25)*90/np.pi
         w = np.arccos((energy/100.0)**0.33)*90/np.pi
-        self.attributes['position'].attr_write(w)
+        self.attributes['wp_position'].attr_write(w)
         self.guiLock.release()
 
     def readWaveplateState(self, data):
@@ -90,10 +105,33 @@ class TangoDeviceClient(QtGui.QWidget):
         data.value = ''
         self.waveplateWidget.setStatus(data)
 
-    def readEnergyIR(self, data):
-        data.value = 1000 * data.value
-        self.energyIRWidget.setAttributeValue(data)
+    def readEnergy(self, data):
+        self.photodiodeEnergyWidget.setAttributeValue(data)
 
+    def readXPosition(self, data):
+        self.positionXWidget.setAttributeValue(data)
+
+    def writeXPosition(self):
+        self.guiLock.acquire()
+        w = self.positionXWidget.getWriteValue()
+        self.attributes['x_position'].attr_write(w)
+        self.guiLock.release()
+
+    def readYPosition(self, data):
+        self.positionYWidget.setAttributeValue(data)
+
+    def writeYPosition(self):
+        self.guiLock.acquire()
+        w = self.positionYWidget.getWriteValue()
+        self.attributes['y_position'].attr_write(w)
+        self.guiLock.release()
+
+    def readImage(self, data):
+        self.cameraWidget.setImage(data)
+
+    def readCameraState(self, data):
+        self.cameraName.setState(data)
+        data.value = ''
 
     def initWaveplate(self):
         self.devices['waveplate'].command_inout('init')
@@ -138,7 +176,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.attr_sizes = qw.QTangoSizes()
         self.attr_sizes.barHeight = 22
-        self.attr_sizes.barWidth = 18
+        self.attr_sizes.barWidth = 25
         self.attr_sizes.readAttributeWidth = 250
         self.attr_sizes.readAttributeHeight = 250
         self.attr_sizes.writeAttributeWidth = 299
@@ -175,23 +213,26 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
         self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
-#         self.layoutAttributes2 = QtGui.QVBoxLayout()
-#         self.layoutAttributes2.setMargin(0)
-#         self.layoutAttributes2.setSpacing(self.attr_sizes.barHeight/2)
-#         self.layoutAttributes2.setContentsMargins(0, 0, 0, 0)
-#
-#         self.layoutAttributes3 = QtGui.QVBoxLayout()
-#         self.layoutAttributes3.setMargin(0)
-#         self.layoutAttributes3.setSpacing(self.attr_sizes.barHeight/2)
-#         self.layoutAttributes3.setContentsMargins(0, 0, 0, 0)
+        self.layoutAttributes2 = QtGui.QVBoxLayout()
+        self.layoutAttributes2.setMargin(0)
+        self.layoutAttributes2.setSpacing(self.attr_sizes.barHeight/2)
+        self.layoutAttributes2.setContentsMargins(0, 0, 0, 0)
 
-        self.title = qw.QTangoTitleBar('Energy control')
-        self.setWindowTitle('Energy control')
+        self.layoutAttributes3 = QtGui.QVBoxLayout()
+        self.layoutAttributes3.setMargin(0)
+        self.layoutAttributes3.setSpacing(self.attr_sizes.barHeight/2)
+        self.layoutAttributes3.setContentsMargins(0, 0, 0, 0)
+
+        self.title = qw.QTangoTitleBar('THG control')
+        self.setWindowTitle('THG control')
         self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
         self.waveplateName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
         self.waveplateName.setAttributeName('Waveplate')
+
+        self.cameraName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.cameraName.setAttributeName('Camera')
 
         self.waveplateWidget = qw.QTangoCommandSelection('Waveplate', colors = self.colors, sizes = self.attr_sizes)
         self.waveplateWidget.addCmdButton('Stop', self.stopWaveplate)
@@ -205,28 +246,38 @@ class TangoDeviceClient(QtGui.QWidget):
         self.positionWidget.setSliderLimits(0, 50)
 
         self.energyWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
-        self.energyWidget.setAttributeName('Energy UV', '%')
+        self.energyWidget.setAttributeName('Energy', '%')
         self.energyWidget.setSliderLimits(0, 100)
         self.energyWidget.setAttributeWarningLimits([-1, 110])
-        self.energyWidget.writeValueLineEdit.editingFinished.connect(self.writePosition)
+        self.energyWidget.writeValueLineEdit.newValueSignal.connect(self.writePosition)
 
-        self.energyIRWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
-        self.energyIRWidget.setAttributeName('Energy IR', 'mJ')
-        self.energyIRWidget.setAttributeWarningLimits([0, 15])
-        self.energyIRWidget.setSliderLimits(0, 10)
+        self.photodiodeEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
+        self.photodiodeEnergyWidget.setAttributeName('Energy', 'uJ')
+        self.photodiodeEnergyWidget.setAttributeWarningLimits([-10, 1000])
+        self.photodiodeEnergyWidget.setSliderLimits(0, 800)
 
-        self.energyUVWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
-        self.energyUVWidget.setAttributeName('Energy UV', 'uJ')
-        self.energyUVWidget.setAttributeWarningLimits([0, 500])
-        self.energyUVWidget.setSliderLimits(0, 200)
+        self.positionXWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
+        self.positionXWidget.setAttributeName('x pos', 'mm')
+        self.positionXWidget.setSliderLimits(-10, 25)
+        self.positionXWidget.setAttributeWarningLimits([-11, 110])
+        self.positionXWidget.writeValueLineEdit.newValueSignal.connect(self.writeXPosition)
 
+        self.positionYWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
+        self.positionYWidget.setAttributeName('y pos', 'mm')
+        self.positionYWidget.setSliderLimits(-10, 25)
+        self.positionYWidget.setAttributeWarningLimits([-11, 110])
+        self.positionYWidget.writeValueLineEdit.newValueSignal.connect(self.writeYPosition)
+
+        self.cameraWidget = qw.QTangoReadAttributeImage()
+        self.cameraWidget.setAttributeName('Image')
+        self.cameraWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         layout2.addWidget(self.title)
         layout2.addLayout(layoutData)
         layoutData.addLayout(self.layout_attributes)
 #        layoutData.addSpacerItem(spacerItemH)
-#        layoutData.addLayout(self.layoutAttributes2)
-#        layoutData.addLayout(self.layoutAttributes3)
+        layoutData.addLayout(self.layoutAttributes2)
+        layoutData.addLayout(self.layoutAttributes3)
 
         self.layout_attributes.addWidget(self.waveplateName)
         self.layout_attributes.addWidget(self.waveplateWidget)
@@ -235,12 +286,18 @@ class TangoDeviceClient(QtGui.QWidget):
         layoutSliders = QtGui.QHBoxLayout()
         layoutSliders.addWidget(self.energyWidget)
         layoutSliders.addWidget(self.positionWidget)
-        layoutSliders.addWidget(self.energyIRWidget)
-        layoutSliders.addWidget(self.energyUVWidget)
+        layoutSliders.addWidget(self.photodiodeEnergyWidget)
         self.layout_attributes.addLayout(layoutSliders)
 #        self.layoutAttributes2.addSpacerItem(spacerItemV)
 
+        layoutSliders2 = QtGui.QHBoxLayout()
+        layoutSliders2.addWidget(self.positionXWidget)
+        layoutSliders2.addWidget(self.positionYWidget)
+        self.layoutAttributes2.addSpacerItem(spacerItemV)
+        self.layoutAttributes2.addLayout(layoutSliders2)
 
+        self.layoutAttributes3.addWidget(self.cameraName)
+        self.layoutAttributes3.addWidget(self.cameraWidget)
 
         layout1.addWidget(self.sidebar)
         layout1.addLayout(layout2)
@@ -248,7 +305,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #        layout0.addWidget(self.bottombar)
 
 #        self.resize(500,800)
-        self.setGeometry(200,100,300,500)
+        self.setGeometry(200,100,1000,400)
 
         self.update()
 

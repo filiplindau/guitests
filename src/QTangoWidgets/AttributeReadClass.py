@@ -22,7 +22,7 @@ class AttributeClass(QtCore.QObject):
         self.device = device
         self.interval = minInterval
         self.getInfoFlag = getInfo
-        
+
         if slot != None:
             self.attrSignal.connect(slot)
 
@@ -34,16 +34,16 @@ class AttributeClass(QtCore.QObject):
         self.signalPending = False
         self.rateLimit = rateLimit
 
-        if eventType == None:            
+        if eventType == None:
             self.readThread = threading.Thread(name = self.name, target = self.attr_read)
             self.stopThread = False
             self.startRead()
-        else:            
+        else:
             self.subscribe_event()
 
     def subscribe_event(self):
         self.eventId = self.device.subscribe_event(self.name, self.eventType, self.attr_read_event, stateless = True)
-        
+
     def unsubscribe_event(self):
         if self.eventId != None:
             self.device.unsubscribe_event(self.eventId)
@@ -100,7 +100,7 @@ class AttributeClass(QtCore.QObject):
                     self.attr.value = None
                     self.attr.w_value = None
                     self.attrSignal.emit(self.attr)
-                    
+
                 except Exception, e:
                     print self.name, ' recovering from ', str(e)
                     self.attr = pt.DeviceAttribute()
@@ -118,7 +118,7 @@ class AttributeClass(QtCore.QObject):
                         if self.interval == None:
                             self.stopThread = True
                             self.interval = 0.0
-                    except Exception, e:
+                    except pt.DevFailed, e:
                         if e[0].reason == 'API_AsynReplyNotArrived':
 #                            print self.name, ' not replied'
                             time.sleep(0.1)
@@ -144,7 +144,7 @@ class AttributeClass(QtCore.QObject):
                 self.attr = self.device.read_attribute_reply(id)
                 replyReady = True
                 self.attrSignal.emit(self.attr)
-            except Exception, e:
+            except pt.DevFailed, e:
                 if e[0].reason == 'API_AsynReplyNotArrived':
         #                            print self.name, ' not replied'
                     time.sleep(0.1)

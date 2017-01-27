@@ -25,7 +25,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		app.processEvents()
 
 		self.devices = {}
-		self.devices['spectrometer']=pt.DeviceProxy('gunlaser/oscillator/spectrometer')
+		self.devices['spectrometer']=pt.DeviceProxy('gunlaser/devices/spectrometer_diag')
 
 		splash.showMessage('Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
 		app.processEvents()
@@ -117,7 +117,7 @@ class TangoDeviceClient(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 
 	def closeEvent(self, event):
 # 		for device in self.devices.itervalues():
@@ -132,22 +132,22 @@ class TangoDeviceClient(QtGui.QWidget):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 
-		self.frameSizes = qw.QTangoSizes()
-		self.frameSizes.barHeight = 30
-		self.frameSizes.barWidth = 20
-		self.frameSizes.readAttributeWidth = 240
-		self.frameSizes.writeAttributeWidth = 299
-		self.frameSizes.fontStretch= 80
-		self.frameSizes.fontType = 'Segoe UI'
-#		self.frameSizes.fontType = 'Trebuchet MS'
-		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 20
-		self.attrSizes.barWidth = 20
-		self.attrSizes.readAttributeWidth = 240
-		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
-#		self.attrSizes.fontType = 'Trebuchet MS'
+		self.frame_sizes = qw.QTangoSizes()
+		self.frame_sizes.barHeight = 30
+		self.frame_sizes.barWidth = 20
+		self.frame_sizes.readAttributeWidth = 240
+		self.frame_sizes.writeAttributeWidth = 299
+		self.frame_sizes.fontStretch= 80
+		self.frame_sizes.fontType = 'Segoe UI'
+#		self.frame_sizes.fontType = 'Trebuchet MS'
+		self.attr_sizes = qw.QTangoSizes()
+		self.attr_sizes.barHeight = 20
+		self.attr_sizes.barWidth = 20
+		self.attr_sizes.readAttributeWidth = 240
+		self.attr_sizes.writeAttributeWidth = 299
+		self.attr_sizes.fontStretch= 80
+		self.attr_sizes.fontType = 'Segoe UI'
+#		self.attr_sizes.fontType = 'Trebuchet MS'
 
 
 		self.colors = qw.QTangoColors()
@@ -170,58 +170,58 @@ class TangoDeviceClient(QtGui.QWidget):
 		spacerItemH = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
 		layoutData = QtGui.QHBoxLayout()
-		layoutData.setMargin(self.attrSizes.barHeight/2)
-		layoutData.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		layoutData.setMargin(self.attr_sizes.barHeight/2)
+		layoutData.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
 		self.title = qw.QTangoTitleBar('Gunlaser spectrometer')
-		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
 #  		self.sidebar.addCmdButton('Init', self.initSpectrometer)
 #  		self.sidebar.addCmdButton('On', self.onSpectrometer)
 #  		self.sidebar.addCmdButton('Off', self.offSpectrometer)
 #  		self.sidebar.addCmdButton('Stop', self.stopSpectrometer)
 		self.bottombar = qw.QTangoHorizontalBar()
-		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.spectrometerName.setAttributeName('Spectrometer')
 
-		self.onOffCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attrSizes)
+		self.onOffCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attr_sizes)
 		self.onOffCommands.addCmdButton('Init', self.initSpectrometer)
 		self.onOffCommands.addCmdButton('On', self.onSpectrometer)
 		self.onOffCommands.addCmdButton('Off', self.offSpectrometer)
 		self.onOffCommands.addCmdButton('Stop', self.stopSpectrometer)
-		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakWidthWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
 		self.peakWidthWidget.setAttributeName('Spectral width')
 		self.peakWidthWidget.setAttributeWarningLimits((20, 70))
 		self.peakWidthWidget.setSliderLimits(0, 100)
-		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attrSizes)
+		self.peakEnergyWidget = qw.QTangoReadAttributeSlider2(colors = self.colors, sizes = self.attr_sizes)
 		self.peakEnergyWidget.setAttributeName('Laser energy')
 		self.peakEnergyWidget.setAttributeWarningLimits((0.5, 5))
 		self.peakEnergyWidget.setSliderLimits(0, 2)
-		self.exposureWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.exposureWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attr_sizes)
 		self.exposureWidget.setAttributeName('Exposure time')
 		self.exposureWidget.setAttributeWarningLimits((10, 900))
 		self.exposureWidget.writeValueSpinbox.editingFinished.connect(self.writeExposure)
 		self.exposureWidget.setSliderLimits(0, 1000)
 
-		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
 		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
 		self.oscSpectrumPlot.setXRange(700, 900)
 		self.oscSpectrumPlot.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
 		layout2.addWidget(self.title)
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 		layoutData.addWidget(self.oscSpectrumPlot)
 
-		self.layoutAttributes.addWidget(self.spectrometerName)
-		self.layoutAttributes.addWidget(self.onOffCommands)
-		self.layoutAttributes.addSpacerItem(spacerItemV)
-		self.layoutAttributes.addWidget(self.peakWidthWidget)
-		self.layoutAttributes.addWidget(self.peakEnergyWidget)
-		self.layoutAttributes.addWidget(self.exposureWidget)
+		self.layout_attributes.addWidget(self.spectrometerName)
+		self.layout_attributes.addWidget(self.onOffCommands)
+		self.layout_attributes.addSpacerItem(spacerItemV)
+		self.layout_attributes.addWidget(self.peakWidthWidget)
+		self.layout_attributes.addWidget(self.peakEnergyWidget)
+		self.layout_attributes.addWidget(self.exposureWidget)
 
 		layout1.addWidget(self.sidebar)
 		layout1.addLayout(layout2)

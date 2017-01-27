@@ -22,7 +22,7 @@ class AttributeClass(QtCore.QObject):
         self.device = device
         self.interval = interval
         self.getInfoFlag = getInfo
-        
+
         if slot != None:
             self.attrSignal.connect(slot)
 
@@ -72,7 +72,7 @@ class AttributeClass(QtCore.QObject):
                     self.attr.value = None
                     self.attr.w_value = None
                     self.attrSignal.emit(self.attr)
-                    
+
                 except Exception, e:
                     print self.name, ' recovering from ', str(e)
                     self.attr = pt.DeviceAttribute()
@@ -85,14 +85,13 @@ class AttributeClass(QtCore.QObject):
                         self.attr = self.device.read_attribute_reply(id)
                         replyReady = True
                         self.attrSignal.emit(self.attr)
-                        print 'signal emitted', self.attr.value.shape
                         # Read only once if interval = None:
                         if self.interval == None:
                             self.stopThread = True
                             self.interval = 0.0
-                    except Exception, e:
+                    except pt.DevFailed, e:
                         if e[0].reason == 'API_AsynReplyNotArrived':
-#                            print self.name, ' not replied'
+#                            print self.name, ' did not reply'
                             time.sleep(0.1)
                         else:
                             replyReady = True

@@ -172,7 +172,7 @@ class TangoDeviceClient(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 			
 	def closeEvent(self, event):
 		for a in self.attributes.itervalues():
@@ -185,20 +185,20 @@ class TangoDeviceClient(QtGui.QWidget):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 		
-		self.frameSizes = qw.QTangoSizes()
-		self.frameSizes.readAttributeWidth = 300
-		self.frameSizes.writeAttributeWidth = 150
-		self.frameSizes.fontStretch= 80
-		self.frameSizes.fontType = 'Segoe UI'
-#		self.frameSizes.fontType = 'Trebuchet MS'
-		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 20
-		self.attrSizes.barWidth = 60
-		self.attrSizes.readAttributeWidth = 300
-		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
-#		self.attrSizes.fontType = 'Trebuchet MS'
+		self.frame_sizes = qw.QTangoSizes()
+		self.frame_sizes.readAttributeWidth = 300
+		self.frame_sizes.writeAttributeWidth = 150
+		self.frame_sizes.fontStretch= 80
+		self.frame_sizes.fontType = 'Segoe UI'
+#		self.frame_sizes.fontType = 'Trebuchet MS'
+		self.attr_sizes = qw.QTangoSizes()
+		self.attr_sizes.barHeight = 20
+		self.attr_sizes.barWidth = 60
+		self.attr_sizes.readAttributeWidth = 300
+		self.attr_sizes.writeAttributeWidth = 299
+		self.attr_sizes.fontStretch= 80
+		self.attr_sizes.fontType = 'Segoe UI'
+#		self.attr_sizes.fontType = 'Trebuchet MS'
 		
 		
 		self.colors = qw.QTangoColors()
@@ -221,47 +221,47 @@ class TangoDeviceClient(QtGui.QWidget):
 		spacerItemH = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 		
 		layoutData = QtGui.QHBoxLayout()
-		layoutData.setMargin(self.attrSizes.barHeight/2)
-		layoutData.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		layoutData.setMargin(self.attr_sizes.barHeight/2)
+		layoutData.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 		
 		self.title = qw.QTangoTitleBar('Delaystage')
-		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
 		self.bottombar = qw.QTangoHorizontalBar()
 		
-		self.delayName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.delayName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.delayName.setAttributeName('Delaystage')
-		self.stopCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attrSizes)
+		self.stopCommands = qw.QTangoCommandSelection('Commands', colors = self.colors, sizes = self.attr_sizes)
 		self.stopCommands.addCmdButton('Home', self.homeMotor)
 		self.stopCommands.addCmdButton('Stop', self.stopMotor)
 				
-		self.positionWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attrSizes)
+		self.positionWidget = qw.QTangoWriteAttributeSlider(colors = self.colors, sizes = self.attr_sizes)
 #		self.positionWidget.setAttributeName('Position', unichr(176))
 		self.positionWidget.setAttributeName('Position', 'deg')
 		self.positionWidget.setAttributeWarningLimits([0, 720])
 		self.positionWidget.setSliderLimits(0, 720)
 		self.positionWidget.writeValueSpinbox.editingFinished.connect(self.writePosition)
 
-		self.limit0Widget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.limit0Widget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit0Widget.setAttributeName('Limit 0')
-		self.limit1Widget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.limit1Widget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit1Widget.setAttributeName('Limit 1')
 		
 				
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 		layoutData.addSpacerItem(spacerItemH)
 						
-		self.layoutAttributes.addWidget(self.delayName)
-		self.layoutAttributes.addWidget(self.stopCommands)
-		self.layoutAttributes.addSpacerItem(spacerItemV)
-		self.layoutAttributes.addWidget(self.limit0Widget)
-		self.layoutAttributes.addWidget(self.limit1Widget)
-		self.layoutAttributes.addWidget(self.positionWidget)
+		self.layout_attributes.addWidget(self.delayName)
+		self.layout_attributes.addWidget(self.stopCommands)
+		self.layout_attributes.addSpacerItem(spacerItemV)
+		self.layout_attributes.addWidget(self.limit0Widget)
+		self.layout_attributes.addWidget(self.limit1Widget)
+		self.layout_attributes.addWidget(self.positionWidget)
 		
 		
 		layout1.addWidget(self.sidebar)

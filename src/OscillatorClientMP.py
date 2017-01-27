@@ -333,7 +333,7 @@ class TangoDeviceClientTest(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 			
 	def closeEvent(self, event):
 		for device in self.devices.itervalues():
@@ -364,10 +364,10 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		layoutData = QtGui.QHBoxLayout()
 		layoutData.setMargin(3)
 		layoutData.setSpacing(0)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(0)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(0)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 		
 		self.title = qw.QTangoTitleBar('Oscillator')
 		self.sidebar = qw.QTangoSideBar()
@@ -402,18 +402,18 @@ class TangoDeviceClientTest(QtGui.QWidget):
 		
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 		layoutData.addWidget(self.oscSpectrumPlot)
 #		layoutData.addSpacerItem(spacerItemH)
 						
-		self.layoutAttributes.addWidget(self.finesseName)
-		self.layoutAttributes.addWidget(self.leelaserName)
-		self.layoutAttributes.addWidget(self.spectrometerName)
-		self.layoutAttributes.addSpacerItem(spacerItemV)		
-		self.layoutAttributes.addWidget(self.laserTempWidget)
-		self.layoutAttributes.addWidget(self.laserPowerWidget)
-		self.layoutAttributes.addWidget(self.peakEnergyWidget)
-		self.layoutAttributes.addWidget(self.laserEnergyTrend)
+		self.layout_attributes.addWidget(self.finesseName)
+		self.layout_attributes.addWidget(self.leelaserName)
+		self.layout_attributes.addWidget(self.spectrometerName)
+		self.layout_attributes.addSpacerItem(spacerItemV)		
+		self.layout_attributes.addWidget(self.laserTempWidget)
+		self.layout_attributes.addWidget(self.laserPowerWidget)
+		self.layout_attributes.addWidget(self.peakEnergyWidget)
+		self.layout_attributes.addWidget(self.laserEnergyTrend)
 		
 		layout1.addWidget(self.sidebar)
 		layout1.addLayout(layout2)

@@ -117,7 +117,7 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.finesseName.setState(data)
 
 	def readPumpShutterState(self, data):
-		self.shutterWidget.setStatus(data)
+		self.shutter_widget.setStatus(data)
 
 	def readPumpOperationState(self, data):
 		self.laserOperationWidget.setStatus(data)
@@ -232,7 +232,7 @@ class TangoDeviceClient(QtGui.QWidget):
 			attQObject = qw.QTangoReadAttributeDouble()
 			attQObject.setAttributeName(att.name)
 			self.attributeQObjects.append(attQObject)
-			self.layoutAttributes.addWidget(attQObject)
+			self.layout_attributes.addWidget(attQObject)
 
 	def closeEvent(self, event):
 #		 for device in self.devices.itervalues():
@@ -248,24 +248,24 @@ class TangoDeviceClient(QtGui.QWidget):
 		s='QWidget{background-color: #000000; }'
 		self.setStyleSheet(s)
 
-		self.frameSizes = qw.QTangoSizes()
-		self.frameSizes.barHeight = 20
-		self.frameSizes.barWidth = 18
-		self.frameSizes.readAttributeWidth = 250
-		self.frameSizes.writeAttributeWidth = 150
-		self.frameSizes.fontStretch= 80
-		self.frameSizes.fontType = 'Segoe UI'
-#		self.frameSizes.fontType = 'Trebuchet MS'
+		self.frame_sizes = qw.QTangoSizes()
+		self.frame_sizes.barHeight = 20
+		self.frame_sizes.barWidth = 18
+		self.frame_sizes.readAttributeWidth = 250
+		self.frame_sizes.writeAttributeWidth = 150
+		self.frame_sizes.fontStretch= 80
+		self.frame_sizes.fontType = 'Segoe UI'
+#		self.frame_sizes.fontType = 'Trebuchet MS'
 
-		self.attrSizes = qw.QTangoSizes()
-		self.attrSizes.barHeight = 22
-		self.attrSizes.barWidth = 18
-		self.attrSizes.readAttributeWidth = 250
-		self.attrSizes.readAttributeHeight = 250
-		self.attrSizes.writeAttributeWidth = 299
-		self.attrSizes.fontStretch= 80
-		self.attrSizes.fontType = 'Segoe UI'
-#		self.attrSizes.fontType = 'Trebuchet MS'
+		self.attr_sizes = qw.QTangoSizes()
+		self.attr_sizes.barHeight = 22
+		self.attr_sizes.barWidth = 18
+		self.attr_sizes.readAttributeWidth = 250
+		self.attr_sizes.readAttributeHeight = 250
+		self.attr_sizes.writeAttributeWidth = 299
+		self.attr_sizes.fontStretch= 80
+		self.attr_sizes.fontType = 'Segoe UI'
+#		self.attr_sizes.fontType = 'Trebuchet MS'
 
 
 		self.colors = qw.QTangoColors()
@@ -285,98 +285,98 @@ class TangoDeviceClient(QtGui.QWidget):
 		layout2.setSpacing(0)
 		layout2.setContentsMargins(-1, 0, 0, 0)
 		spacerItemV = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
-		spacerItemBar = QtGui.QSpacerItem(self.frameSizes.barWidth, self.frameSizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		spacerItemBar = QtGui.QSpacerItem(self.frame_sizes.barWidth, self.frame_sizes.barHeight+8, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
 		spacerItemH = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
 		layoutData = QtGui.QHBoxLayout()
-		layoutData.setMargin(self.attrSizes.barHeight/2)
-		layoutData.setSpacing(self.attrSizes.barHeight*2)
-		self.layoutAttributes = QtGui.QVBoxLayout()
-		self.layoutAttributes.setMargin(0)
-		self.layoutAttributes.setSpacing(self.attrSizes.barHeight/2)
-		self.layoutAttributes.setContentsMargins(0, 0, 0, 0)
+		layoutData.setMargin(self.attr_sizes.barHeight/2)
+		layoutData.setSpacing(self.attr_sizes.barHeight*2)
+		self.layout_attributes = QtGui.QVBoxLayout()
+		self.layout_attributes.setMargin(0)
+		self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
+		self.layout_attributes.setContentsMargins(0, 0, 0, 0)
 
 		self.layoutAttributes2 = QtGui.QVBoxLayout()
 		self.layoutAttributes2.setMargin(0)
-		self.layoutAttributes2.setSpacing(self.attrSizes.barHeight/2)
+		self.layoutAttributes2.setSpacing(self.attr_sizes.barHeight/2)
 		self.layoutAttributes2.setContentsMargins(0, 0, 0, 0)
 
 		self.layoutAttributes3 = QtGui.QVBoxLayout()
 		self.layoutAttributes3.setMargin(0)
-		self.layoutAttributes3.setSpacing(self.attrSizes.barHeight/2)
+		self.layoutAttributes3.setSpacing(self.attr_sizes.barHeight/2)
 		self.layoutAttributes3.setContentsMargins(0, 0, 0, 0)
 
 		self.title = qw.QTangoTitleBar('Oscillator control')
 		self.setWindowTitle('Oscillator control')
-		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frameSizes)
+		self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
 		self.bottombar = qw.QTangoHorizontalBar()
 
-		self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.finesseName.setAttributeName('Finesse')
 
-		self.shutterWidget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attrSizes)
-		self.shutterWidget.addCmdButton('Open', self.openFinesseShutter)
-		self.shutterWidget.addCmdButton('Close', self.closeFinesseShutter)
+		self.shutter_widget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+		self.shutter_widget.addCmdButton('Open', self.openFinesseShutter)
+		self.shutter_widget.addCmdButton('Close', self.closeFinesseShutter)
 
-		self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors = self.colors, sizes = self.attrSizes)
+		self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors = self.colors, sizes = self.attr_sizes)
 		self.laserOperationWidget.addCmdButton('Start', self.onFinesse)
 		self.laserOperationWidget.addCmdButton('Stop', self.offFinesse)
 
-		self.attrSizes.readAttributeHeight = 250
-		self.laserTempWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+		self.attr_sizes.readAttributeHeight = 250
+		self.laserTempWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
 		self.laserTempWidget.setAttributeName('Temp', ''.join((unichr(0x00b0),'C')))
 		self.laserTempWidget.setAttributeWarningLimits([25, 27])
 		self.laserTempWidget.setSliderLimits(23, 28)
 
-		self.laserPowerWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+		self.laserPowerWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
 		self.laserPowerWidget.setAttributeName('Pump pwr', 'W')
 		self.laserPowerWidget.setSliderLimits(0, 6)
 		self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
 		self.laserPowerWidget.writeValueLineEdit.editingFinished.connect(self.writePumpPower)
 
-		self.attrSizes.readAttributeHeight = 250
-		self.prism1PositionWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+		self.attr_sizes.readAttributeHeight = 250
+		self.prism1PositionWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
 		self.prism1PositionWidget.setAttributeName('Prism 1', 'steps')
 		self.prism1PositionWidget.setSliderLimits(-500, 500)
 		self.prism1PositionWidget.setAttributeWarningLimits((-500, 500))
 		self.prism1PositionWidget.writeValueLineEdit.editingFinished.connect(self.writePrism1Position)
 
-		self.prism1LimitWidget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.prism1LimitWidget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.prism1LimitWidget.setAttributeName('Prism1 limit')
 
-		self.prism2PositionWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+		self.prism2PositionWidget = qw.QTangoWriteAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
 		self.prism2PositionWidget.setAttributeName('Prism 2', 'steps')
 		self.prism2PositionWidget.setSliderLimits(-500, 500)
 		self.prism2PositionWidget.setAttributeWarningLimits((-500, 500))
 		self.prism2PositionWidget.writeValueLineEdit.editingFinished.connect(self.writePrism2Position)
 
-		self.prism2LimitWidget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attrSizes)
+		self.prism2LimitWidget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.prism2LimitWidget.setAttributeName('Prism2 limit')
 
-		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frameSizes)
+		self.spectrometerName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
 		self.spectrometerName.setAttributeName('Spectrometer')
 
-		self.onOffCommands = qw.QTangoCommandSelection('Spectrometer commands', colors = self.colors, sizes = self.attrSizes)
+		self.onOffCommands = qw.QTangoCommandSelection('Spectrometer commands', colors = self.colors, sizes = self.attr_sizes)
 		self.onOffCommands.addCmdButton('Init', self.initSpectrometer)
 		self.onOffCommands.addCmdButton('On', self.onSpectrometer)
 		self.onOffCommands.addCmdButton('Off', self.offSpectrometer)
 		self.onOffCommands.addCmdButton('Stop', self.stopSpectrometer)
 
-		self.attrSizes.readAttributeHeight = 200
-		self.peakWidthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+		self.attr_sizes.readAttributeHeight = 200
+		self.peakWidthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
 		self.peakWidthWidget.setAttributeName(''.join((unichr(0x0394),unichr(0x03bb), ' FWHM')), 'nm')
 		self.peakWidthWidget.setAttributeWarningLimits([35, 100])
 		self.peakWidthWidget.setSliderLimits(0, 70)
-		self.peakEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
-		self.peakEnergyWidget.setAttributeName('Osc pwr', 'a.u.')
+		self.peakEnergyWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
+		self.peakEnergyWidget.setAttributeName('Osc pwr', 'mW')
 		self.peakEnergyWidget.setAttributeWarningLimits([350, 800])
 		self.peakEnergyWidget.setSliderLimits(100, 450)
-		self.peakWavelengthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attrSizes)
+		self.peakWavelengthWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
 		self.peakWavelengthWidget.setAttributeName(''.join((unichr(0x03bb),' peak')), 'nm')
 		self.peakWavelengthWidget.setAttributeWarningLimits([780, 810])
 		self.peakWavelengthWidget.setSliderLimits(760, 840)
 
-		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attrSizes)
+		self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
 		self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
 		self.oscSpectrumPlot.setXRange(700, 900)
 		self.oscSpectrumPlot.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -385,15 +385,15 @@ class TangoDeviceClient(QtGui.QWidget):
 
 		layout2.addWidget(self.title)
 		layout2.addLayout(layoutData)
-		layoutData.addLayout(self.layoutAttributes)
+		layoutData.addLayout(self.layout_attributes)
 #		layoutData.addSpacerItem(spacerItemH)
 		layoutData.addLayout(self.layoutAttributes2)
 		layoutData.addLayout(self.layoutAttributes3)
 
-		self.layoutAttributes.addWidget(self.finesseName)
-		self.layoutAttributes.addWidget(self.shutterWidget)
-		self.layoutAttributes.addWidget(self.laserOperationWidget)
-		self.layoutAttributes.addSpacerItem(spacerItemV)
+		self.layout_attributes.addWidget(self.finesseName)
+		self.layout_attributes.addWidget(self.shutter_widget)
+		self.layout_attributes.addWidget(self.laserOperationWidget)
+		self.layout_attributes.addSpacerItem(spacerItemV)
 
 		layoutSliders = QtGui.QHBoxLayout()
 		layoutSliders.addWidget(self.laserPowerWidget)

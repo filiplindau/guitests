@@ -13,8 +13,6 @@ from collections import OrderedDict
 import time
 import copy
 import re
-import decimal
-
 
 backgroundColor = '#000000'
 primaryColor0 = '#ff9900'
@@ -38,19 +36,9 @@ class QTangoColors(object):
 		self.primaryColor0 = '#ff9900'
 		self.primaryColor1 = '#ffcc66'
 		self.primaryColor2 = '#feff99'
-		self.primaryColor3 = '#bb6622'
-		self.primaryColor4 = '#aa5533'
-		self.primaryColor5 = '#882211'
 		self.secondaryColor0 = '#66cbff'
 		self.secondaryColor1 = '#3399ff'
 		self.secondaryColor2 = '#99cdff'
-		self.secondaryColor3 = '#3366cc'
-		self.secondaryColor4 = '#000088'
-		self.tertiaryColor0 = '#cc99cc'
-		self.tertiaryColor1 = '#cc6699'
-		self.tertiaryColor2 = '#cc6666'
-		self.tertiaryColor3 = '#664466'
-		self.tertiaryColor4 = '#9977aa'
 
 		self.faultColor = '#ff0000'
 #		self.alarmColor2 = '#f7bd5a'
@@ -65,21 +53,10 @@ class QTangoColors(object):
 		self.unknownColor = '#45616f'
 		self.disableColor = '#ff00ff'
 		self.movingColor = '#feff99'
-		self.runningColor = '#feff99'
 
 		self.validColor = self.secondaryColor0
 		self.invalidColor = self.unknownColor
 		self.changingColor = self.secondaryColor1
-
-		self.legend_color_list = [self.secondaryColor0,
-								self.primaryColor2,
-								self.tertiaryColor1,
-								self.secondaryColor3,
-								self.primaryColor3,
-								self.tertiaryColor4,
-								self.primaryColor5,
-								self.secondaryColor4,
-								self.tertiaryColor3]
 
 class QTangoSizes(object):
 	def __init__(self):
@@ -122,67 +99,10 @@ class FloatValidator(QtGui.QValidator):
 
 def format_float(value):
 	"""Modified form of the 'g' format specifier."""
-	string = "{:.4g}".format(value).replace("e+", "e")
+	string = "{:g}".format(value).replace("e+", "e")
 	string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
 	return string
 
-def to_precision(x,p):
-	"""
-	returns a string representation of x formatted with a precision of p
-
-	Based on the webkit javascript implementation taken from here:
-	https://code.google.com/p/webkit-mirror/source/browse/JavaScriptCore/kjs/number_object.cpp
-	"""
-	x = float(x)
-	if x == 0.:
-		return "0." + "0"*(p-1)
-
-	out = []
-
-	if x < 0:
-		out.append("-")
-		x = -x
-
-	e = int(np.log10(x))
-	tens = 10**(e - p + 1)
-	n = np.floor(x/tens)
-
-	if n < 10**(p - 1):
-		e = e -1
-		tens = 10**(e - p+1)
-		n = np.floor(x / tens)
-
-	if abs((n + 1.) * tens - x) <= abs(n * tens -x):
-		n = n + 1
-
-	if n >= 10**p:
-		n = n / 10.
-		e = e + 1
-
-	m = "%.*g" % (p, n)
-
-	if e < -2 or e >= p:
-		out.append(m[0])
-		if p > 1:
-			out.append(".")
-			out.extend(m[1:p])
-		out.append('e')
-		if e > 0:
-			out.append("+")
-		out.append(str(e))
-	elif e == (p -1):
-		out.append(m)
-	elif e >= 0:
-		out.append(m[:e+1])
-		if e+1 < len(m):
-			out.append(".")
-			out.extend(m[e+1:])
-	else:
-		out.append("0.")
-		out.extend(["0"]*-(e+1))
-		out.append(m)
-
-	return "".join(out)
 
 
 class QTangoAttributeBase(QtGui.QWidget):
@@ -234,9 +154,6 @@ class QTangoAttributeBase(QtGui.QWidget):
 		elif state_str == str(pt.DevState.MOVING):
 			color = self.attrColors.movingColor
 			stateString = 'MOVING'
-		elif state_str == str(pt.DevState.RUNNING):
-			color = self.attrColors.runningColor
-			stateString = 'RUNNING'
 		else:
 			color = self.attrColors.unknownColor
 			stateString = 'UNKNOWN'
@@ -302,21 +219,15 @@ class QTangoAttributeBase(QtGui.QWidget):
 
 
 class QTangoTitleBar(QtGui.QWidget):
-	def __init__(self, title='', sizes = None, parent=None):
+	def __init__(self, title='', parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		if title == None:
 			self.title = ''
 		else:
 			self.title = title
-		if sizes == None:
-			self.sizes = QTangoSizes()
-		else:
-			self.sizes = sizes
-
 		self.setupLayout()
 
 	def setupLayout(self):
-		barHeight = self.sizes.barHeight
 		self.startLabel = QtGui.QLabel('')
 		s = ''.join(('QLabel {min-height: ', str(int(barHeight * 1.25)), 'px; \n',
 					'min-width: ', str(int(barHeight * 1.25 / 3)), 'px; \n',
@@ -345,12 +256,9 @@ class QTangoTitleBar(QtGui.QWidget):
 
 		self.nameLabel.setText(self.title.upper())
 		font = self.nameLabel.font()
-		font.setFamily(self.sizes.fontType)
-		font.setStretch(self.sizes.fontStretch)
-		font.setWeight(self.sizes.fontWeight)
-#		font.setFamily('TrebuchetMS')
-#		font.setStretch(QtGui.QFont.Condensed)
-#		font.setWeight(QtGui.QFont.Light)
+		font.setFamily('TrebuchetMS')
+		font.setStretch(QtGui.QFont.Condensed)
+		font.setWeight(QtGui.QFont.Light)
 		font.setPointSize(int(barHeight * 1.15))
 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 		self.nameLabel.setFont(font)
@@ -785,9 +693,6 @@ class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
 		elif state_str == str(pt.DevState.MOVING):
 			color = self.attrColors.movingColor
 			stateString = 'MOVING'
-		elif state_str == str(pt.DevState.RUNNING):
-			color = self.attrColors.runningColor
-			stateString = 'RUNNING'
 		else:
 			color = self.attrColors.unknownColor
 			stateString = 'UNKNOWN'
@@ -938,9 +843,6 @@ class QTangoEndLabel(QtGui.QLabel, QTangoAttributeBase):
 		elif state_str == str(pt.DevState.MOVING):
 			color = self.attrColors.movingColor
 			stateString = 'MOVING'
-		elif state_str == str(pt.DevState.RUNNING):
-			color = self.attrColors.runningColor
-			stateString = 'RUNNING'
 		else:
 			color = self.attrColors.unknownColor
 			stateString = 'UNKNOWN'
@@ -971,8 +873,6 @@ class QTangoAttributeNameLabel(QtGui.QLabel, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		QtGui.QLabel.__init__(self, parent)
-		self.name_text = ''
-		self.currentAttrColor = self.attrColors.secondaryColor0
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -1002,7 +902,7 @@ class QTangoAttributeNameLabel(QtGui.QLabel, QTangoAttributeBase):
 # 					'min-width: ', str(int(readWidth)), 'px; \n',
 # 					'max-width: ', str(int(readWidth)), 'px; \n',
 					'background-color: ', self.attrColors.backgroundColor, '; \n',
-					'color: ', self.currentAttrColor, ';}'))
+					'color: ', self.attrColors.secondaryColor0, ';}'))
 		self.setStyleSheet(s)
 
 		font = self.font()
@@ -1016,49 +916,10 @@ class QTangoAttributeNameLabel(QtGui.QLabel, QTangoAttributeBase):
 		self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
 		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
 
-	def setQuality(self, quality):
-		state_str = str(quality)
-		if state_str == str(pt.AttrQuality.ATTR_VALID):
-			color = self.attrColors.validColor
-			stateString = 'VALID'
-		elif state_str == str(pt.AttrQuality.ATTR_INVALID):
-			color = self.attrColors.invalidColor
-			stateString = 'INVALID'
-		elif state_str == str(pt.AttrQuality.ATTR_ALARM):
-			color = self.attrColors.alarmColor
-			stateString = 'ALARM'
-		elif state_str == str(pt.AttrQuality.ATTR_WARNING):
-			color = self.attrColors.warnColor
-			stateString = 'WARNING'
-		elif state_str == str(pt.AttrQuality.ATTR_CHANGING):
-			color = self.attrColors.changingColor
-			stateString = 'CHANGING'
-		else:
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-
-		self.quality = stateString
-		self.currentAttrColor = color
-		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', self.attrColors.backgroundColor, '; \n',
-					'color: ', self.currentAttrColor, ';}'))
-		self.setStyleSheet(s)
-#		QtGui.QLabel.setText(self, "".join(("<font color=", self.currentAttrColor, ">", self.name_text, "</font>")))
-
-
-		self.update()
-
-#	def setText(self, s):
-#		self.name_text = str(s)
-#		QtGui.QLabel.setText(self, "".join(("<font color=", self.currentAttrColor, ">", self.name_text, "</font>")))
-
 class QTangoAttributeUnitLabel(QtGui.QLabel, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		QtGui.QLabel.__init__(self, parent)
-		self.unit_text = ''
-		self.currentAttrColor = self.attrColors.secondaryColor0
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -1080,52 +941,15 @@ class QTangoAttributeUnitLabel(QtGui.QLabel, QTangoAttributeBase):
 # 					'min-width: ', str(int(unitWidth)), 'px; \n',
 # 					'max-width: ', str(int(unitWidth)), 'px; \n',
 					'background-color: ', self.attrColors.backgroundColor, '; \n',
-					'color: ', self.currentAttrColor, ';}'))
+					'color: ', self.attrColors.secondaryColor0, ';}'))
 		self.setStyleSheet(s)
 
 	def setText(self, unitText):
 		if unitText == '':
-#			txt = '[a.u.]'
-			txt = 'a.u.'
+			txt = '[a.u.]'
 		else:
-#			txt=''.join(('[', unitText, ']'))
-			txt=''.join(('', unitText, ''))
-		self.unit_text = txt
-#		QtGui.QLabel.setText(self, "".join(("<font color=", self.currentAttrColor, ">", self.unit_text, "</font>")))
+			txt=''.join(('[', unitText, ']'))
 		QtGui.QLabel.setText(self, txt)
-
-	def setQuality(self, quality):
-		state_str = str(quality)
-		if state_str == str(pt.AttrQuality.ATTR_VALID):
-			color = self.attrColors.validColor
-			stateString = 'VALID'
-		elif state_str == str(pt.AttrQuality.ATTR_INVALID):
-			color = self.attrColors.invalidColor
-			stateString = 'INVALID'
-		elif state_str == str(pt.AttrQuality.ATTR_ALARM):
-			color = self.attrColors.alarmColor
-			stateString = 'ALARM'
-		elif state_str == str(pt.AttrQuality.ATTR_WARNING):
-			color = self.attrColors.warnColor
-			stateString = 'WARNING'
-		elif state_str == str(pt.AttrQuality.ATTR_CHANGING):
-			color = self.attrColors.changingColor
-			stateString = 'CHANGING'
-		else:
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-
-		self.quality = stateString
-		self.currentAttrColor = color
-
-		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-					'background-color: ', self.attrColors.backgroundColor, '; \n',
-					'color: ', self.currentAttrColor, ';}'))
-		self.setStyleSheet(s)
-#		QtGui.QLabel.setText(self, "".join(("<font color=", self.currentAttrColor, ">", self.unit_text, "</font>")))
-
-		self.update()
 
 class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -1173,9 +997,7 @@ class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 			'min-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
 			'max-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
 			'qproperty-readOnly: 1; \n',
-#			'color: ', self.attrColors.secondaryColor0,
-#			'color: ', self.currentAttrColor,
-			';} \n'))
+			'color: ', self.attrColors.secondaryColor0, ';} \n'))
 
 		font = self.font()
 		font.setFamily(self.sizes.fontType)
@@ -1198,10 +1020,10 @@ class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 			val = value.value
 		else:
 			val = value
-		if val != None:
-			QtGui.QDoubleSpinBox.setValue(self,val)
-		else:
-			QtGui.QDoubleSpinBox.setValue(self,0.0)
+ 		if val != None:
+ 			QtGui.QDoubleSpinBox.setValue(self,val)
+ 		else:
+ 			QtGui.QDoubleSpinBox.setValue(self,0.0)
 #		QtGui.QDoubleSpinBox.setValue(self,val)
 
 	def validate(self, text, position):
@@ -1223,124 +1045,6 @@ class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 		decimal += steps
 		new_string = "{:g}".format(decimal) + (groups[3] if groups[3] else "")
 		self.lineEdit().setText(new_string)
-
-
-class QTangoReadAttributeLabel(QtGui.QLabel, QTangoAttributeBase):
-	def __init__(self, sizes = None, colors = None, precision = 4, parent=None):
-		QTangoAttributeBase.__init__(self, sizes, colors, parent)
-		QtGui.QLabel.__init__(self, parent)
-		self.precision = 4
-		self.currentAttrColor = self.attrColors.secondaryColor0
-		self.setupLayout()
-
-	def setupLayout(self):
-		self.setLocale(QtCore.QLocale(QtCore.QLocale.English))
-		s = ''.join(('QLabel { \n',
-			'background-color: ', self.attrColors.backgroundColor, '; \n',
-			'selection-background-color: ', self.attrColors.secondaryColor1, '; \n',
-			'selection-color: ', self.attrColors.backgroundColor, '; \n',
-#			'border-width: ', str(int(self.sizes.barHeight/10)), 'px; \n',
-			'border-width: ', str(int(1)), 'px; \n',
-			'border-color: ', self.attrColors.backgroundColor, '; \n',
-			'border-top-style: solid; \n',
-			'border-bottom-style: solid; \n',
-			'border-left-style: double; \n',
-			'border-right-style: solid; \n',
-			'border-radius: 0px; \n',
-			'padding: 0px; \n',
-			'margin: 0px; \n',
-			'min-width: ', str(int(self.sizes.barHeight)*1), 'px; \n',
-			'max-width: ', str(int(self.sizes.barHeight)*4), 'px; \n',
-			'min-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
-			'max-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
-			'color: ', self.currentAttrColor, ';} \n'))
-
-		font = self.font()
-		font.setFamily(self.sizes.fontType)
-		font.setStretch(self.sizes.fontStretch)
-		font.setWeight(self.sizes.fontWeight)
-		font.setPointSize(int(self.sizes.barHeight * 0.7))
-		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-		self.setFont(font)
-		self.setStyleSheet(s)
-		self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-		self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
-
-		self.validator = FloatValidator()
-
-	def setValue(self, value):
-		if type(value) == pt.DeviceAttribute:
-			self.setQuality(value.quality)
-			val = value.value
-
-		else:
-			val = value
-		if val != None:
-#			QtGui.QLabel.setText(self, "".join(("<font color=", self.currentAttrColor, ">", self.textFromValue(val), "</font>")))
-			QtGui.QLabel.setText(self, self.textFromValue(val))
-		else:
-			QtGui.QLabel.setValue(self, "0.0")
-#		QtGui.QDoubleSpinBox.setValue(self,val)
-
-	def validate(self, text, position):
-		return self.validator.validate(text, position)
-
-	def fixup(self, text):
-		return self.validator.fixup(text)
-
-	def valueFromText(self, text):
-		return float(text)
-
-	def textFromValue(self, value):
-		return to_precision(value, self.precision)
-#		return format_float(value)
-
-	def setQuality(self, quality):
-		state_str = str(quality)
-		if state_str == str(pt.AttrQuality.ATTR_VALID):
-			color = self.attrColors.validColor
-			stateString = 'VALID'
-		elif state_str == str(pt.AttrQuality.ATTR_INVALID):
-			color = self.attrColors.invalidColor
-			stateString = 'INVALID'
-		elif state_str == str(pt.AttrQuality.ATTR_ALARM):
-			color = self.attrColors.alarmColor
-			stateString = 'ALARM'
-		elif state_str == str(pt.AttrQuality.ATTR_WARNING):
-			color = self.attrColors.warnColor
-			stateString = 'WARNING'
-		elif state_str == str(pt.AttrQuality.ATTR_CHANGING):
-			color = self.attrColors.changingColor
-			stateString = 'CHANGING'
-		else:
-			color = self.attrColors.unknownColor
-			stateString = 'UNKNOWN'
-
-		self.quality = stateString
-		self.currentAttrColor = color
-
-		s = ''.join(('QLabel { \n',
-			'background-color: ', self.attrColors.backgroundColor, '; \n',
-			'selection-background-color: ', self.attrColors.secondaryColor1, '; \n',
-			'selection-color: ', self.attrColors.backgroundColor, '; \n',
-#			'border-width: ', str(int(self.sizes.barHeight/10)), 'px; \n',
-			'border-width: ', str(int(1)), 'px; \n',
-			'border-color: ', self.attrColors.backgroundColor, '; \n',
-			'border-top-style: solid; \n',
-			'border-bottom-style: solid; \n',
-			'border-left-style: double; \n',
-			'border-right-style: solid; \n',
-			'border-radius: 0px; \n',
-			'padding: 0px; \n',
-			'margin: 0px; \n',
-			'min-width: ', str(int(self.sizes.barHeight)*1), 'px; \n',
-			'max-width: ', str(int(self.sizes.barHeight)*4), 'px; \n',
-			'min-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
-			'max-height: ', str(int(self.sizes.barHeight*1.3)), 'px; \n',
-			'color: ', self.currentAttrColor, ';} \n'))
-		self.setStyleSheet(s)
-
-		self.update()
 
 
 class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
@@ -1430,12 +1134,7 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 
 
 class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
-	''' A line edit for input of values to a tango attribute. Will emit a signal newValueSignal
-	when enter is pressed.
-	'''
-	newValueSignal = QtCore.pyqtSignal()
-
-	def __init__(self, sizes=None, colors=None, parent=None):
+	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
 		QtGui.QLineEdit.__init__(self, parent)
 
@@ -1443,7 +1142,6 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 		self.lastKey = QtCore.Qt.Key_0
 
 		self.dataValue = 1.0
-		self.dataFormat = "{:.4g}"
 
 		self.setupLayout()
 
@@ -1545,7 +1243,7 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 
 	def setValue(self, value):
 		self.dataValue = value
-		sVal = self.dataFormat.format((value))
+		sVal = "{:.4g}".format((value))
 		self.setText(sVal)
 
 	def keyPressEvent(self, event):
@@ -1554,120 +1252,51 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 			self.lastKey = event.key()
 			if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_Down:
 				print 'Upp!'
-				txt = str(self.text()).lower()
+				txt = str(self.text())
 				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
 					self.dataValue = np.double(self.text())
 
 				commaPos = txt.find('.')
-				expPos = txt.find('e')
 				if commaPos < 0:
 					# Compensate if there is no comma
-					if expPos < 0:
-						# No exponent
-						commaPos = txt.__len__()
-					else:
-						commaPos = expPos
+					commaPos = txt.__len__()
 				cursorPos = self.cursorPosition()
-				cursorDecimalPos = commaPos - cursorPos
-				print 'decimal pos', cursorDecimalPos
+				decimalPos = commaPos - cursorPos
+				print 'decimal pos', decimalPos
 				print 'comma pos', commaPos
 				print 'cursor pos', cursorPos
-				print 'exp pos', expPos
 				print 'Old dataValue: ', self.dataValue
 
-				# Compensate for the length of the comma character if we are to left of the comma
-				if cursorDecimalPos < 0:
-					print 'New decimal pos ', cursorDecimalPos
-					newDecimalPos = cursorDecimalPos + 1
+
+				if decimalPos < 0:
+					print 'New decimal pos ', decimalPos
+					newDecimalPos = decimalPos + 1
 				else:
-					newDecimalPos = cursorDecimalPos
-
-
-				if cursorPos <= expPos or expPos < 0:
-					# We are adjusting decimal value
+					newDecimalPos = decimalPos
+#
 # 				print txt, pos
-					# Find exponent value:
-					if expPos > 0:
-						expValue = float(txt[expPos+1:])
-					else:
-						expValue = 0
-					if event.key() == QtCore.Qt.Key_Up:
-						stepDir = 1
-					else:
-						stepDir = -1
-					self.dataValue += stepDir * 10**(expValue + newDecimalPos)
-					print 'New decimal pos', newDecimalPos
-					print "Step ", stepDir * 10**newDecimalPos
-					print 'New decimal dataValue: ', self.dataValue
-
-
-					txt = self.dataFormat.format(self.dataValue)
-					newCommaPos = txt.find('.')
-					if newCommaPos < 0:
-						# There is no comma (integer)
-						newCommaPos = txt.__len__()
-						txt += '.'
-					if cursorDecimalPos < 0:
-						newCursorPos = newCommaPos - cursorDecimalPos
-					else:
-						newCursorPos = newCommaPos - cursorDecimalPos
-					print "newCursorPosition: ", newCursorPos
-					# Check if the new number was truncated due to trailing zeros being removed
-					if newCursorPos > txt.__len__()-1:
-						print "Adding ", newCursorPos - txt.__len__() , " zeros"
-						txt += '0' * (newCursorPos - txt.__len__() )
-					self.clear()
-					self.insert(txt)
-					self.setCursorPosition(newCursorPos)
-
+				if event.key() == QtCore.Qt.Key_Up:
+					stepDir = 1
 				else:
-					# We are adjusting exponent value
-					print "Adjusting exponent"
-					cursorExpPos = txt.__len__() - cursorPos
-					print "cursorExpPos ", cursorExpPos
-					if event.key() == QtCore.Qt.Key_Up:
-						self.dataValue *= 10**(cursorExpPos+1)
-					else:
-						self.dataValue /= 10**(cursorExpPos+1)
+					stepDir = -1
+				self.dataValue += stepDir * 10**newDecimalPos
 
-					print 'New decimal dataValue: ', self.dataValue
-					txt = self.dataFormat.format(self.dataValue)
-					self.clear()
-					self.insert(txt)
+				print 'New dataValue: ', self.dataValue
 
-			elif event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]:
+				self.clear()
+				self.insert(str(self.dataValue))
+# 				self.setText(str(self.dataValue))
+				txt = str(self.text())
+				commaPos = txt.find('.')
+				newCursorPos = commaPos - decimalPos
+  				self.setCursorPosition(newCursorPos)
+
+			elif event.key() == QtCore.Qt.Key_Enter:
 				print 'Enter!'
 				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
 					self.dataValue = np.double(self.text())
-				self.newValueSignal.emit()
 				# This fires an editingFinished event
 				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
-
-			elif event.key() in [QtCore.Qt.Key_Right]:
-				# This is to add another zero if we press right while at the right edge of the field
-				cursorPos = self.cursorPosition()
-				txt = str(self.text()).lower()
-				if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
-					self.dataValue = np.double(self.text())
-				print "cursorPos ", cursorPos
-				print "txt.__len__", txt.__len__()
-				if cursorPos == txt.__len__():
-					# We are at the right edge so add a zero if it is a decimal number
-					commaPos = txt.find('.')
-					expPos = txt.find('e')
-					if expPos < 0:
-						# There is no exponent, so ok to add zero
-						if commaPos < 0:
-							# Compensate if there is no comma
-							txt += '.'
-							commaPos = txt.__len__()
-						txt += '0'
-						self.clear()
-						self.insert(txt)
-				else:
-					# We were not at the right edge, so process normally
-					super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
-
 			else:
 				super(QTangoWriteAttributeLineEdit, self).keyPressEvent(event)
 
@@ -1957,96 +1586,74 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 			self.sizes = QTangoSizes()
 		else:
 			self.sizes = sizes
-		self.unit = None
-		self.prefixDict = {'k': 1e-3, 'M': 1e-6, 'G': 1e-9, 'T': 1e-12, 'P': 1e-15,
-						'm': 1e3, 'u': 1e6, 'n': 1e9, 'p': 1e12, 'f': 1e15, 'c': 1e2}
-		self.prefix=None
-		self.prefixFactor = 1.0
 		self.setupLayout()
 
 	def setupLayout(self):
-#		readValueWidth = self.sizes.barWidth
-#		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2-readValueWidth
+		readValueWidth = self.sizes.barWidth
+		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2-readValueWidth
 
-		self.startLabel = QTangoStartLabel(self.sizes, self.attrColors)
-		self.endLabel = QTangoEndLabel(self.sizes, self.attrColors)
-		self.nameLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
-		self.nameLabel.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Minimum)
-		self.unitLabel = QTangoAttributeUnitLabel(self.sizes, self.attrColors)
-		self.valueSpinbox = QTangoReadAttributeLabel(self.sizes, self.attrColors)
-		self.unitLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
-#		self.valueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-# 		self.startLabel = QtGui.QLabel('')
-# 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
-# 					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
-# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'background-color: ', self.attrColors.secondaryColor0, ';}'))
-# 		self.startLabel.setStyleSheet(st)
-# 		self.endLabel = QtGui.QLabel('')
-# 		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-# 					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
-# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'background-color: ', self.attrColors.secondaryColor0, ';}'))
-# 		self.endLabel.setStyleSheet(st)
-#
-# 		self.nameLabel = QtGui.QLabel('Test')
-# 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'min-width: ', str(int(readWidth)), 'px; \n',
-# 					'max-width: ', str(int(readWidth)), 'px; \n',
-# 					'background-color: ', self.attrColors.backgroundColor, '; \n',
-# 					'color: ', self.attrColors.secondaryColor0, ';}'))
-# 		self.nameLabel.setStyleSheet(s)
-#
-# 		self.unitLabel = QtGui.QLabel('')
-# 		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'max-height: ', str(self.sizes.barHeight), 'px; \n',
-# 					'min-width: ', str(int(readWidth)), 'px; \n',
-# 					'max-width: ', str(int(readWidth)), 'px; \n',
-# 					'background-color: ', self.attrColors.backgroundColor, '; \n',
-# 					'color: ', self.attrColors.secondaryColor0, ';}'))
-# 		self.unitLabel.setStyleSheet(s)
+		self.startLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 6)), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.startLabel.setStyleSheet(st)
+		self.endLabel = QtGui.QLabel('')
+		st = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+					'max-width: ', str(int(self.sizes.barHeight / 2)), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'background-color: ', self.attrColors.secondaryColor0, ';}'))
+		self.endLabel.setStyleSheet(st)
 
-# 		font = self.nameLabel.font()
-# 		font.setFamily(self.sizes.fontType)
-# 		font.setStretch(self.sizes.fontStretch)
-# 		font.setWeight(self.sizes.fontWeight)
-# 		font.setPointSize(int(self.sizes.barHeight * 0.7))
-# 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-# #		font.setPointSize(int(self.sizes.fontSize))
-# 		self.nameLabel.setFont(font)
-# 		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-# 		self.nameLabel.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-#
-# 		self.valueSpinbox = QtGui.QDoubleSpinBox()
-# 		s = ''.join(('QDoubleSpinBox { \n',
-#             'background-color: ', self.attrColors.backgroundColor, '; \n',
-#             'border-width: 0px; \n',
-#             'border-color: #339; \n',
-#             'border-style: solid; \n',
-#             'border-radius: 0; \n',
-#             'border: 0px; \n',
-#             'padding: 0px; \n',
-#             'margin: 0px; \n',
-#             'qproperty-buttonSymbols: NoButtons; \n',
-#             'min-width: ', str(int(readValueWidth)), 'px; \n',
-# 			'max-width: ', str(int(readValueWidth)), 'px; \n',
-#             'min-height: ', str(self.sizes.barHeight), 'px; \n',
-#             'max-height: ', str(self.sizes.barHeight), 'px; \n',
-#             'qproperty-readOnly: 1; \n',
-#             'color: ', self.attrColors.secondaryColor0, ';} \n'))
-# 		font = self.valueSpinbox.font()
-# 		font.setFamily(self.sizes.fontType)
-# 		font.setStretch(self.sizes.fontStretch)
-# 		font.setWeight(self.sizes.fontWeight)
-# 		font.setPointSize(int(self.sizes.barHeight * 0.7))
-# 		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-# 		self.valueSpinbox.setFont(font)
-# 		self.valueSpinbox.setStyleSheet(s)
-# 		self.valueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-# 		self.valueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+		self.nameLabel = QtGui.QLabel('Test')
+		s = ''.join(('QLabel {min-height: ', str(self.sizes.barHeight), 'px; \n',
+					'max-height: ', str(self.sizes.barHeight), 'px; \n',
+					'min-width: ', str(int(readWidth)), 'px; \n',
+					'max-width: ', str(int(readWidth)), 'px; \n',
+					'background-color: ', self.attrColors.backgroundColor, '; \n',
+					'color: ', self.attrColors.secondaryColor0, ';}'))
+		self.nameLabel.setStyleSheet(s)
+
+		font = self.nameLabel.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+#		font.setPointSize(int(self.sizes.fontSize))
+		self.nameLabel.setFont(font)
+		self.nameLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+		self.nameLabel.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+
+		self.valueSpinbox = QtGui.QDoubleSpinBox()
+		s = ''.join(('QDoubleSpinBox { \n',
+            'background-color: ', self.attrColors.backgroundColor, '; \n',
+            'border-width: 0px; \n',
+            'border-color: #339; \n',
+            'border-style: solid; \n',
+            'border-radius: 0; \n',
+            'border: 0px; \n',
+            'padding: 0px; \n',
+            'margin: 0px; \n',
+            'qproperty-buttonSymbols: NoButtons; \n',
+            'min-width: ', str(int(readValueWidth)), 'px; \n',
+			'max-width: ', str(int(readValueWidth)), 'px; \n',
+            'min-height: ', str(self.sizes.barHeight), 'px; \n',
+            'max-height: ', str(self.sizes.barHeight), 'px; \n',
+            'qproperty-readOnly: 1; \n',
+            'color: ', self.attrColors.secondaryColor0, ';} \n'))
+		font = self.valueSpinbox.font()
+		font.setFamily(self.sizes.fontType)
+		font.setStretch(self.sizes.fontStretch)
+		font.setWeight(self.sizes.fontWeight)
+		font.setPointSize(int(self.sizes.barHeight * 0.7))
+		font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+		self.valueSpinbox.setFont(font)
+		self.valueSpinbox.setStyleSheet(s)
+		self.valueSpinbox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+		self.valueSpinbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
 		spacerItem = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
@@ -2058,7 +1665,6 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 		layout.addWidget(self.startLabel)
 		layout.addWidget(self.nameLabel)
 		layout.addWidget(self.valueSpinbox)
-		layout.addWidget(self.unitLabel)
 		layout.addWidget(self.endLabel)
 
 		self.setMaximumWidth(self.sizes.readAttributeWidth)
@@ -2070,43 +1676,21 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 
 	@QtCore.pyqtSignature('setAttributeName(QString)')
 
-	def setAttributeName(self, aName, aUnit = None):
+	def setAttributeName(self, aName):
 		self.nameLabel.setText(aName)
-		if aUnit is not None:
-			self.setUnit(aUnit)
 		self.update()
 
 	def setAttributeValue(self, value):
 		if type(value) == pt.DeviceAttribute:
 			self.startLabel.setQuality(value.quality)
 			self.endLabel.setQuality(value.quality)
-			self.unitLabel.setQuality(value.quality)
-			self.valueSpinbox.setQuality(value.quality)
-			self.nameLabel.setQuality(value.quality)
 			val = value.value
 		else:
 			val = value
 
-		self.valueSpinbox.setValue(val * self.prefixFactor)
+		self.valueSpinbox.setValue(val)
 		self.update()
 
-	def setUnit(self, unit):
-		self.unit = unit
-		if self.unit != None:
-			unitStr = self.unit
-			if self.prefix != None:
-				unitStr = ''.join((self.prefix, unitStr))
-
-			self.unitLabel.setText(unitStr)
-
-	def setPrefix(self, prefix):
-		try:
-			self.prefixFactor = self.prefixDict[prefix]
-			self.prefix = prefix
-			self.setUnit(self.unit)
-		except KeyError:
-			self.prefix = None
-			self.prefixFactor = 1.0
 
 
 class QTangoHSliderBase(QtGui.QSlider, QTangoAttributeBase):
@@ -2628,12 +2212,9 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 #		font.setStretch(self.sizes.fontStretch)
 
 		# Strings to draw
-		sVal = ''.join(("{:.4g}".format((self.attrValue)), " ", self.unit))
-		sMin = "{:.4g}".format((self.attrMinimum))
-		sMax = "{:.4g}".format((self.attrMaximum))
-#		sVal = "{:.3g}".format((self.attrValue))
-#		sMin = "{:.3g}".format((self.attrMinimum))
-#		sMax = "{:.3g}".format((self.attrMaximum))
+		sVal = "{:.3g}".format((self.attrValue))
+		sMin = "{:.3g}".format((self.attrMinimum))
+		sMax = "{:.3g}".format((self.attrMaximum))
 
 		# Width of value text:
 		sValWidth = QtGui.QFontMetricsF(font).width(sVal)
@@ -2876,7 +2457,7 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		self.update()
 
 class QTangoTrendBase(pg.PlotWidget):
-	def __init__(self, name=None, sizes = None, colors = None, parent=None):
+	def __init__(self, sizes = None, colors = None, parent=None):
 		pg.PlotWidget.__init__(self, useOpenGL = True)
 		if colors == None:
 			self.attrColors = QTangoColors()
@@ -2885,23 +2466,16 @@ class QTangoTrendBase(pg.PlotWidget):
 		if sizes == None:
 			self.sizes = QTangoSizes()
 		else:
-			self.sizes = sizes	
+			self.sizes = sizes
 
-		self.valuesSize = 200000
-		self.duration = 600.0
-		self.xValues = []
-		self.yValues = []
+		self.valuesSize = 100000
 
-		self.legend = None
-		self.curve_focus = 0
-		self.curve_name_list = []
-
-		self.setupLayout(name)
+		self.setupLayout()
 		self.setupData()
 
 
-	def setupLayout(self, name=None):
-		self.setXRange(-self.duration, 0)
+	def setupLayout(self):
+		self.setXRange(-600, 0)
 		self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 #		self.setMaximumWidth(self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2)
 		pi=self.getPlotItem()
@@ -2929,46 +2503,29 @@ class QTangoTrendBase(pg.PlotWidget):
 		brushGood = QtGui.QBrush(colorGood, style = QtCore.Qt.SolidPattern)
 		penLines = QtGui.QPen(QtGui.QColor('#55555500'))
 
-		high_lim = 1e9
+		self.warningRegionUpper = pg.LinearRegionItem(values=[24, 100], orientation = pg.LinearRegionItem.Horizontal,
+													brush = brushWarn, movable = False)
+		self.warningRegionUpper.lines[0].setPen(penLines)
+		self.warningRegionUpper.lines[1].setPen(penLines)
+		self.warningRegionLower = pg.LinearRegionItem(values=[-100, 26], orientation = pg.LinearRegionItem.Horizontal,
+													brush = brushWarn, movable = False)
+		self.warningRegionLower.lines[0].setPen(penLines)
+		self.warningRegionLower.lines[1].setPen(penLines)
+		self.goodRegion = pg.LinearRegionItem(values=[24, 26], orientation = pg.LinearRegionItem.Horizontal,
+													brush = brushGood, movable = False)
+		self.goodRegion.lines[0].setPen(penLines)
+		self.goodRegion.lines[1].setPen(penLines)
+		self.addItem(self.warningRegionUpper)
+		self.addItem(self.warningRegionLower)
+		self.addItem(self.goodRegion)
+		self.valueTrendCurve = self.plot()
+		self.valueTrendCurve.setPen(self.attrColors.secondaryColor0, width = 2.0)
 
-# 		self.warningRegionUpper = pg.LinearRegionItem(values=[high_lim, high_lim], orientation = pg.LinearRegionItem.Horizontal,
-# 													brush = brushWarn, movable = False)
-# 		self.warningRegionUpper.lines[0].setPen(penLines)
-# 		self.warningRegionUpper.lines[1].setPen(penLines)
-# 		self.warningRegionLower = pg.LinearRegionItem(values=[-high_lim, -high_lim], orientation = pg.LinearRegionItem.Horizontal,
-# 													brush = brushWarn, movable = False)
-# 		self.warningRegionLower.lines[0].setPen(penLines)
-# 		self.warningRegionLower.lines[1].setPen(penLines)
-# 		self.goodRegion = pg.LinearRegionItem(values=[-high_lim, high_lim], orientation = pg.LinearRegionItem.Horizontal,
-# 													brush = brushGood, movable = False)
-# 		self.goodRegion.lines[0].setPen(penLines)
-# 		self.goodRegion.lines[1].setPen(penLines)
-# 		self.addItem(self.warningRegionUpper)
-# 		self.addItem(self.warningRegionLower)
-# 		self.addItem(self.goodRegion)
-		self.valueTrendCurves = []
-		self.currentDataIndex = []
-
-		self.addCurve(name)
-
-	def setupData(self, curve=0):
-		""" Pre-allocate data arrays
-		"""
-		if len(self.xValues) > curve+1:
-			# Curve already exists
-#			self.xValues[curve] = np.linspace(-self.duration, 0, self.valuesSize)
-			self.xValues[curve] = -np.ones(self.valuesSize)*np.inf
-			self.yValues[curve] = np.zeros(self.valuesSize)
-			self.currentDataIndex[curve] = 0
-			self.valueTrendCurves[curve].setData(self.xValues[curve], self.yValues[curve], antialias = True)
-		else:
-			# Need to create new arrays
-			self.xValues.append(-np.ones(self.valuesSize)*np.inf)
-			self.yValues.append(np.zeros(self.valuesSize))
-			self.currentDataIndex.append(0)
-			if len(self.valueTrendCurves) < curve+1:
-				self.addCurve()
-#			self.valueTrendCurves[curve].setData(self.xValues[curve], self.yValues[curve], antialias = True)
+	def setupData(self):
+		self.xValues = np.linspace(-10000, 0, self.valuesSize)
+		self.yValues = np.sin(self.xValues*10*np.pi/600)+1
+		self.currentDataIndex = 0
+		self.valueTrendCurve.setData(self.xValues, self.yValues, antialias = True)
 
 	def setWarningLimits(self, limits):
 		if type(limits)==pt.AttributeInfoListEx:
@@ -2981,85 +2538,20 @@ class QTangoTrendBase(pg.PlotWidget):
 		self.warningRegionLower.setRegion([-1e6, warnLow])
 		self.goodRegion.setRegion([warnLow, warnHigh])
 
-	def configureAttribute(self, attrInfo):
-		QTangoAttributeBase.configureAttribute(self, attrInfo)
-		try:
-			min_warning = float(self.attrInfo.alarms.min_warning)
-		except:
-			min_warning = -np.inf
-		try:
-			max_warning = float(self.attrInfo.alarms.max_warning)
-		except:
-			max_warning = np.inf
-		self.setWarningLimits((min_warning, max_warning))
-		self.setUnit(self.attrInfo.unit)
 
-	def setDuration(self, duration):
-		""" Set the duration of the trend graph in x axis units
-		(e.g. samples, seconds...)
-		"""
-		self.duration = duration
-		self.setXRange(-self.duration, 0)
+	def addPoint(self, xNew, yNew):
+		if self.currentDataIndex+1 > self.valuesSize:
+			self.currentDataIndex = int(self.valuesSize*0.75)
+			self.xValues[0:self.currentDataIndex]=self.xValues[self.valuesSize-self.currentDataIndex:self.valuesSize]
+			self.yValues[0:self.currentDataIndex]=self.yValues[self.valuesSize-self.currentDataIndex:self.valuesSize]
 
-	def addCurve(self, name=None):
-		curve_index = len(self.valueTrendCurves)
-		if name is not None:
-			new_curve = self.plot(name=name)
-			self.curve_name_list.append(name)
-		else:
-			new_curve = self.plot(name=str(curve_index))
-			self.curve_name_list.append(str(curve_index))
-		curve_color = self.attrColors.legend_color_list[curve_index % len(self.attrColors.legend_color_list)]
-		new_curve.setPen(curve_color, width = 2.0)
-		new_curve.curve.setClickable(True)
-		self.valueTrendCurves.append(new_curve)
-		
-		self.setupData(len(self.valueTrendCurves)-1)
-		
-		new_curve.sigClicked.connect(self.setCurveFocus)
-#		self.autoRange(items=self.valueTrendCurves)
-#		vb = self.plotItem.getViewBox()
-#		vb.autoRange(items=self.valueTrendCurves)
-
-	def setCurveFocus(self, curve):
-		name = curve.opts.get('name', None)		
-
-	def showLegend(self, show_legend=True):
-		if show_legend is True:
-			if self.legend is None:
-				self.legend = self.addLegend(offset=(5, 5))
-				for it in self.valueTrendCurves:
-					self.legend.addItem(it, it.opts.get('name', None))
-		else:
-			if self.legend is not None:
-				self.legend.scene().removeItem(self.legend)
-				self.legend = None
-
-	def setCurveName(self, curve, name):
-		self.valueTrendCurves[curve].opts['name'] = name
-
-	def addPoint(self, data, curve=0):
-		if type(data) == pt.DeviceAttribute:
-			xNew = data.time.totime()
-			yNew = data.value
-		else:
-			xNew = data[0]
-			yNew = data[1]
-		# Rescaling if the number of sample is too high
-		if self.currentDataIndex[curve]+1 > self.valuesSize:
-			self.currentDataIndex[curve] = int(self.valuesSize*0.75)
-			self.xValues[curve][0:self.currentDataIndex[curve]]=self.xValues[curve][self.valuesSize-self.currentDataIndex[curve]:self.valuesSize]
-			self.yValues[curve][0:self.currentDataIndex[curve]]=self.yValues[curve][self.valuesSize-self.currentDataIndex[curve]:self.valuesSize]
-		elif self.currentDataIndex[curve] == 0:
-			self.xValues[curve][0] = xNew
-			self.yValues[curve][0] = yNew
-		self.currentDataIndex[curve]+=1
-		self.xValues[curve][self.currentDataIndex[curve]] = xNew
-		start_index = np.argmax((self.xValues[curve]-xNew) > -self.duration)
-		self.yValues[curve][self.currentDataIndex[curve]] = yNew
-		self.valueTrendCurves[curve].setData(self.xValues[curve][start_index:self.currentDataIndex[curve]]-xNew, self.yValues[curve][start_index:self.currentDataIndex[curve]], antialias = True)
-		self.update()
-
+		elif self.currentDataIndex == 0:
+			self.xValues[0] = xNew
+			self.yValues[0] = yNew
+		self.currentDataIndex+=1
+		self.xValues[self.currentDataIndex] = xNew
+		self.yValues[self.currentDataIndex] = yNew
+		self.valueTrendCurve.setData(self.xValues[0:self.currentDataIndex]-xNew, self.yValues[0:self.currentDataIndex], antialias = True)
 
 class QTangoSpectrumBase(pg.PlotWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -3073,7 +2565,6 @@ class QTangoSpectrumBase(pg.PlotWidget):
 		else:
 			self.sizes = sizes
 
-		self.legend = None
 		self.setupLayout()
 
 	def setupLayout(self):
@@ -3081,15 +2572,13 @@ class QTangoSpectrumBase(pg.PlotWidget):
 		pi=self.getPlotItem()
 		pi.hideAxis('left')
 		pi.showAxis('right', True)
-		pi.showGrid(True, True, 0.2)
 		axLeft = pi.getAxis('right')
 		axLeft.setPen(self.attrColors.secondaryColor0)
 		axBottom = pi.getAxis('bottom')
 		axBottom.setPen(self.attrColors.secondaryColor0)
 
 		self.spectrumCurves = [self.plot()]
-		self.spectrumNames = ['']
-		self.spectrumCurves[0].setPen(self.attrColors.secondaryColor0, width=2.0)
+		self.spectrumCurves[0].setPen(self.attrColors.secondaryColor0, width = 2.0)
 #		self.spectrumCurve.setDownsampling(True, True, 'subsample')
 
 		self.useOpenGL(True)
@@ -3102,29 +2591,10 @@ class QTangoSpectrumBase(pg.PlotWidget):
 		self.spectrumCurves[index].setData(y = yData, x = xData, antialias = False)
 		self.update()
 
-	def showLegend(self, state):
-		pi = self.getPlotItem()
-		if state == True:
-			if self.legend == None:
-				self.legend = pi.addLegend()
-				for ind, cur in enumerate(self.spectrumCurves):
-					self.legend.addItem(cur, self.spectrumNames[ind])
-		else:
-			if self.legend != None:
-				self.legend.scene().removeItem(self.legend)
-				self.legend = None
-
-	def setCurveName(self, index, name):
-		self.spectrumNames[index] = name
-		if self.legend != None:
-			self.legend.removeItem(name)
-			self.legend.addItem(self.spectrumCurves[index], self.spectrumNames[index])
-
-	def addPlot(self, color, name=''):
+	def addPlot(self, color):
 		p = self.plot()
 		p.setPen(color, width = 2.0)
 		self.spectrumCurves.append(p)
-		self.spectrumNames.append(name)
 
 class QTangoImageWithHistBase(pg.ImageView):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -3197,21 +2667,9 @@ class QTangoImageBase(pg.GraphicsView):
 		self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
 
-	def setImage(self, image):
-		if image is not None:
-			if type(image) == pt.DeviceAttribute:
-				data = image.value
-				if image.quality == pt.AttrQuality.ATTR_VALID:
-					gradEditor = pg.GradientEditorItem()
-					gradEditor.loadPreset('flame')
-					self.lut = gradEditor.getLookupTable(256)
-				else:
-					gradEditor = pg.GradientEditorItem()
-					gradEditor.loadPreset('gray')
-					self.lut = gradEditor.getLookupTable(8)
-			else:
-				data = image
-			self.image.setImage(np.transpose(data), autoLevels=False, lut=self.lut, autoDownSample=True)
+	def setImage(self, data):
+		if data is not None:
+			self.image.setImage(np.transpose(data), autoLevels = False, lut = self.lut, autoDownSample = True)
 			self.update()
 
 class QTangoReadAttributeSlider(QTangoAttributeBase):
@@ -3774,7 +3232,7 @@ class QTangoReadAttributeBoolean(QTangoAttributeBase):
 
 
 class QTangoReadAttributeTrend(QtGui.QWidget):
-	def __init__(self, name=None, sizes = None, colors = None, parent=None):
+	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		if colors == None:
 			self.attrColors = QTangoColors()
@@ -3784,63 +3242,36 @@ class QTangoReadAttributeTrend(QtGui.QWidget):
 			self.sizes = QTangoSizes()
 		else:
 			self.sizes = sizes
-		self.unit = None
-		self.prefixDict = {'k': 1e3, 'M': 1e6, 'G': 1e9, 'T': 1e12, 'P': 1e15,
-						'm': 1e-3, 'u': 1e-6, 'n': 1e-9, 'p': 1e-12, 'f': 1e-15, 'c': 1e-2}
-		self.prefix=None
-		self.prefixFactor = 1.0
+		self.setupLayout()
 
-		self.curve_focus = 0
-		self.setupLayout(name)
-
-	def setupLayout(self, name=None):
+	def setupLayout(self):
 		readValueWidth = self.sizes.barWidth
 		readWidth = self.sizes.readAttributeWidth-self.sizes.barHeight/6-self.sizes.barHeight/2
 
 		self.startLabel = QTangoStartLabel(self.sizes, self.attrColors)
 		self.endLabel = QTangoEndLabel(self.sizes, self.attrColors)
 		self.nameLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
-		self.unitLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
-		self.curveNameLabel= QTangoAttributeNameLabel(self.sizes, self.attrColors)
-		if name is not None:
-			self.curveNameLabel.setText(name)
-		else:
-			self.curveNameLabel.setText(''.join(('curve 0')))
-		self.valueSpinbox = QTangoReadAttributeLabel(self.sizes, self.attrColors)
-		self.nameLabel.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-#		self.valueSpinbox.setMinimumWidth(50)
-		self.valueSlider = QTangoVSliderBase2(self.sizes, self.attrColors)
-		
-		self.valueTrend = QTangoTrendBase(name=name, sizes=self.sizes, colors=self.attrColors)
-		self.valueTrend.valueTrendCurves[-1].sigClicked.connect(self.setCurveFocus)
-		
+		self.valueSpinbox = QTangoReadAttributeSpinBox(self.sizes, self.attrColors)
+		self.valueSlider = QTangoHSliderBase(self.sizes, self.attrColors)
+		self.valueTrend = QTangoTrendBase(self.sizes, self.attrColors)
+
 		self.layout = QtGui.QHBoxLayout(self)
 		self.layout.setContentsMargins(0,0,0,0)
 #		self.layout.setMargin(int(self.sizes.barHeight/10))
 		self.layout.setMargin(0)
 		self.layout.setSpacing(self.sizes.barWidth/3)
 
-		layout2 = QtGui.QVBoxLayout()
-		layout3 = QtGui.QHBoxLayout()
-		layout2.addLayout(layout3)
-		layout2.addWidget(self.valueTrend)
-		layout3.addWidget(self.nameLabel)
-		layout3.addWidget(self.curveNameLabel)
-		layout3.addWidget(self.valueSpinbox)
-		layout3.addWidget(self.unitLabel)
-# 		self.layoutGrid = QtGui.QGridLayout()
-# 		self.layoutGrid.setContentsMargins(0, 0, 0, 0)
-# 		self.layoutGrid.setMargin(0)
-# 		self.layoutGrid.addWidget(self.nameLabel, 0, 0)
-# 		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)
-# 		self.layoutGrid.addWidget(self.unitLabel, 0, 2)
-# 		self.layoutGrid.addWidget(self.valueTrend, 1, 0, 1, 3)
-# 		self.layoutGrid.setHorizontalSpacing(self.sizes.barWidth/4)
-# 		self.layoutGrid.setVerticalSpacing(0)
+		self.layoutGrid = QtGui.QGridLayout()
+		self.layoutGrid.setContentsMargins(0, 0, 0, 0)
+		self.layoutGrid.setMargin(0)
+		self.layoutGrid.addWidget(self.nameLabel, 0, 0)
+		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)
+		self.layoutGrid.addWidget(self.valueTrend, 1, 0, 1, 2)
+		self.layoutGrid.setHorizontalSpacing(self.sizes.barWidth/4)
+		self.layoutGrid.setVerticalSpacing(0)
 
 		self.layout.addWidget(self.startLabel)
-#		self.layout.addLayout(self.layoutGrid)
-		self.layout.addLayout(layout2)
+		self.layout.addLayout(self.layoutGrid)
 		self.layout.addWidget(self.endLabel)
 
 		self.setMaximumWidth(self.sizes.readAttributeWidth)
@@ -3854,125 +3285,28 @@ class QTangoReadAttributeTrend(QtGui.QWidget):
 
 	@QtCore.pyqtSignature('setAttributeName(QString)')
 
-	def setAttributeName(self, aName, aUnit = None):
+	def setAttributeName(self, aName):
 		self.nameLabel.setText(aName)
-		if aUnit != None:
-			self.valueSlider.setUnit(aUnit)
-			self.setUnit(aUnit)
 		self.update()
 
-	def setAttributeValue(self, value, curve=0):
+	def setAttributeValue(self, value):
 		if type(value) == pt.DeviceAttribute:
-			if value.value != None:
-				val = value.value
-				if curve == 0:
-					self.valueSlider.setValue(value)
-					self.valueSpinbox.setValue(value)
-				self.valueTrend.addPoint(value, curve)
-				self.nameLabel.setQuality(value.quality)
-				self.unitLabel.setQuality(value.quality)
-		else:
-			t = time.time()
-			self.valueTrend.addPoint([t, value], curve)
-			if curve == 0:
-				self.valueSlider.setValue(value)
-				self.valueSpinbox.setValue(value)
-
-		self.update()
-
-	def addPoint(self, value, curve=0):
-		if type(value) == pt.DeviceAttribute:
-			if value.value != None:
-				val = value.value
-				value.value /= self.prefixFactor
-				self.valueSlider.setValue(value)
-				self.valueTrend.addPoint(value, curve)
-				self.nameLabel.setQuality(value.quality)
-				self.curveNameLabel.setQuality(value.quality)
-				self.unitLabel.setQuality(value.quality)
-				self.startLabel.setQuality(value.quality)
-				self.endLabel.setQuality(value.quality)
-				self.unitLabel.setQuality(value.quality)
-				self.valueSpinbox.setQuality(value.quality)
+			self.startLabel.setQuality(value.quality)
+			self.endLabel.setQuality(value.quality)
+			val = value.value
 		else:
 			val = value
-			value /= self.prefixFactor
-			self.valueSlider.setValue(value)
-			t = time.time()
-			self.valueTrend.addPoint([t, value], curve)
-		if curve == self.curve_focus:
-			self.valueSlider.setValue(value)
-			self.valueSpinbox.setValue(value)
+
+		t = time.time()
+		self.valueSpinbox.setValue(val)
+		self.valueTrend.addPoint(t, val)
 		self.update()
 
-	def setUnit(self, unit):
-		self.unit = unit
-		if self.unit != None:
-			unitStr = self.unit
-			if self.prefix != None:
-				unitStr = ''.join((self.prefix, unitStr))
-
-			self.unitLabel.setText(unitStr)
-
-	def setPrefix(self, prefix):
-		try:
-			self.prefixFactor = self.prefixDict[prefix]
-			self.prefix = prefix
-			self.setUnit(self.unit)
-		except KeyError:
-			self.prefix = None
-			self.prefixFactor = 1.0
-
 	def setAttributeWarningLimits(self, limits):
-		self.valueSlider.setWarningLimits(limits)
 		self.valueTrend.setWarningLimits(limits)
-
-	def setSliderLimits(self, min, max):
-		self.valueSlider.setSliderLimits(min, max)
-
-	def setSliderRangeAnchor(self, anchor, range, anchorPos = 0.75):
-		'''Set the slider total range. The anchor value is set at
-		realtive position anchorPos (0-1)
-		'''
-		valMin = anchor - range*anchorPos
-		valMax = anchor + range*(1-anchorPos)
-		self.valueSlider.setSliderLimits(valMin, valMax)
-
-	def configureAttribute(self, attrInfo):
-		QTangoAttributeBase.configureAttribute(self, attrInfo)
-		try:
-			min_warning = float(self.attrInfo.alarms.min_warning)
-		except:
-			min_warning = -np.inf
-		try:
-			max_warning = float(self.attrInfo.alarms.max_warning)
-		except:
-			max_warning = np.inf
-		self.setAttributeWarningLimits((min_warning, max_warning))
-		self.valueSlider.setUnit(self.attrInfo.unit)
-		self.setUnit(self.attrInfo.unit)
 
 	def setTrendLimits(self, low, high):
 		self.valueTrend.setYRange(low, high, padding = 0.05)
-
-	def addCurve(self, name=None):
-		self.valueTrend.addCurve(name)
-		self.valueTrend.valueTrendCurves[-1].sigClicked.connect(self.setCurveFocus)		
-		
-	def setCurveFocus(self, curve):		
-		name = curve.opts.get('name', None)
-		if name is not None:
-			self.curve_focus = self.valueTrend.curve_name_list.index(name)	
-			self.curveNameLabel.setText(name)	
-
-	def setCurveName(self, curve, name):
-		self.valueTrend.setCurveName(curve, name)
-
-	def showLegend(self, show_legend=True):
-		self.valueTrend.showLegend(show_legend)
-
-	def setDuration(self, duration):
-		self.valueTrend.setDuration(duration)
 
 class QTangoReadAttributeSpectrum(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
@@ -4442,16 +3776,8 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 		self.layout.setMargin(int(self.sizes.barHeight/10))
 		self.layout.setSpacing(self.sizes.barHeight/6.0)
 
-		layout2 = QtGui.QHBoxLayout()
-		layout2.setContentsMargins(0, 0, 0, 0)
-		layout2.setMargin(int(self.sizes.barHeight / 10))
-		layout2.setSpacing(self.sizes.barHeight / 6.0)
-		layout2.addWidget(self.writeLabel)
-		layout2.addWidget(self.writeValueLineEdit)
-
 		self.layout.addWidget(self.valueSlider)
-		self.layout.addLayout(layout2)
-#		self.layout.addWidget(self.writeValueLineEdit)
+		self.layout.addWidget(self.writeValueLineEdit)
 		self.layout.addWidget(self.nameLabel)
 
 		self.setMaximumWidth(self.sizes.barWidth*4)
@@ -4482,7 +3808,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 					self.writeValueInitialized = True
 					self.setAttributeWriteValue(data.w_value)
 
-				if np.abs((data.w_value - self.writeValueLineEdit.value()) / data.w_value) > 0.0001:
+				if data.w_value != self.writeValueLineEdit.value():
 					if self.writeLabel.currentAttrColor != self.attrColors.secondaryColor0:
 						self.writeLabel.currentAttrColor = self.attrColors.secondaryColor0
 						self.writeLabel.setupLayout()
@@ -4492,9 +3818,6 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 						self.writeLabel.setupLayout()
 		else:
 			self.valueSlider.setValue(data)
-			self.unitLabel.setQuality(data.quality)
-			self.valueSpinbox.setQuality(data.quality)
-			self.nameLabel.setQuality(data.quality)
 		self.update()
 
 	def setAttributeWriteValue(self, value):
@@ -4533,7 +3856,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 		return self.writeValueLineEdit.value()
 
 class QTangoWriteAttributeDouble(QtGui.QWidget):
-	def __init__(self, sizes = None, colors = None, precision=4, parent=None):
+	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		self.attrColors = QTangoColors()
 		if colors == None:
@@ -4547,8 +3870,6 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 
 		self.writeValueInitialized = False
 		self.unit = None
-		self.precision = precision
-		self.prefix = None
 
 		self.setupLayout()
 
@@ -4561,10 +3882,8 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 		self.startLabel = QTangoStartLabel(self.sizes, self.attrColors)
 		self.endLabel = QTangoEndLabel(self.sizes, self.attrColors)
 		self.nameLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
-		self.nameLabel.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Minimum)
 		self.unitLabel = QTangoAttributeUnitLabel(self.sizes, self.attrColors)
-#		self.valueSpinbox = QTangoReadAttributeSpinBox(self.sizes, self.attrColors)
-		self.valueSpinbox = QTangoReadAttributeLabel(self.sizes, self.attrColors)
+		self.valueSpinbox = QTangoReadAttributeSpinBox(self.sizes, self.attrColors)
 #		self.writeValueSpinbox = QTangoWriteAttributeSpinBox(self.sizes, self.attrColors)
 		self.writeValueLineEdit = QTangoWriteAttributeLineEdit(self.sizes, self.attrColors)
 #		self.writeValueLineEdit.editingFinished.connect(self.editingFinished)
@@ -4684,7 +4003,6 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 		layoutGrid.setMargin(int(self.sizes.barHeight/10))
 		layoutGrid.addWidget(self.nameLabel, 0, 0)
 		layoutGrid.addWidget(self.valueSpinbox, 0, 2)
-		layoutGrid.addWidget(self.unitLabel, 0, 3)
 		layoutGrid.addWidget(self.writeLabel, 1, 1)
 		layoutGrid.addWidget(self.writeValueLineEdit, 1, 2)
 
@@ -4710,16 +4028,8 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def setAttributeName(self, aName, aUnit = None):
 		self.nameLabel.setText(aName)
 		if aUnit != None:
-			self.setUnit(aUnit)
+			self.unit = aUnit
 		self.update()
-
-	def setUnit(self, unit):
-		self.unit = unit
-		if self.unit != None:
-			unitStr = self.unit
-			if self.prefix != None:
-				unitStr = ''.join((self.prefix, unitStr))
-			self.unitLabel.setText(unitStr)
 
 	def setAttributeValue(self, value):
 		if type(value) == pt.DeviceAttribute:
@@ -4739,10 +4049,6 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 						self.writeLabel.setupLayout()
 			self.startLabel.setQuality(value.quality)
 			self.endLabel.setQuality(value.quality)
-			self.unitLabel.setQuality(value.quality)
-			self.valueSpinbox.setQuality(value.quality)
-			self.nameLabel.setQuality(value.quality)
-
 			val = value.value
 		else:
 			val = value
