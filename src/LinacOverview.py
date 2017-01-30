@@ -1,16 +1,15 @@
-'''
+"""
 Created on 23 jan 2017
 
 @author: Filip Lindau
-'''
+"""
 from PyQt4 import QtGui, QtCore
 
 import time
 import sys
 
 
-
-
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self,parent)
@@ -44,6 +43,9 @@ class TangoDeviceClient(QtGui.QWidget):
                                                         'I-EX3/DIA/BPL-01')))
         self.devices['sp02_charge']=pt.DeviceProxy(''.join((self.database_name,
                                                         'I-SP02/DIA/BPL-02')))
+        self.devices['virtual_cathode']=pt.DeviceProxy(''.join((self.database_name,
+                                                        'lima/liveviewer/i-gs00-dia-caml-01')))
+        self.devices['virtual_cathode'].command_inout_asynch('start')
 
         print time.clock()-t0, ' s'
 
@@ -69,9 +71,11 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['ex3_charge'].attrSignal.connect(self.read_ex3_charge)
         self.attributes['sp02_charge'] = AttributeClass('Sum', self.devices['sp02_charge'], 1.0)
         self.attributes['sp02_charge'].attrSignal.connect(self.read_sp02_charge)
+        self.attributes['virtual_cathode'] = AttributeClass('Image', self.devices['virtual_cathode'], 5.0)
+        self.attributes['virtual_cathode'].attrSignal.connect(self.read_virtual_cathode)
 
     def read_shutter_state(self, data):
-        if data.value == True:
+        if data.value is True:
             data.value = 'Open'
             if data.quality == pt.AttrQuality.ATTR_VALID:
                 data.quality = pt.AttrQuality.ATTR_VALID
@@ -115,6 +119,9 @@ class TangoDeviceClient(QtGui.QWidget):
 
     def read_sp02_charge(self, data):
         self.linac_charge_trend_widget.addPoint(data, 2)
+
+    def read_virtual_cathode(self, data):
+        self.virtual_cathode_widget.setImage(data, True)
 
     def closeEvent(self, event):
 #         for device in self.devices.itervalues():
@@ -186,6 +193,14 @@ class TangoDeviceClient(QtGui.QWidget):
         self.layout_attributes.setMargin(0)
         self.layout_attributes.setSpacing(self.attr_sizes.barHeight/2)
         self.layout_attributes.setContentsMargins(0, 0, 0, 0)
+        layout_attributes2 = QtGui.QVBoxLayout()
+        layout_attributes2.setMargin(0)
+        layout_attributes2.setSpacing(self.attr_sizes.barHeight / 2)
+        layout_attributes2.setContentsMargins(0, 0, 0, 0)
+        layout_attributes_top = QtGui.QHBoxLayout()
+        layout_attributes_top.setMargin(0)
+        layout_attributes_top.setSpacing(self.attr_sizes.barHeight / 2)
+        layout_attributes_top.setContentsMargins(0, 0, 0, 0)
 
         self.title = qw.QTangoTitleBar('Linac', self.title_sizes)
         self.setWindowTitle('Linac overview')
@@ -223,17 +238,28 @@ class TangoDeviceClient(QtGui.QWidget):
         self.linac_charge_trend_widget.showLegend(False)
         self.linac_charge_trend_widget.showLegend(True)
 
+        self.virtual_cathode_widget = qw.QTangoReadAttributeImage()
+        self.virtual_cathode_widget.setAttributeName('Virtual cathode')
+        self.virtual_cathode_widget.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.virtual_cathode_widget.setMaximumHeight(self.attr_sizes.readAttributeHeight)
+        self.virtual_cathode_widget.setMaximumWidth(self.attr_sizes.readAttributeWidth)
+
 
 
 ############################
 # Setting up layout
 #
-        self.layout_attributes.addWidget(self.shutter_widget)
-        self.layout_attributes.addWidget(self.gun_widget)
-        self.layout_attributes.addWidget(self.timing_widget)
+        layout_attributes2.addWidget(self.shutter_widget)
+        layout_attributes2.addWidget(self.gun_widget)
+        layout_attributes2.addWidget(self.timing_widget)
+        layout_attributes2.addSpacerItem(spacer_item_v)
+        layout_attributes_top.addLayout(layout_attributes2)
+        layout_attributes_top.addSpacerItem(spacer_item_h)
+        layout_attributes_top.addWidget(self.virtual_cathode_widget)
+        self.layout_attributes.addLayout(layout_attributes_top)
         self.layout_attributes.addWidget(self.linac_charge_trend_widget)
         self.layout_attributes.addWidget(self.rings_trend_widget)        
-        self.layout_attributes.addSpacerItem(spacer_item_v)
+
 
         layout2.addWidget(self.title)
         layout2.addSpacerItem(QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))

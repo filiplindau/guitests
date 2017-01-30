@@ -117,6 +117,7 @@ import sys
 #     def getInfo(self):
 #         self.getInfoFlag = True
 
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self,parent)

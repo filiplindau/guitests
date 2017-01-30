@@ -78,7 +78,9 @@ class TangoWorker(QtCore.QObject):
 		print time.clock()-t0
 		
 		return attList
-		
+
+
+# noinspection PyAttributeOutsideInit
 class DeviceConnectionThread(QtCore.QThread):
 	deviceReadySignal = QtCore.pyqtSignal(object)
 	attributeListReadySignal = QtCore.pyqtSignal(object)
@@ -146,8 +148,9 @@ class DeviceConnectionPyThread(threading.Thread):
 		time.sleep(2)
 #		self.attributeListReadySignal.emit(self.attributeList)
 		print 'Signal emitted'
-	
-		
+
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClientTest(QtGui.QWidget):
 	def __init__(self, parent = None):
 		QtGui.QWidget.__init__(self,parent)

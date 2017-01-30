@@ -11,6 +11,7 @@ import threading
 import PyTango as pt
 
 
+# noinspection PyAttributeOutsideInit
 class AttributeEventClass(QtCore.QObject):
     '''This class encapsulates the tango events for an attribute and re-emits
     a Qt signal. The main purpose of this is that the Qt gui obejcts cannot 

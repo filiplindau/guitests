@@ -222,6 +222,8 @@ class DeviceProcessHandler:
 	def startProcess(self):
 		self.process.start()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClientTest(QtGui.QWidget):
 	def __init__(self, parent = None):
 		QtGui.QWidget.__init__(self,parent)

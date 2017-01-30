@@ -28,6 +28,8 @@ from AttributeReadThreadClass import AttributeClass
 motorName = 'gunlaser/motors/zaber01'
 cameraName = pt.DeviceProxy('gunlaser/cameras/cam0')
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, cameraName, motorName, parent=None):
         QtGui.QWidget.__init__(self, parent)

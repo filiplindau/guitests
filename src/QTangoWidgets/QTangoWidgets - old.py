@@ -218,6 +218,7 @@ class QTangoAttributeBase(QtGui.QWidget):
 		self.attrInfo = attrInfo
 
 
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoTitleBar(QtGui.QWidget):
 	def __init__(self, title='', parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -277,6 +278,8 @@ class QTangoTitleBar(QtGui.QWidget):
 	def setName(self, name):
 		self.nameLabel.setText(name)
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoSideBar(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -483,6 +486,8 @@ class QTangoCommandButton(QtGui.QPushButton, QTangoAttributeBase):
 		self.setStyleSheet(s)
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoCommandSelection(QTangoAttributeBase):
 	def __init__(self, title, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -951,6 +956,8 @@ class QTangoAttributeUnitLabel(QtGui.QLabel, QTangoAttributeBase):
 			txt=''.join(('[', unitText, ']'))
 		QtGui.QLabel.setText(self, txt)
 
+
+# noinspection PyAttributeOutsideInit
 class QTangoReadAttributeSpinBox(QtGui.QDoubleSpinBox, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -1133,6 +1140,7 @@ class QTangoComboBoxBase(QtGui.QComboBox, QTangoAttributeBase):
 		self.setStyleSheet(s2)
 
 
+# noinspection PyAttributeOutsideInit
 class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -1575,6 +1583,8 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
 
 		self.setStyleSheet(s)
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -1692,7 +1702,7 @@ class QTangoReadAttributeDouble(QtGui.QWidget):
 		self.update()
 
 
-
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoHSliderBase(QtGui.QSlider, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -1859,6 +1869,8 @@ class QTangoHSliderBase(QtGui.QSlider, QTangoAttributeBase):
 		self.attrMaximum = max
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -2061,6 +2073,8 @@ class QTangoHSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		self.attrMaximum = max
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoHSliderBaseCompact(QtGui.QSlider, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -2172,6 +2186,8 @@ class QTangoHSliderBaseCompact(QtGui.QSlider, QTangoAttributeBase):
 		self.attrMaximum = max
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -2456,6 +2472,8 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
 		self.unit = aUnit
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoTrendBase(pg.PlotWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		pg.PlotWidget.__init__(self, useOpenGL = True)
@@ -2553,6 +2571,8 @@ class QTangoTrendBase(pg.PlotWidget):
 		self.yValues[self.currentDataIndex] = yNew
 		self.valueTrendCurve.setData(self.xValues[0:self.currentDataIndex]-xNew, self.yValues[0:self.currentDataIndex], antialias = True)
 
+
+# noinspection PyAttributeOutsideInit
 class QTangoSpectrumBase(pg.PlotWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		pg.PlotWidget.__init__(self, useOpenGL = True)
@@ -2672,6 +2692,8 @@ class QTangoImageBase(pg.GraphicsView):
 			self.image.setImage(np.transpose(data), autoLevels = False, lut = self.lut, autoDownSample = True)
 			self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSlider(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -2744,6 +2766,8 @@ class QTangoReadAttributeSlider(QTangoAttributeBase):
 	def setSliderLimits(self, min, max):
 		self.valueSlider.setSliderLimits(min, max)
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSlider2(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -2834,6 +2858,8 @@ class QTangoReadAttributeSlider2(QTangoAttributeBase):
 		self.setAttributeWarningLimits((min_warning, max_warning))
 		self.unitLabel.setText(self.attrInfo.unit)
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSlider3(QTangoReadAttributeSlider2):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoReadAttributeSlider2.__init__(self, sizes, colors, parent)
@@ -2897,6 +2923,8 @@ class QTangoReadAttributeSlider3(QTangoReadAttributeSlider2):
 			self.valueSlider.setValue(val)
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSlider4(QTangoReadAttributeSlider2):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoReadAttributeSlider2.__init__(self, sizes, colors, parent)
@@ -2964,6 +2992,8 @@ class QTangoReadAttributeSlider4(QTangoReadAttributeSlider2):
 			self.valueSpinbox.setSuffix(QtCore.QString.fromUtf8(''.join((' ', aUnit))))
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSliderCompact(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3056,6 +3086,8 @@ class QTangoReadAttributeSliderCompact(QTangoAttributeBase):
 		self.unitLabel.setText(self.attrInfo.unit)
 		self.valueSpinbox.setSuffix(''.join((' ', self.attrInfo.unit)))
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSliderV(QTangoReadAttributeSlider2):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3166,6 +3198,7 @@ class QTangoReadAttributeSliderV(QTangoReadAttributeSlider2):
 		self.setUnit(self.attrInfo.unit)
 
 
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeBoolean(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3230,7 +3263,7 @@ class QTangoReadAttributeBoolean(QTangoAttributeBase):
 		self.update()
 
 
-
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeTrend(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -3308,6 +3341,8 @@ class QTangoReadAttributeTrend(QtGui.QWidget):
 	def setTrendLimits(self, low, high):
 		self.valueTrend.setYRange(low, high, padding = 0.05)
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeSpectrum(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3376,6 +3411,8 @@ class QTangoReadAttributeSpectrum(QTangoAttributeBase):
 		else:
 			self.spectrum.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeImage(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3434,7 +3471,7 @@ class QTangoReadAttributeImage(QTangoAttributeBase):
 			self.imageWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
 
-
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoReadAttributeImageWithHist(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3485,7 +3522,7 @@ class QTangoReadAttributeImageWithHist(QTangoAttributeBase):
 		self.imageWidget.setImage(im, autoRange = False, autoLevels = False)
 
 
-
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoWriteAttributeSlider(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)
@@ -3595,6 +3632,8 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
 	def getWriteValue(self):
 		return self.writeValueSpinbox.value()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoWriteAttributeSlider4(QTangoWriteAttributeSlider):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoWriteAttributeSlider.__init__(self, sizes, colors, parent)
@@ -3748,6 +3787,8 @@ class QTangoWriteAttributeSlider4(QTangoWriteAttributeSlider):
 	def getWriteValue(self):
 		return self.writeValueLineEdit.value()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoWriteAttributeSlider.__init__(self, sizes, colors, parent)
@@ -3855,6 +3896,8 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 	def getWriteValue(self):
 		return self.writeValueLineEdit.value()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -4063,6 +4106,8 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
 	def getWriteValue(self):
 		return self.writeValueLineEdit.value()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoWriteAttributeComboBox(QtGui.QWidget):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -4303,6 +4348,8 @@ class QTangoDeviceStatus(QtGui.QWidget):
 
 		self.update()
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoDeviceNameStatus(QTangoAttributeBase):
 	def __init__(self, sizes = None, colors = None, parent=None):
 		QTangoAttributeBase.__init__(self, sizes, colors, parent)

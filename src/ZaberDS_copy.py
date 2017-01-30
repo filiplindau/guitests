@@ -80,6 +80,7 @@ class MotorData():
 #==================================================================
 
 
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class ZaberMotorDS(PyTango.Device_4Impl):
 
 #--------- Add you global variables here --------------------------

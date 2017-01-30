@@ -10,6 +10,8 @@ from PyQt4 import QtGui, QtCore
 import time
 import sys
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self,parent)

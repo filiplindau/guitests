@@ -11,6 +11,7 @@ import time
 import sys
 
 
+# noinspection PyAttributeOutsideInit
 class AttributeClass(QtCore.QObject):
     import PyTango as pt
     attrSignal = QtCore.pyqtSignal(pt.device_attribute.DeviceAttribute)
@@ -117,6 +118,8 @@ class AttributeClass(QtCore.QObject):
     def getInfo(self):
         self.getInfoFlag = True
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self,parent)

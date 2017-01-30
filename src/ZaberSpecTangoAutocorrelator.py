@@ -23,6 +23,8 @@ redpitayaName = 'b-v0-gunlaser-csdb-0:10000/gunlaser/devices/redpitaya2'
 motorName = 'gunlaser/motors/zaber01'
 spectrometerName = pt.DeviceProxy('gunlaser/devices/spectrometer_diag')
 
+
+# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, redpitayaName, specName, motorName, parent=None):
         QtGui.QWidget.__init__(self, parent)

@@ -13,6 +13,7 @@ import threading
 import PyTango as pt
 
 
+# noinspection PyAttributeOutsideInit
 class AttributeClass(QtCore.QObject):
     attrSignal = QtCore.pyqtSignal(pt.device_attribute.DeviceAttribute)
     attrInfoSignal = QtCore.pyqtSignal(pt.AttributeInfoEx)
