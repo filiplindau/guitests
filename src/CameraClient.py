@@ -17,7 +17,7 @@ class TangoDeviceClient(QtGui.QWidget):
         QtGui.QWidget.__init__(self,parent)
 #        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
-        self.devName = 'gunlaser/cameras/spectrometer_camera'
+        self.devName = 'gunlaser/thg/camera'
 
         self.setupLayout()
 
@@ -77,8 +77,8 @@ class TangoDeviceClient(QtGui.QWidget):
 #             device.terminate()
         for a in self.attributes.itervalues():
             print 'Stopping', a.name
-            a.stopRead()
-            a.readThread.join()
+            a.stop_read()
+            a.read_thread.join()
         print 'All stopped.'
         print 'Sending close event'
         super(TangoDeviceClient, self).closeEvent(event)

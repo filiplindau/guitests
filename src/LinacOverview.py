@@ -11,7 +11,7 @@ import sys
 
 # noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QtGui.QWidget.__init__(self,parent)
 #        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.timeVector = None
@@ -128,7 +128,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #             device.terminate()
         for a in self.attributes.itervalues():
             print 'Stopping', a.name
-            a.stopRead()
+            a.stop_read()
         for a in self.attributes.itervalues():
             a.readThread.join()
         event.accept()

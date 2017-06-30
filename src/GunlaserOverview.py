@@ -13,8 +13,8 @@ import sys
 
 # noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
-    def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self,parent)
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
 #        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.timeVector = None
         self.errorSampleTime = None
@@ -26,18 +26,18 @@ class TangoDeviceClient(QtGui.QWidget):
         splash.showMessage('         Initializing devices', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
-        t0=time.clock()
-        self.devices = {}
-        self.devices['spectrometer']=pt.DeviceProxy('gunlaser/oscillator/spectrometer')
-        self.devices['finesse']=pt.DeviceProxy('gunlaser/oscillator/finesse')
-        self.devices['redpitaya0']=pt.DeviceProxy('gunlaser/devices/redpitaya0')
-        self.devices['regenLee']=pt.DeviceProxy('gunlaser/regen/leelaser')
-        self.devices['redpitaya1']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
-        self.devices['mpLee']=pt.DeviceProxy('gunlaser/mp/leelaser')
-        self.devices['redpitaya4']=pt.DeviceProxy('gunlaser/devices/redpitaya4')
-        self.devices['halcyon']=pt.DeviceProxy('gunlaser/oscillator/halcyon')
-        self.devices['regenTemp']=pt.DeviceProxy('gunlaser/regen/temperature')
-        self.devices['mpTemp']=pt.DeviceProxy('gunlaser/mp/temperature')
+        t0 = time.clock()
+        self.devices = dict()
+        self.devices['spectrometer'] = pt.DeviceProxy('gunlaser/oscillator/spectrometer')
+        self.devices['finesse'] = pt.DeviceProxy('gunlaser/oscillator/finesse')
+        self.devices['redpitaya0'] = pt.DeviceProxy('gunlaser/devices/redpitaya0')
+        self.devices['regenLee'] = pt.DeviceProxy('gunlaser/regen/leelaser')
+        self.devices['redpitaya1'] = pt.DeviceProxy('gunlaser/devices/redpitaya1')
+        self.devices['mpLee'] = pt.DeviceProxy('gunlaser/mp/leelaser')
+        self.devices['redpitaya4'] = pt.DeviceProxy('gunlaser/devices/redpitaya4')
+        self.devices['halcyon'] = pt.DeviceProxy('gunlaser/oscillator/halcyon')
+        self.devices['regenTemp'] = pt.DeviceProxy('gunlaser/regen/temperature')
+        self.devices['mpTemp'] = pt.DeviceProxy('gunlaser/mp/temperature')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
@@ -156,7 +156,6 @@ class TangoDeviceClient(QtGui.QWidget):
         data.value = data.value*1e3
         self.peakEnergyWidget.setAttributeValue(data)
 
-
     def readPeakWidth(self, data):
         self.peakWidthWidget.setAttributeValue(data)
 
@@ -177,7 +176,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.timeVector = data.value
 
     def readSpectrum(self, data):
-        if self.timeVector == None:
+        if self.timeVector is None:
             print 'No time vector'
         else:
             self.oscSpectrumPlot.setSpectrum(xData = self.timeVector, yData = data)
@@ -188,7 +187,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #             device.terminate()
         for a in self.attributes.itervalues():
             print 'Stopping', a.name
-            a.stopRead()
+            a.stop_read()
         for a in self.attributes.itervalues():
             a.readThread.join()
         event.accept()
@@ -271,22 +270,22 @@ class TangoDeviceClient(QtGui.QWidget):
 #######################
 # Finesse widgets
 #
-        self.finesseName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.finesseName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.finesseName.setAttributeName('Finesse')
 
-        self.shutter_widget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+        self.shutter_widget = qw.QTangoCommandSelection('Shutter', colors=self.colors, sizes=self.attr_sizes)
 
-        self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors = self.colors, sizes = self.attr_sizes)
+        self.laserOperationWidget = qw.QTangoCommandSelection('Laser', colors=self.colors, sizes=self.attr_sizes)
 
         self.attr_sizes.readAttributeHeight = 300
 
-        self.laserPowerWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
+        self.laserPowerWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
         self.laserPowerWidget.setAttributeName('Finesse', 'W')
         self.laserPowerWidget.setSliderLimits(0, 7)
         self.laserPowerWidget.setAttributeWarningLimits([4, 5.5])
 
-        self.finesseTempWidget = qw.QTangoReadAttributeSliderV(colors = self.colors, sizes = self.attr_sizes)
-        self.finesseTempWidget.setAttributeName('Temp', ''.join((unichr(0x00b0),'C')))
+        self.finesseTempWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
+        self.finesseTempWidget.setAttributeName('Temp', ''.join((unichr(0x00b0), 'C')))
         self.finesseTempWidget.setAttributeWarningLimits([25, 27])
         self.finesseTempWidget.setSliderLimits(23, 28)
 
@@ -457,7 +456,8 @@ if __name__ == '__main__':
     splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
-    splash.showMessage('         Importing modules', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color = QtGui.QColor('#66cbff'))
+    splash.showMessage('         Importing modules', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft,
+                       color=QtGui.QColor('#66cbff'))
     app.processEvents()
 
     import QTangoWidgets.QTangoWidgets as qw
@@ -467,7 +467,8 @@ if __name__ == '__main__':
     import threading
     import numpy as np
 
-    splash.showMessage('         Starting GUI', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color = QtGui.QColor('#66cbff'))
+    splash.showMessage('         Starting GUI', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft,
+                       color=QtGui.QColor('#66cbff'))
     app.processEvents()
     myapp = TangoDeviceClient()
     myapp.show()

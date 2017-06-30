@@ -8,7 +8,8 @@ from PyQt4 import QtGui, QtCore
 
 import time
 import sys
-
+from scipy.interpolate import interp1d
+import numpy as np
 
 # noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
@@ -19,23 +20,29 @@ class TangoDeviceClient(QtGui.QWidget):
         self.xData = None
         self.xDataTemp = None
 
+        self.W266_data = np.array([376, 370, 342, 325, 300, 275, 250, 224, 200, 173, 149, 127, 100, 71, 54, 25, 9, 0])
+        self.W266_data = self.W266_data / (self.W266_data.max()*1.0)
+        self.theta_data = np.array([0, 5, 10, 12, 14.4, 16.4, 18.2, 19.9, 21.4, 23, 24.5, 25.7, 27.3, 29.2, 30.6,
+                                    33.4, 35.8, 45])
+        self.th_interp = interp1d(self.W266_data, self.theta_data, kind='quadratic')
+        self.w266_interp = interp1d(self.theta_data, self.W266_data, kind='quadratic')
+
         self.setupLayout()
 
-        splash.showMessage('         Initializing devices', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Initializing devices', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
         t0=time.clock()
         self.devices = {}
-        self.devices['waveplate']=pt.DeviceProxy('gunlaser/mp/waveplate')
-        self.devices['camera']=pt.DeviceProxy('gunlaser/thg/camera')
-        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya3')
-        self.devices['mirror_x']=pt.DeviceProxy('gunlaser/thg/mirror_x')
-        self.devices['mirror_y']=pt.DeviceProxy('gunlaser/thg/mirror_y')
+        self.devices['waveplate'] = pt.DeviceProxy('gunlaser/mp/waveplate')
+        self.devices['camera'] = pt.DeviceProxy('gunlaser/thg/camera')
+        self.devices['redpitaya'] = pt.DeviceProxy('gunlaser/devices/redpitaya3')
+        self.devices['mirror_x'] = pt.DeviceProxy('gunlaser/thg/mirror_x')
+        self.devices['mirror_y'] = pt.DeviceProxy('gunlaser/thg/mirror_y')
         print time.clock()-t0, ' s'
 
-        splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Reading startup attributes', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
-
 
         self.guiLock = threading.Lock()
         self.attributes = {}
@@ -69,8 +76,6 @@ class TangoDeviceClient(QtGui.QWidget):
 #         self.timer.timeout.connect(self.checkDevices)
 #         self.timer.start(100)
 
-
-
     def checkDevices(self):
         for a in self.attributes.itervalues():
             pass
@@ -81,8 +86,10 @@ class TangoDeviceClient(QtGui.QWidget):
 
 #        data.value = 100*np.cos(2*data.value*np.pi/180.0)**4
 #        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**4
-        data.value = 100*np.cos(2*data.value*np.pi/180.0)**3
-        data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**3
+#         data.value = 100*np.cos(2*data.value*np.pi/180.0)**3
+#         data.w_value = 100*np.cos(2*data.w_value*np.pi/180.0)**3
+        data.value = 100.0*self.w266_interp(data.value)
+        data.w_value = 100.0 * self.w266_interp(data.w_value)
         self.energyWidget.setAttributeValue(data)
 
     def writePosition(self):
@@ -95,7 +102,8 @@ class TangoDeviceClient(QtGui.QWidget):
         elif energy < 0:
             energy = 0
 #        w = np.arccos((energy/100.0)**0.25)*90/np.pi
-        w = np.arccos((energy/100.0)**0.33)*90/np.pi
+#         w = np.arccos((energy/100.0)**0.33)*90/np.pi
+        w = self.th_interp(energy/100.0)
         self.attributes['wp_position'].attr_write(w)
         self.guiLock.release()
 
@@ -155,7 +163,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #             device.terminate()
         for a in self.attributes.itervalues():
             print 'Stopping', a.name
-            a.stopRead()
+            a.stop_read()
         for a in self.attributes.itervalues():
             a.readThread.join()
         event.accept()

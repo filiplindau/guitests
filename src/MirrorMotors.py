@@ -261,7 +261,7 @@ class TangoDeviceClient(QtGui.QWidget):
 # 			device.terminate()
 		for a in self.attributes.itervalues():
 			print 'Stopping', a.name
-			a.stopRead()
+			a.stop_read()
 			a.readThread.join()
 		event.accept()
 		
