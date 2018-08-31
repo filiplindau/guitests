@@ -10,7 +10,7 @@ import time
 import sys
 
 
-# noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
+# noinspection PyAttributeOutsideInit
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self,parent)
@@ -24,21 +24,20 @@ class TangoDeviceClient(QtGui.QWidget):
         splash.showMessage('         Initializing devices', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
-        t0=time.clock()
-        self.devices = {}
-        self.devices['leelaser']=pt.DeviceProxy('gunlaser/regen/leelaser')
-        self.devices['ionpump']=pt.DeviceProxy('gunlaser/regen/ionpump')
-        self.devices['temperature']=pt.DeviceProxy('gunlaser/regen/temperature')
-        self.devices['kmpc']=pt.DeviceProxy('gunlaser/regen/kmpc')
-        self.devices['crystalcam']=pt.DeviceProxy('gunlaser/regen/crystalcam')
+        t0 = time.clock()
+        self.devices = dict()
+        self.devices['leelaser'] = pt.DeviceProxy('gunlaser/regen/leelaser')
+        self.devices['ionpump'] = pt.DeviceProxy('gunlaser/regen/ionpump')
+        self.devices['temperature'] = pt.DeviceProxy('gunlaser/regen/temperature')
+        self.devices['kmpc'] = pt.DeviceProxy('gunlaser/regen/kmpc')
+        self.devices['crystalcam'] = pt.DeviceProxy('gunlaser/regen/crystalcam')
         print time.clock()-t0, ' s'
 
-        splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Reading startup attributes', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
-
         self.guiLock = threading.Lock()
-        self.attributes = {}
+        self.attributes = dict()
         self.attributes['leelasercurrent'] = AttributeClass('current', self.devices['leelaser'], 0.3)
         self.attributes['leelaserpercentcurrent'] = AttributeClass('percentcurrent', self.devices['leelaser'], 0.3)
         self.attributes['leelaserstatus'] = AttributeClass('status', self.devices['leelaser'], 0.3)
@@ -52,7 +51,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['leelaserstate'].attrSignal.connect(self.readLeeLaserState)
         self.attributes['leelaseroperationstate'].attrSignal.connect(self.readLeeLaserOperationState)
 
-        splash.showMessage('       Reading startup attributes... KMPC', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color = QtGui.QColor('#66cbff'))
+        splash.showMessage('       Reading startup attributes... KMPC', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeft, color=QtGui.QColor('#66cbff'))
         app.processEvents()
 
 # KMPC
@@ -80,7 +79,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['crystalimage'].attrSignal.connect(self.readCrystalImage)
         self.attributes['crystalimagestate'].attrSignal.connect(self.readCrystalImageState)
 
-        splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Setting up variables', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
 #         self.timer = QtCore.QTimer(self)
@@ -246,62 +245,63 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.title = qw.QTangoTitleBar('Regen control')
         self.setWindowTitle('Regen control')
-        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
+        self.sidebar = qw.QTangoSideBar(colors=self.colors, sizes=self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
-        self.leeLaserName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.leeLaserName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.leeLaserName.setAttributeName('LeeLaser')
-        self.leeLaserOperationStateWidget = qw.QTangoCommandSelection('Laser operation', colors = self.colors, sizes = self.attr_sizes)
+        self.leeLaserOperationStateWidget = qw.QTangoCommandSelection('Laser operation',
+                                                                      colors=self.colors, sizes=self.attr_sizes)
         self.leeLaserOperationStateWidget.addCmdButton('Stop', self.stopLeeLaser)
         self.leeLaserOperationStateWidget.addCmdButton('Start', self.startLeeLaser)
         self.leeLaserOperationStateWidget.addCmdButton('Clear fault', self.clearFaultLeeLaser)
 
-        self.leeLaserShutterWidget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+        self.leeLaserShutterWidget = qw.QTangoCommandSelection('Shutter', colors=self.colors, sizes=self.attr_sizes)
         self.leeLaserShutterWidget.addCmdButton('Close', self.closeLeeLaserShutter)
         self.leeLaserShutterWidget.addCmdButton('Open', self.openLeeLaserShutter)
 
-        self.leeLaserCurrentWidget = qw.QTangoReadAttributeSlider4(colors = self.colors, sizes = self.attr_sizes)
+        self.leeLaserCurrentWidget = qw.QTangoReadAttributeSlider4(colors=self.colors, sizes=self.attr_sizes)
         self.leeLaserCurrentWidget.setAttributeName('LeeLaser current', 'A')
         self.leeLaserCurrentWidget.setAttributeWarningLimits([10, 23.6])
         self.leeLaserCurrentWidget.setSliderLimits(6, 30)
 
-        self.leeLaserPercentCurrentWidget = qw.QTangoWriteAttributeSlider4(colors = self.colors, sizes = self.attr_sizes)
+        self.leeLaserPercentCurrentWidget = qw.QTangoWriteAttributeSlider4(colors=self.colors, sizes=self.attr_sizes)
         self.leeLaserPercentCurrentWidget.setAttributeName('LeeLaser percent current', '%')
         self.leeLaserPercentCurrentWidget.setAttributeWarningLimits([40, 74])
         self.leeLaserPercentCurrentWidget.setSliderLimits(36, 80)
         self.leeLaserPercentCurrentWidget.writeValueSpinbox.editingFinished.connect(self.writeLeeLaserPercentCurrent)
 
-        self.kmpcOperationWidget = qw.QTangoCommandSelection('KMPC operation', colors = self.colors, sizes = self.attr_sizes)
+        self.kmpcOperationWidget = qw.QTangoCommandSelection('KMPC operation', colors=self.colors, sizes=self.attr_sizes)
         self.kmpcOperationWidget.addCmdButton('Off', self.offKMPC)
         self.kmpcOperationWidget.addCmdButton('On', self.onKMPC)
 
-        self.kmpcVoltageWidget = qw.QTangoReadAttributeSlider4(colors = self.colors, sizes = self.attr_sizes)
+        self.kmpcVoltageWidget = qw.QTangoReadAttributeSlider4(colors=self.colors, sizes=self.attr_sizes)
         self.kmpcVoltageWidget.setAttributeName('KMPC voltage')
         self.kmpcVoltageWidget.setAttributeWarningLimits([4.9, 5.1])
         self.kmpcVoltageWidget.setSliderLimits(4.5, 5.5)
 
-        self.ionpumpPressureWidget = qw.QTangoReadAttributeSlider4(colors = self.colors, sizes = self.attr_sizes)
+        self.ionpumpPressureWidget = qw.QTangoReadAttributeSlider4(colors=self.colors, sizes=self.attr_sizes)
         self.ionpumpPressureWidget.setAttributeName('Crystal pressure', 'mBar')
         self.ionpumpPressureWidget.setAttributeWarningLimits([0, 5e-7])
         self.ionpumpPressureWidget.setSliderLimits(0, 1e-7)
 
-        self.temperatureWidget = qw.QTangoReadAttributeSlider4(colors = self.colors, sizes = self.attr_sizes)
+        self.temperatureWidget = qw.QTangoReadAttributeSlider4(colors=self.colors, sizes=self.attr_sizes)
         self.temperatureWidget.setAttributeName('Crystal temp', 'degC')
         self.temperatureWidget.setAttributeWarningLimits([-280, -170])
         self.temperatureWidget.setSliderLimits(-270, 30)
 
-        self.crystalImageName = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.crystalImageName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.crystalImageName.setAttributeName('Crystal camera')
 
-        self.crystalImageWidget = qw.QTangoReadAttributeImage(colors = self.colors, sizes = self.attr_sizes)
+        self.crystalImageWidget = qw.QTangoReadAttributeImage(colors=self.colors, sizes=self.attr_sizes)
         self.crystalImageWidget.setAttributeName('Crystal image')
         self.crystalImageWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 #        self.crystalImageWidget.fixedSize(True)
 
-        self.crystalImageOperationWidget = qw.QTangoCommandSelection('Camera operation', colors = self.colors, sizes = self.attr_sizes)
+        self.crystalImageOperationWidget = qw.QTangoCommandSelection('Camera operation',
+                                                                     colors=self.colors, sizes=self.attr_sizes)
         self.crystalImageOperationWidget.addCmdButton('Stop', self.stopCrystalCamera)
         self.crystalImageOperationWidget.addCmdButton('Start', self.startCrystalCamera)
-
 
         layout2.addWidget(self.title)
         layout2.addLayout(layoutData)

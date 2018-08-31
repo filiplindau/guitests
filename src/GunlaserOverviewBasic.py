@@ -15,7 +15,7 @@ import sys
 class TangoDeviceClient(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-#        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        #        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.timeVector = None
         self.errorSampleTime = None
         self.xData = None
@@ -38,13 +38,14 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['halcyon'] = pt.DeviceProxy('gunlaser/oscillator/halcyon_raspberry')
         self.devices['regenTemp'] = pt.DeviceProxy('gunlaser/regen/temperature')
         self.devices['mpTemp'] = pt.DeviceProxy('gunlaser/mp/temperature')
-        print time.clock()-t0, ' s'
+        print time.clock() - t0, ' s'
 
-        splash.showMessage('         Reading startup attributes', alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
+        splash.showMessage('         Reading startup attributes',
+                           alignment=QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
         self.guiLock = threading.Lock()
-        self.attributes = {}
+        self.attributes = dict()
         self.attributes['finessePower'] = AttributeClass('power', self.devices['finesse'], 0.3)
         self.attributes['finesseTemperature'] = AttributeClass('lasertemperature', self.devices['finesse'], 0.3)
         self.attributes['finesseState'] = AttributeClass('state', self.devices['finesse'], 0.3)
@@ -52,12 +53,10 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['finesseOperationState'] = AttributeClass('laseroperationstate', self.devices['finesse'], 0.3)
         self.attributes['peakwidth'] = AttributeClass('peakwidth', self.devices['spectrometer'], 0.3)
         self.attributes['oscPower'] = AttributeClass('measurementdata1', self.devices['redpitaya0'], 0.3)
-        self.attributes['wavelengths'] = AttributeClass('wavelengthsROI', self.devices['spectrometer'], None)
-        self.attributes['spectrum'] = AttributeClass('spectrumROI', self.devices['spectrometer'], 0.3)
         self.attributes['halcyonState'] = AttributeClass('state', self.devices['halcyon'], 0.3)
         self.attributes['halcyonPiezoVoltage'] = AttributeClass('piezovoltage', self.devices['halcyon'], 0.3)
         self.attributes['halcyonErrorFrequency'] = AttributeClass('errorfrequency', self.devices['halcyon'], 0.3)
-        
+
         self.attributes['finessePower'].attrSignal.connect(self.readFinessePower)
         self.attributes['finesseTemperature'].attrSignal.connect(self.readFinesseTemperature)
         self.attributes['finesseState'].attrSignal.connect(self.readFinesseState)
@@ -65,12 +64,10 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['finesseOperationState'].attrSignal.connect(self.readFinesseOperationState)
         self.attributes['peakwidth'].attrSignal.connect(self.readPeakWidth)
         self.attributes['oscPower'].attrSignal.connect(self.readOscillatorPower)
-        self.attributes['spectrum'].attrSignal.connect(self.readSpectrum)
-        self.attributes['wavelengths'].attrSignal.connect(self.readWavelengths)
         self.attributes['halcyonState'].attrSignal.connect(self.readHalcyonState)
         self.attributes['halcyonPiezoVoltage'].attrSignal.connect(self.readPiezoVoltage)
         self.attributes['halcyonErrorFrequency'].attrSignal.connect(self.readErrorFrequency)
-        
+
         self.attributes['regenState'] = AttributeClass('state', self.devices['regenLee'], 0.3)
         self.attributes['regenShutterState'] = AttributeClass('shutterstate', self.devices['regenLee'], 0.3)
         self.attributes['regenOperationState'] = AttributeClass('laserstate', self.devices['regenLee'], 0.3)
@@ -131,7 +128,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.regenOperationWidget.setStatus(data)
 
     def readRegenLeePower(self, data):
-        data.value = data.value*1e3
+        data.value = data.value * 1e3
         self.regenLeePowerWidget.setAttributeValue(data)
 
     def readRegenLeePercentCurrent(self, data):
@@ -139,7 +136,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
     def readRegenCrystalTemp(self, data):
         self.regenTempWidget.setAttributeValue(data)
-        
+
     def readMPState(self, data):
         self.mpLeeName.setState(data)
 
@@ -150,7 +147,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.mpOperationWidget.setStatus(data)
 
     def readMPLeePower(self, data):
-        data.value = data.value*1e3
+        data.value = data.value * 1e3
         self.mpLeePowerWidget.setAttributeValue(data)
 
     def readMPLeePercentCurrent(self, data):
@@ -158,9 +155,9 @@ class TangoDeviceClient(QtGui.QWidget):
 
     def readMPCrystalTemp(self, data):
         self.mpTempWidget.setAttributeValue(data)
-        
+
     def readOscillatorPower(self, data):
-        data.value = data.value*1e3
+        data.value = data.value * 1e3
         self.peakEnergyWidget.setAttributeValue(data)
 
     def readPeakWidth(self, data):
@@ -185,25 +182,11 @@ class TangoDeviceClient(QtGui.QWidget):
 
     def readUvPercent(self, data):
         data.value = data.value
-        self.uvEnergyWidget.setAttributeWarningLimits([0.01*data.value*200, 500])
+        self.uvEnergyWidget.setAttributeWarningLimits([0.01 * data.value * 200, 500])
 
     def readIrPercent(self, data):
         data.value = data.value
-        self.irEnergyWidget.setAttributeWarningLimits([0.01*data.value*6.0, 20])
-
-    def readWavelengths(self, data):
-        try:
-            print 'time vector read: ', data.value.shape[0]
-        except:
-            pass
-        self.timeVector = data.value
-
-    def readSpectrum(self, data):
-        if self.timeVector is None:
-            print 'No time vector'
-        else:
-            self.oscSpectrumPlot.setSpectrum(xData=self.timeVector, yData=data)
-            self.oscSpectrumPlot.update()
+        self.irEnergyWidget.setAttributeWarningLimits([0.01 * data.value * 6.0, 20])
 
     def closeEvent(self, event):
         for a in self.attributes.itervalues():
@@ -224,7 +207,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.title_sizes.writeAttributeWidth = 150
         self.title_sizes.fontStretch = 80
         self.title_sizes.fontType = 'Arial'
-        
+
         self.frame_sizes = qw.QTangoSizes()
         self.frame_sizes.barHeight = 60
         self.frame_sizes.barWidth = 35
@@ -232,7 +215,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.frame_sizes.writeAttributeWidth = 150
         self.frame_sizes.fontStretch = 80
         self.frame_sizes.fontType = 'Arial'
-#        self.frame_sizes.fontType = 'Trebuchet MS'
+        #        self.frame_sizes.fontType = 'Trebuchet MS'
 
         self.attr_sizes = qw.QTangoSizes()
         self.attr_sizes.barHeight = 30
@@ -242,7 +225,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attr_sizes.writeAttributeWidth = 299
         self.attr_sizes.fontStretch = 80
         self.attr_sizes.fontType = 'Arial'
-#        self.attr_sizes.fontType = 'Trebuchet MS'
+        #        self.attr_sizes.fontType = 'Trebuchet MS'
 
         self.colors = qw.QTangoColors()
 
@@ -261,26 +244,26 @@ class TangoDeviceClient(QtGui.QWidget):
         layout2.setSpacing(0)
         layout2.setContentsMargins(-1, 0, 0, 0)
         spacerItemV = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
-        spacerItemBar = QtGui.QSpacerItem(self.frame_sizes.barWidth, self.frame_sizes.barHeight+8,
+        spacerItemBar = QtGui.QSpacerItem(self.frame_sizes.barWidth, self.frame_sizes.barHeight + 8,
                                           QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         spacerItemH = QtGui.QSpacerItem(20, 5, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
 
         layoutData = QtGui.QHBoxLayout()
-        layoutData.setMargin(self.attr_sizes.barHeight/2)
-        layoutData.setSpacing(self.attr_sizes.barHeight*2)
+        layoutData.setMargin(self.attr_sizes.barHeight / 2)
+        layoutData.setSpacing(self.attr_sizes.barHeight * 2)
         self.layoutAttributesOsc = QtGui.QVBoxLayout()
         self.layoutAttributesOsc.setMargin(0)
-        self.layoutAttributesOsc.setSpacing(self.attr_sizes.barHeight/2)
+        self.layoutAttributesOsc.setSpacing(self.attr_sizes.barHeight / 2)
         self.layoutAttributesOsc.setContentsMargins(0, 0, 0, 0)
 
         self.layoutAttributesRegen = QtGui.QVBoxLayout()
         self.layoutAttributesRegen.setMargin(0)
-        self.layoutAttributesRegen.setSpacing(self.attr_sizes.barHeight/2)
+        self.layoutAttributesRegen.setSpacing(self.attr_sizes.barHeight / 2)
         self.layoutAttributesRegen.setContentsMargins(0, 0, 0, 0)
 
         self.layoutAttributesMP = QtGui.QVBoxLayout()
         self.layoutAttributesMP.setMargin(0)
-        self.layoutAttributesMP.setSpacing(self.attr_sizes.barHeight/2)
+        self.layoutAttributesMP.setSpacing(self.attr_sizes.barHeight / 2)
         self.layoutAttributesMP.setContentsMargins(0, 0, 0, 0)
 
         self.title = qw.QTangoTitleBar('Gunlaser overview', self.title_sizes)
@@ -288,9 +271,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.sidebar = qw.QTangoSideBar(colors=self.colors, sizes=self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
-#######################
-# Finesse widgets
-#
+        #######################
+        # Finesse widgets
+        #
         self.finesseName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.finesseName.setAttributeName('Finesse')
 
@@ -310,14 +293,13 @@ class TangoDeviceClient(QtGui.QWidget):
         self.finesseTempWidget.setAttributeWarningLimits([25, 27])
         self.finesseTempWidget.setSliderLimits(23, 28)
 
-
-######################
-# Spectrometer widgets
-#
+        ######################
+        # Spectrometer widgets
+        #
 
         self.attr_sizes.readAttributeHeight = 300
         self.peakWidthWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
-#        self.peakWidthWidget.setAttributeName(''.join((unichr(0x0394),unichr(0x03bb), ' FWHM')), 'nm')
+        #        self.peakWidthWidget.setAttributeName(''.join((unichr(0x0394),unichr(0x03bb), ' FWHM')), 'nm')
         self.peakWidthWidget.setAttributeName('Width', 'nm')
         self.peakWidthWidget.setAttributeWarningLimits([35, 100])
         self.peakWidthWidget.setSliderLimits(0, 70)
@@ -325,15 +307,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.peakEnergyWidget.setAttributeName('Oscillator', 'mW')
         self.peakEnergyWidget.setAttributeWarningLimits([150, 800])
         self.peakEnergyWidget.setSliderLimits(50, 250)
-        self.oscSpectrumPlot = qw.QTangoReadAttributeSpectrum(colors=self.colors, sizes=self.attr_sizes)
-        self.oscSpectrumPlot.setAttributeName('Oscillator spectrum')
-        self.oscSpectrumPlot.setXRange(700, 900)
-        self.oscSpectrumPlot.setMinimumWidth(600)
-        self.oscSpectrumPlot.setMaximumWidth(600)
-        self.oscSpectrumPlot.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
-######################
-# Halcyon widgets
+        ######################
+        # Halcyon widgets
         self.halcyonName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.attr_sizes)
         self.halcyonName.setAttributeName('Halcyon')
 
@@ -347,10 +323,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.piezoVoltageWidget.setSliderLimits(0, 100)
         self.piezoVoltageWidget.setAttributeWarningLimits([30, 70])
 
-
-######################
-# Regen widgets
-#
+        ######################
+        # Regen widgets
+        #
 
         self.regenLeeName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.regenLeeName.setAttributeName('Regen')
@@ -374,9 +349,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.regenTempWidget.setAttributeWarningLimits([-280, -170])
         self.regenTempWidget.setSliderLimits(-270, 30)
 
-######################
-# mp widgets
-#
+        ######################
+        # mp widgets
+        #
 
         self.mpLeeName = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.mpLeeName.setAttributeName('MP')
@@ -400,9 +375,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.mpTempWidget.setAttributeWarningLimits([-280, -170])
         self.mpTempWidget.setSliderLimits(-270, 30)
 
-######################
-# energy widgets
-#
+        ######################
+        # energy widgets
+        #
         self.attr_sizes.readAttributeHeight = 300
 
         self.irEnergyWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
@@ -415,14 +390,14 @@ class TangoDeviceClient(QtGui.QWidget):
         self.uvEnergyWidget.setSliderLimits(0, 400)
         self.uvEnergyWidget.setAttributeWarningLimits([50, 400])
 
-############################
-# Setting up layout
-#
+        ############################
+        # Setting up layout
+        #
         layout2.addWidget(self.title)
         layout2.addSpacerItem(QtGui.QSpacerItem(20, 60, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
         layout2.addLayout(layoutData)
         layoutData.addLayout(self.layoutAttributesOsc)
-#        layoutData.addSpacerItem(spacerItemH)
+        #        layoutData.addSpacerItem(spacerItemH)
         layoutData.addLayout(self.layoutAttributesRegen)
         layoutData.addLayout(self.layoutAttributesMP)
 
@@ -431,9 +406,12 @@ class TangoDeviceClient(QtGui.QWidget):
         layoutSlidersOsc.addWidget(self.finesseTempWidget)
         layoutSlidersOsc.addWidget(self.peakEnergyWidget)
         layoutSlidersOsc.addWidget(self.peakWidthWidget)
-        
+
         layoutSpectrumOsc = QtGui.QHBoxLayout()
-        layoutSpectrumOsc.addWidget(self.oscSpectrumPlot)
+
+        layoutHalcyonData = QtGui.QHBoxLayout()
+        layoutHalcyonData.addWidget(self.piezoVoltageWidget)
+        layoutHalcyonData.addWidget(self.errorFrequencyWidget)
 
         self.layoutAttributesOsc.addWidget(self.finesseName)
         self.layoutAttributesOsc.addWidget(self.shutter_widget)
@@ -442,16 +420,12 @@ class TangoDeviceClient(QtGui.QWidget):
                                                                  QtGui.QSizePolicy.Minimum))
         self.layoutAttributesOsc.addLayout(layoutSlidersOsc)
         self.layoutAttributesOsc.addSpacerItem(spacerItemV)
-        self.layoutAttributesOsc.addLayout(layoutSpectrumOsc)
+        self.layoutAttributesOsc.addLayout(layoutHalcyonData)
 
         layoutSlidersRegen = QtGui.QHBoxLayout()
         layoutSlidersRegen.addWidget(self.regenLeePercentCurrentWidget)
         layoutSlidersRegen.addWidget(self.regenLeePowerWidget)
         layoutSlidersRegen.addWidget(self.regenTempWidget)
-        
-        layoutHalcyonData = QtGui.QHBoxLayout()
-        layoutHalcyonData.addWidget(self.piezoVoltageWidget)
-        layoutHalcyonData.addWidget(self.errorFrequencyWidget)
 
         self.layoutAttributesRegen.addWidget(self.regenLeeName)
         self.layoutAttributesRegen.addWidget(self.regenShutterWidget)
@@ -460,8 +434,8 @@ class TangoDeviceClient(QtGui.QWidget):
                                                                    QtGui.QSizePolicy.Minimum))
         self.layoutAttributesRegen.addLayout(layoutSlidersRegen)
         self.layoutAttributesRegen.addSpacerItem(spacerItemV)
-        self.layoutAttributesRegen.addWidget(self.halcyonName)
-        self.layoutAttributesRegen.addLayout(layoutHalcyonData)
+#        self.layoutAttributesRegen.addWidget(self.halcyonName)
+#        self.layoutAttributesRegen.addLayout(layoutHalcyonData)
 
         layoutSlidersMP = QtGui.QHBoxLayout()
         layoutSlidersMP.addWidget(self.mpLeePercentCurrentWidget)
@@ -481,17 +455,17 @@ class TangoDeviceClient(QtGui.QWidget):
         layoutSlidersEnergy.addWidget(self.uvEnergyWidget)
         self.layoutAttributesMP.addLayout(layoutSlidersEnergy)
 
-
-    #        layout1.addWidget(self.sidebar)
+        #        layout1.addWidget(self.sidebar)
         layout1.addLayout(layout2)
         layout0.addLayout(layout1)
-#        layout0.addWidget(self.bottombar)
+        #        layout0.addWidget(self.bottombar)
 
-#        self.resize(500,800)
-#        self.setGeometry(200,100,1600,300)
+        #        self.resize(500,800)
+        #        self.setGeometry(200,100,1600,300)
         self.showFullScreen()
 
         self.update()
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

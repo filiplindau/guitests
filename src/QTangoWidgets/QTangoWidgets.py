@@ -326,7 +326,7 @@ class QTangoAttributeBase(QtGui.QWidget):
 
 # noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
 class QTangoTitleBar(QtGui.QWidget):
-    def __init__(self, title='', sizes=None, parent=None):
+    def __init__(self, title='', sizes=None, colors=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
         if title is None:
             self.title = ''
@@ -336,6 +336,10 @@ class QTangoTitleBar(QtGui.QWidget):
             self.sizes = QTangoSizes()
         else:
             self.sizes = sizes
+        if colors is None:
+            self.attrColors = QTangoColors()
+        else:
+            self.attrColors = colors
 
         self.setupLayout()
 
@@ -345,7 +349,7 @@ class QTangoTitleBar(QtGui.QWidget):
         s = ''.join(('QLabel {min-height: ', str(int(barHeight * 1.25)), 'px; \n',
                      'min-width: ', str(int(barHeight * 1.25 / 3)), 'px; \n',
                      'max-height: ', str(int(barHeight * 1.25)), 'px; \n',
-                     'background-color: ', primaryColor0, '; \n',
+                     'background-color: ', self.attrColors.primaryColor0, '; \n',
                      '}'))
         self.startLabel.setStyleSheet(s)
 
@@ -355,15 +359,15 @@ class QTangoTitleBar(QtGui.QWidget):
         s = ''.join(('QLabel {min-height: ', str(int(barHeight * 1.25)), 'px; \n',
                      'min-width: ', str(int(barHeight * 1.25)), 'px; \n',
                      'max-height: ', str(int(barHeight * 1.25)), 'px; \n',
-                     'background-color: ', primaryColor0, '; \n',
+                     'background-color: ', self.attrColors.primaryColor0, '; \n',
                      '}'))
         self.endLabel.setStyleSheet(s)
 
         self.nameLabel = QtGui.QLabel('')
         s = ''.join(('QLabel {min-height: ', str(int(barHeight * 1.25)), 'px; \n',
                      'max-height: ', str(int(barHeight * 1.25)), 'px; \n',
-                     'background-color: ', backgroundColor, '; \n',
-                     'color: ', primaryColor0, '; \n',
+                     'background-color: ', self.attrColors.backgroundColor, '; \n',
+                     'color: ', self.attrColors.primaryColor0, '; \n',
                      '}'))
         self.nameLabel.setStyleSheet(s)
 
@@ -507,6 +511,55 @@ class QTangoHorizontalBar(QtGui.QWidget):
         self.layout.setMargin(0)
         self.layout.addWidget(self.startLabel)
         self.layout.addWidget(self.endLabel)
+
+
+class QTangoContentWidget(QtGui.QWidget):
+    def __init__(self, name, sizes=None, colors=None, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        if colors is None:
+            self.attrColors = QTangoColors()
+        else:
+            self.attrColors = colors
+        if sizes is None:
+            self.sizes = QTangoSizes()
+        else:
+            self.sizes = sizes
+        self.layout = None
+        self.name = name
+        self.setupLayout()
+
+    def setupLayout(self):
+        colors = self.attrColors
+        colors.primaryColor0 = colors.secondaryColor0
+        self.title_bar = QTangoTitleBar(self.name, sizes=self.sizes, colors=colors)
+        # self.title_bar.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.side_bar = QTangoSideBar(colors=self.attrColors, sizes=self.sizes)
+        self.layout = QtGui.QVBoxLayout()
+        self.layout.setMargin(0)
+        self.layout.setSpacing(0)
+        self.setLayout(self.layout)
+        self.setMinimumHeight(self.sizes.readAttributeHeight * 1.2)
+        self.layout_bar = QtGui.QHBoxLayout()
+        self.layout_content = QtGui.QHBoxLayout()
+        self.layout_content.setMargin(self.sizes.barHeight)
+        self.layout_content.setSpacing(self.sizes.barHeight * 2)
+        self.layout_content.setContentsMargins(self.sizes.barHeight * 1.25,
+                                               self.sizes.barHeight * 1.25,
+                                               self.sizes.barHeight,
+                                               self.sizes.barHeight)
+        self.layout.addWidget(self.title_bar)
+        self.layout.addLayout(self.layout_bar)
+        self.layout_bar.addWidget(self.side_bar)
+        self.layout_bar.addLayout(self.layout_content)
+
+    def addLayout(self, layout):
+        self.layout_content.addLayout(layout)
+
+    def addWidget(self, widget):
+        self.layout_content.addWidget(widget)
+
+    def addSpacerItem(self, spaceritem):
+        self.layout_content.addSpacerItem(spaceritem)
 
 
 class QTangoCommandButton(QtGui.QPushButton, QTangoAttributeBase):
@@ -748,7 +801,7 @@ class QTangoStartLabel(QtGui.QLabel, QTangoAttributeBase):
         self.setupLayout()
 
     def setQuality(self, quality):
-        QTangoAttributeBase.setQuality(self, state, use_background_color=True)
+        QTangoAttributeBase.setQuality(self, quality, use_background_color=True)
 
     def setState(self, state):
         QTangoAttributeBase.setState(self, state, use_background_color=True)
@@ -824,7 +877,7 @@ class QTangoEndLabel(QtGui.QLabel, QTangoAttributeBase):
         self.setupLayout()
 
     def setQuality(self, quality):
-        QTangoAttributeBase.setQuality(self, state, use_background_color=True)
+        QTangoAttributeBase.setQuality(self, quality, use_background_color=True)
 
     def setState(self, state):
         QTangoAttributeBase.setState(self, state, use_background_color=True)

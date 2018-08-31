@@ -12,3 +12,5 @@ encoding//src/QTangoWidgets/QTangoWidgets.py=utf-8
 encoding//src/RedPitayaClient.py=utf-8
 encoding//src/SmallTrend.py=utf-8
 encoding//src/SpectrometerClient.py=utf-8
+encoding//src/ZaberSpecTangoAutocorrelator.py=utf-8
+encoding//src/test_camera.py=utf-8

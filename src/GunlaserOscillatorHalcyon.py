@@ -34,7 +34,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['prism2']=pt.DeviceProxy('gunlaser/oscillator/prism2')
         self.devices['picomotor']=pt.DeviceProxy('gunlaser/devices/picomotor-0')
         self.devices['halcyon']=pt.DeviceProxy('gunlaser/oscillator/halcyon_raspberry')
-        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya0')
+        self.devices['redpitaya']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
         print time.clock()-t0, ' s'
 
         splash.showMessage('         Reading startup attributes', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)

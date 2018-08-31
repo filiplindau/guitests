@@ -32,7 +32,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['mp_temp']=pt.DeviceProxy('gunlaser/mp/temperature')
         self.devices['spectrometer']=pt.DeviceProxy('gunlaser/oscillator/spectrometer')
         self.devices['halcyon']=pt.DeviceProxy('gunlaser/oscillator/halcyon_raspberry')
-        self.devices['redpitaya_osc']=pt.DeviceProxy('gunlaser/devices/redpitaya0')
+        self.devices['redpitaya_osc']=pt.DeviceProxy('gunlaser/devices/redpitaya1')
         self.devices['redpitaya_thg']=pt.DeviceProxy('gunlaser/devices/redpitaya3')
         print time.clock()-t0, ' s'
 
