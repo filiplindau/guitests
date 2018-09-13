@@ -1534,7 +1534,10 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 
     def setValue(self, value):
         self.dataValue = value
-        sVal = self.dataFormat.format((value))
+        try:
+            sVal = self.dataFormat.format((value))
+        except ValueError:
+            sVal = str(value)
         self.setText(sVal)
 
     def keyPressEvent(self, event):

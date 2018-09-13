@@ -231,7 +231,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
         cat_sizes = qw.QTangoSizes()
         cat_sizes.barHeight = 20
-        cat_sizes.barWidth = 5
+        cat_sizes.barWidth = 2
         cat_sizes.readAttributeWidth = 100
         cat_sizes.readAttributeHeight = 250
         cat_sizes.writeAttributeWidth = 299
@@ -257,13 +257,17 @@ class TangoDeviceClient(QtGui.QWidget):
         self.warning_widget = QtGui.QLabel("LASER RADIATION\n\nAvoid eye or skin exposure to\n"
                                            "direct or scattered radiation\n\nCLASS 4 LASER PRODUCT")
         s = ''.join(('QLabel {background-color: ', self.colors.backgroundColor, '; \n',
-                     'color: ', self.colors.warnColor2, ';}'))
+                     'color: ', self.colors.warnColor2, '; \n',
+                     'padding: 20px; \n',
+                     # 'padding-right: 20px; \n',
+                     'border: 3px solid; \n',
+                    'border-color:', self.colors.warnColor2, ';}'))
         self.warning_widget.setStyleSheet(s)
         font = self.warning_widget.font()
         font.setFamily(self.attr_sizes.fontType)
         font.setStretch(self.attr_sizes.fontStretch)
         font.setWeight(self.attr_sizes.fontWeight)
-        font.setPointSize(int(40))
+        font.setPointSize(int(36))
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.warning_widget.setFont(font)
         self.warning_widget.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
@@ -281,7 +285,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attr_sizes.readAttributeHeight = 300
 
         self.finessePowerWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
-        self.finessePowerWidget.setAttributeName('Finesse power', 'W')
+        self.finessePowerWidget.setAttributeName('Finesse', 'W')
         self.finessePowerWidget.setSliderLimits(0, 7)
         self.finessePowerWidget.setAttributeWarningLimits([4, 5.5])
 
@@ -296,7 +300,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attr_sizes.readAttributeHeight = 300
         self.peakWidthWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
         #        self.peakWidthWidget.setAttributeName(''.join((unichr(0x0394),unichr(0x03bb), ' FWHM')), 'nm')
-        self.peakWidthWidget.setAttributeName('Spectral width', 'nm')
+        self.peakWidthWidget.setAttributeName('Bandwidth', 'nm')
         self.peakWidthWidget.setAttributeWarningLimits([35, 100])
         self.peakWidthWidget.setSliderLimits(0, 70)
         self.oscillatorPowerWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
@@ -310,7 +314,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.halcyonName.setAttributeName('Halcyon')
 
         self.errorFrequencyWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
-        self.errorFrequencyWidget.setAttributeName('Error freq', 'kHz')
+        self.errorFrequencyWidget.setAttributeName('Error freq', 'Hz')
         self.errorFrequencyWidget.setSliderLimits(-1, 10000)
         self.errorFrequencyWidget.setAttributeWarningLimits([-1, 100000])
 
@@ -331,7 +335,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attr_sizes.readAttributeHeight = 300
 
         self.pataraEnergyWidget = qw.QTangoReadAttributeSliderV(colors=self.colors, sizes=self.attr_sizes)
-        self.pataraEnergyWidget.setAttributeName('Patara Energy', 'mJ')
+        self.pataraEnergyWidget.setAttributeName('Patara', 'mJ')
         self.pataraEnergyWidget.setSliderLimits(0, 55)
         self.pataraEnergyWidget.setAttributeWarningLimits([30, 50])
 
@@ -419,8 +423,6 @@ class TangoDeviceClient(QtGui.QWidget):
         cryos_widget = qw.QTangoContentWidget("Cryos", sizes=cat_sizes, colors=self.colors)
         cryos_widget.addWidget(self.regenTempWidget)
         cryos_widget.addWidget(self.mpTempWidget)
-
-
 
         ############################
         # Setting up layout

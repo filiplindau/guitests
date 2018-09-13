@@ -102,7 +102,6 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attributes['mp_temperature'] = AttributeClass('temperature', self.devices['mp_temp'], 0.5)
         self.attributes['mp_temperature'].attrSignal.connect(self.read_mp_temperature)
 
-
         splash.showMessage('         Setting up variables', alignment = QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
         app.processEvents()
 
@@ -251,8 +250,6 @@ class TangoDeviceClient(QtGui.QWidget):
             self.layout_attributes.addWidget(attQObject)
 
     def closeEvent(self, event):
-#         for device in self.devices.itervalues():
-#             device.terminate()
         for a in self.attributes.itervalues():
             print 'Stopping', a.name
             a.stop_read()
@@ -261,7 +258,7 @@ class TangoDeviceClient(QtGui.QWidget):
         event.accept()
 
     def setupLayout(self):
-        s='QWidget{background-color: #000000; }'
+        s = 'QWidget{background-color: #000000; }'
         self.setStyleSheet(s)
 
         self.frame_sizes = qw.QTangoSizes()
@@ -269,7 +266,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.frame_sizes.barWidth = 18
         self.frame_sizes.readAttributeWidth = 280
         self.frame_sizes.writeAttributeWidth = 150
-        self.frame_sizes.fontStretch= 80
+        self.frame_sizes.fontStretch = 80
         self.frame_sizes.fontType = 'Segoe UI'
 #        self.frame_sizes.fontType = 'Trebuchet MS'
 
@@ -279,10 +276,9 @@ class TangoDeviceClient(QtGui.QWidget):
         self.attr_sizes.readAttributeWidth = 280
         self.attr_sizes.readAttributeHeight = 250
         self.attr_sizes.writeAttributeWidth = 299
-        self.attr_sizes.fontStretch= 80
+        self.attr_sizes.fontStretch = 80
         self.attr_sizes.fontType = 'Segoe UI'
 #        self.attr_sizes.fontType = 'Trebuchet MS'
-
 
         self.colors = qw.QTangoColors()
 
@@ -325,39 +321,39 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.title = qw.QTangoTitleBar('Gunlaser Control')
         self.setWindowTitle('Gunlaser control')
-        self.sidebar = qw.QTangoSideBar(colors = self.colors, sizes = self.frame_sizes)
+        self.sidebar = qw.QTangoSideBar(colors=self.colors, sizes=self.frame_sizes)
         self.bottombar = qw.QTangoHorizontalBar()
 
-        self.finesse_name = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.finesse_name = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.finesse_name.setAttributeName('Finesse')
 
-        self.finesse_shutter_widget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+        self.finesse_shutter_widget = qw.QTangoCommandSelection('Shutter', colors=self.colors, sizes=self.attr_sizes)
         self.finesse_shutter_widget.addCmdButton('Open', self.open_finesse_shutter)
         self.finesse_shutter_widget.addCmdButton('Close', self.close_finesse_shutter)
 
-        self.finesse_operation_widget = qw.QTangoCommandSelection('Operation', colors = self.colors, sizes = self.attr_sizes)
+        self.finesse_operation_widget = qw.QTangoCommandSelection('Operation', colors=self.colors, sizes=self.attr_sizes)
         self.finesse_operation_widget.addCmdButton('Start', self.start_finesse)
         self.finesse_operation_widget.addCmdButton('Stop', self.stop_finesse)
 
-        self.finesse_power_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.finesse_power_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.finesse_power_widget.setAttributeName('Finesse power', 'W')
 
-        self.finesse_temp_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.finesse_temp_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.finesse_temp_widget.setAttributeName('Finesse temp', 'degC')
 
-        self.oscillator_power_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.oscillator_power_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.oscillator_power_widget.setAttributeName('Oscillator power', 'W')
         self.oscillator_power_widget.setPrefix('m')
-        self.oscillator_peak_width_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.oscillator_peak_width_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.oscillator_peak_width_widget.setAttributeName('Width FWHM', 'nm')
-        self.oscillator_spectrum_plot = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
+        self.oscillator_spectrum_plot = qw.QTangoReadAttributeSpectrum(colors=self.colors, sizes=self.attr_sizes)
         self.oscillator_spectrum_plot.setAttributeName('Oscillator spectrum')
         self.oscillator_spectrum_plot.setXRange(700, 900)
         self.oscillator_spectrum_plot.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-        self.error_frequency_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.error_frequency_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.error_frequency_widget.setAttributeName('Error frequency', 'Hz')
-        self.error_trace_widget = qw.QTangoReadAttributeSpectrum(colors = self.colors, sizes = self.attr_sizes)
+        self.error_trace_widget = qw.QTangoReadAttributeSpectrum(colors=self.colors, sizes=self.attr_sizes)
         self.error_trace_widget.setAttributeName('Error trace')
 #        self.error_trace_widget.fixedSize(fixed=True)
         self.error_trace_widget.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
@@ -365,34 +361,34 @@ class TangoDeviceClient(QtGui.QWidget):
         self.error_trace_widget.setMaximumHeight(150)
         self.error_trace_widget.setMinimumHeight(150)
 
-        self.regen_lee_name = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.regen_lee_name = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.regen_lee_name.setAttributeName('Regen LeeLaser')
-        self.regen_operation_widget = qw.QTangoCommandSelection('Operation', colors = self.colors, sizes = self.attr_sizes)
+        self.regen_operation_widget = qw.QTangoCommandSelection('Operation', colors=self.colors, sizes=self.attr_sizes)
         self.regen_operation_widget.addCmdButton('Start', self.start_regen)
         self.regen_operation_widget.addCmdButton('Stop', self.stop_regen)
         self.regen_operation_widget.addCmdButton('Clear', self.clear_regen)
-        self.regen_shutter_widget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+        self.regen_shutter_widget = qw.QTangoCommandSelection('Shutter', colors=self.colors, sizes=self.attr_sizes)
         self.regen_shutter_widget.addCmdButton('Open', self.open_regen_shutter)
         self.regen_shutter_widget.addCmdButton('Close', self.close_regen_shutter)
-        self.regen_current_widget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.regen_current_widget = qw.QTangoWriteAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.regen_current_widget.setAttributeName('Regen current', '%')
         self.regen_current_widget.writeValueLineEdit.newValueSignal.connect(self.write_regen_lee_percentcurrent)
-        self.regen_temp_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.regen_temp_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.regen_temp_widget.setAttributeName('Regen cryo temp', 'degC')
 
-        self.mp_lee_name = qw.QTangoDeviceNameStatus(colors = self.colors, sizes = self.frame_sizes)
+        self.mp_lee_name = qw.QTangoDeviceNameStatus(colors=self.colors, sizes=self.frame_sizes)
         self.mp_lee_name.setAttributeName('MP LeeLaser')
-        self.mp_operation_widget = qw.QTangoCommandSelection('Operation', colors = self.colors, sizes = self.attr_sizes)
+        self.mp_operation_widget = qw.QTangoCommandSelection('Operation', colors=self.colors, sizes=self.attr_sizes)
         self.mp_operation_widget.addCmdButton('Start', self.start_mp)
         self.mp_operation_widget.addCmdButton('Stop', self.stop_mp)
         self.mp_operation_widget.addCmdButton('Clear', self.clear_mp)
-        self.mp_shutter_widget = qw.QTangoCommandSelection('Shutter', colors = self.colors, sizes = self.attr_sizes)
+        self.mp_shutter_widget = qw.QTangoCommandSelection('Shutter', colors=self.colors, sizes=self.attr_sizes)
         self.mp_shutter_widget.addCmdButton('Open', self.open_mp_shutter)
         self.mp_shutter_widget.addCmdButton('Close', self.close_mp_shutter)
-        self.mp_current_widget = qw.QTangoWriteAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.mp_current_widget = qw.QTangoWriteAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.mp_current_widget.setAttributeName('MP current', '%')
         self.mp_current_widget.writeValueLineEdit.newValueSignal.connect(self.write_mp_lee_percentcurrent)
-        self.mp_temp_widget = qw.QTangoReadAttributeDouble(colors = self.colors, sizes = self.attr_sizes)
+        self.mp_temp_widget = qw.QTangoReadAttributeDouble(colors=self.colors, sizes=self.attr_sizes)
         self.mp_temp_widget.setAttributeName('MP cryo temp', 'degC')
 
         layout2.addWidget(self.title)
@@ -440,7 +436,7 @@ class TangoDeviceClient(QtGui.QWidget):
 #        layout0.addWidget(self.bottombar)
 
 #        self.resize(500,800)
-        self.setGeometry(200,100,1200,600)
+        self.setGeometry(200, 100, 1200, 600)
 
         self.update()
 
