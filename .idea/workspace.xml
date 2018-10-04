@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="397380a5-03dd-4570-a69d-bdebf82a0ef2" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/GunlaserOverviewBasicPatara.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.pydevproject" beforeDir="false" afterPath="$PROJECT_DIR$/.pydevproject" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.core.resources.prefs" beforeDir="false" afterPath="$PROJECT_DIR$/.settings/org.eclipse.core.resources.prefs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GunlaserControl.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GunlaserControl.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GunlaserOscillatorHalcyon.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GunlaserOscillatorHalcyon.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GunlaserOverview.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GunlaserOverview.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GunlaserRegenControlWide.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GunlaserRegenControlWide.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GunlaserTHGControl.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GunlaserTHGControl.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/GuiQualityTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GunlaserControlPatara.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GunlaserControlPatara.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,34 +21,39 @@
     <session id="-1696657098">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="1" />
+          <entry key="project.open.time.1" value="1" />
+          <entry key="project.open.time.10" value="2" />
+          <entry key="project.open.time.12" value="1" />
+          <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.4" value="1" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.opened" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="5" />
+          <entry key="py" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="5" />
+          <entry key="Python" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="dummy" value="152" />
-          <entry key="py" value="3651" />
+          <entry key="dummy" value="409" />
+          <entry key="py" value="7179" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="152" />
-          <entry key="Python" value="3651" />
+          <entry key="PLAIN_TEXT" value="409" />
+          <entry key="Python" value="7179" />
         </counts>
       </usages-collector>
+      <usages-collector id="statistics.vcs.git.usages" />
     </session>
   </component>
   <component name="FileEditorManager">
@@ -61,19 +61,38 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1598">
-              <caret line="99" column="70" selection-start-line="99" selection-start-column="47" selection-end-line="99" selection-end-column="70" />
+            <state relative-caret-position="119">
+              <caret line="16" column="29" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
+              <folding>
+                <element signature="e#71#102#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-182">
+              <caret line="3185" column="6" selection-start-line="3185" selection-start-column="6" selection-end-line="3185" selection-end-column="6" />
+              <folding>
+                <element signature="e#71#106#0" expanded="true" />
+                <marker date="1538658153412" expanded="true" signature="18733:20710" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py">
+        <entry file="file://$PROJECT_DIR$/src/GuiQualityTest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="772">
-              <caret line="545" column="74" selection-start-line="545" selection-start-column="74" selection-end-line="545" selection-end-column="74" />
+            <state relative-caret-position="562">
+              <caret line="167" column="57" selection-start-line="167" selection-start-column="57" selection-end-line="167" selection-end-column="57" />
               <folding>
-                <marker date="1535718589546" expanded="true" signature="18334:20311" ph="..." />
+                <element signature="e#78#109#0" expanded="true" />
+                <marker date="1538658216868" expanded="true" signature="1825:1834" ph="..." />
+                <marker date="1538658216868" expanded="true" signature="1876:2470" ph="..." />
+                <marker date="1538658216868" expanded="true" signature="2164:2224" ph="..." />
               </folding>
             </state>
           </provider>
@@ -82,7 +101,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/GunlaserOverview.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="903">
+            <state relative-caret-position="696">
               <caret line="333" lean-forward="true" selection-start-line="327" selection-end-line="333" />
               <folding>
                 <element signature="e#77#108#0" expanded="true" />
@@ -91,11 +110,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewExtended.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/GunlaserControl.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="766">
-              <caret line="513" column="53" selection-start-line="513" selection-start-column="53" selection-end-line="513" selection-end-column="53" />
+            <state relative-caret-position="4369">
+              <caret line="260" column="12" selection-start-line="260" selection-start-column="12" selection-end-line="260" selection-end-column="12" />
+              <folding>
+                <element signature="e#54#85#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/GunlaserControlPatara.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="328">
+              <caret line="212" column="8" selection-start-line="212" selection-start-column="8" selection-end-line="212" selection-end-column="8" />
               <folding>
                 <element signature="e#78#109#0" expanded="true" />
               </folding>
@@ -106,10 +137,34 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasicPatara.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3262">
-              <caret line="1" column="22" lean-forward="true" selection-start-line="1" selection-end-line="1" selection-end-column="22" />
+            <state relative-caret-position="714">
+              <caret line="184" lean-forward="true" selection-start-line="177" selection-end-line="184" />
               <folding>
-                <element signature="e#77#108#0" expanded="true" />
+                <element signature="e#78#109#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewExtended.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="8670">
+              <caret line="513" column="53" selection-end-line="587" />
+              <folding>
+                <element signature="e#78#109#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasicCategories.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="5321">
+              <caret line="316" column="66" selection-start-line="316" selection-start-column="66" selection-end-line="316" selection-end-column="66" />
+              <folding>
+                <marker date="1536047873724" expanded="true" signature="7119:7256" ph="..." />
               </folding>
             </state>
           </provider>
@@ -136,6 +191,8 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>quality</find>
+      <find>warning</find>
+      <find>self.dataFormat.format</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -144,22 +201,25 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py" />
         <option value="$PROJECT_DIR$/src/GunlaserTHGControl.py" />
         <option value="$PROJECT_DIR$/GunlaserOverviewBasic.py" />
         <option value="$PROJECT_DIR$/src/GunlaserOverview.py" />
         <option value="$PROJECT_DIR$/src/GunlaserRegenControlWide.py" />
         <option value="$PROJECT_DIR$/GunlaserOverviewBasicPatara.py" />
         <option value="$PROJECT_DIR$/src/GunlaserOverviewBasicPatara.py" />
-        <option value="$PROJECT_DIR$/src/GunlaserOverviewBasicCategories.py" />
-        <option value="$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py" />
         <option value="$PROJECT_DIR$/src/GunlaserOverviewExtended.py" />
+        <option value="$PROJECT_DIR$/src/GunlaserOverviewBasicCategories.py" />
+        <option value="$PROJECT_DIR$/src/GunlaserControl.py" />
+        <option value="$PROJECT_DIR$/src/GunlaserControlPatara.py" />
+        <option value="$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py" />
+        <option value="$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py" />
+        <option value="$PROJECT_DIR$/src/GuiQualityTest.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="12" />
-    <option name="y" value="28" />
+    <option name="x" value="526" />
+    <option name="y" value="8" />
     <option name="width" value="1252" />
     <option name="height" value="1167" />
   </component>
@@ -168,7 +228,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -187,10 +246,15 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="QTangoWidgets" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="guitests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -323,11 +387,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="12" y="28" width="1252" height="1167" extended-state="0" />
-    <editor active="true" />
+    <frame x="526" y="8" width="1252" height="1167" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21169686" />
-      <window_info id="Structure" order="1" weight="0.26771006" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.21169686" />
+      <window_info active="true" id="Structure" order="1" visible="true" weight="0.26771006" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32913843" />
@@ -337,7 +400,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32913843" />
       <window_info anchor="bottom" id="Python Console" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Tail" order="11" />
@@ -363,29 +426,49 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/GunlaserOverviewBasic.py" />
-    <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py">
+    <entry file="file://$PROJECT_DIR$/src/GunlaserTHGControl.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1598">
-          <caret line="99" column="70" selection-start-line="99" selection-start-column="47" selection-end-line="99" selection-end-column="70" />
+        <state relative-caret-position="5134">
+          <caret line="307" column="8" selection-start-line="307" selection-start-column="8" selection-end-line="315" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../TangoWidgetsQt5/GunlaserOverview.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="14" column="39" selection-end-line="494" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/GunlaserControl.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4267">
-          <caret line="254" column="32" selection-start-line="254" selection-start-column="32" selection-end-line="254" selection-end-column="32" />
+        <state relative-caret-position="4369">
+          <caret line="260" column="12" selection-start-line="260" selection-start-column="12" selection-end-line="260" selection-end-column="12" />
           <folding>
             <element signature="e#54#85#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/GunlaserTHGControl.py">
+    <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewExtended.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5134">
-          <caret line="307" column="8" selection-start-line="307" selection-start-column="8" selection-end-line="315" selection-end-column="21" />
+        <state relative-caret-position="8670">
+          <caret line="513" column="53" selection-end-line="587" />
           <folding>
-            <element signature="e#77#108#0" expanded="true" />
+            <element signature="e#78#109#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasicCategories.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5321">
+          <caret line="316" column="66" selection-start-line="316" selection-start-column="66" selection-end-line="316" selection-end-column="66" />
+          <folding>
+            <marker date="1536047873724" expanded="true" signature="7119:7256" ph="..." />
           </folding>
         </state>
       </provider>
@@ -397,46 +480,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../TangoWidgetsQt5/GunlaserOverview.py">
+    <entry file="file://$PROJECT_DIR$/src/GunlaserControlPatara.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="328">
+          <caret line="212" column="8" selection-start-line="212" selection-start-column="8" selection-end-line="212" selection-end-column="8" />
           <folding>
-            <element signature="e#71#113#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="14" column="39" selection-end-line="494" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasicCategories.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="668">
-          <caret line="495" column="37" lean-forward="true" selection-end-line="536" />
-          <folding>
-            <element signature="e#77#108#0" expanded="true" />
-            <marker date="1535699540994" expanded="true" signature="7119:7256" ph="..." />
+            <element signature="e#78#109#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewBasicPatara.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3262">
-          <caret line="1" column="22" lean-forward="true" selection-start-line="1" selection-end-line="1" selection-end-column="22" />
+        <state relative-caret-position="714">
+          <caret line="184" lean-forward="true" selection-start-line="177" selection-end-line="184" />
           <folding>
-            <element signature="e#77#108#0" expanded="true" />
+            <element signature="e#78#109#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/AttributeReadThreadClass.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="16" column="29" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
+          <folding>
+            <element signature="e#71#102#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/GunlaserOverview.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="903">
+        <state relative-caret-position="696">
           <caret line="333" lean-forward="true" selection-start-line="327" selection-end-line="333" />
           <folding>
             <element signature="e#77#108#0" expanded="true" />
@@ -444,22 +520,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py">
+    <entry file="file://$PROJECT_DIR$/src/GuiQualityTest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="772">
-          <caret line="545" column="74" selection-start-line="545" selection-start-column="74" selection-end-line="545" selection-end-column="74" />
+        <state relative-caret-position="562">
+          <caret line="167" column="57" selection-start-line="167" selection-start-column="57" selection-end-line="167" selection-end-column="57" />
           <folding>
-            <marker date="1535718589546" expanded="true" signature="18334:20311" ph="..." />
+            <element signature="e#78#109#0" expanded="true" />
+            <marker date="1538658216868" expanded="true" signature="1825:1834" ph="..." />
+            <marker date="1538658216868" expanded="true" signature="1876:2470" ph="..." />
+            <marker date="1538658216868" expanded="true" signature="2164:2224" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/GunlaserOverviewExtended.py">
+    <entry file="file://$PROJECT_DIR$/src/QTangoWidgets/QTangoWidgets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="766">
-          <caret line="513" column="53" selection-start-line="513" selection-start-column="53" selection-end-line="513" selection-end-column="53" />
+        <state relative-caret-position="-182">
+          <caret line="3185" column="6" selection-start-line="3185" selection-start-column="6" selection-end-line="3185" selection-end-column="6" />
           <folding>
-            <element signature="e#78#109#0" expanded="true" />
+            <element signature="e#71#106#0" expanded="true" />
+            <marker date="1538658153412" expanded="true" signature="18733:20710" ph="..." />
           </folding>
         </state>
       </provider>

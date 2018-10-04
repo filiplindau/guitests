@@ -303,7 +303,7 @@ class TangoDeviceClient(QtGui.QWidget):
         self.devices['patara'].command_inout('stop')
 
     def clear_patara(self):
-        self.devices['patara'].command_inout('clearfault')
+        self.devices['patara'].command_inout('clear_fault')
 
     def init_patara(self):
         self.devices['patara'].command_inout('init')

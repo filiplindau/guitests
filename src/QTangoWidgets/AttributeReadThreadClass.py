@@ -11,6 +11,14 @@ import time
 import sys
 import threading
 import PyTango as pt
+import logging
+
+logger = logging.getLogger("AttributeClass")
+logger.setLevel(logging.FATAL)
+f = logging.Formatter("%(asctime)s - %(name)s.   %(funcName)s - %(levelname)s - %(message)s")
+fh = logging.StreamHandler()
+fh.setFormatter(f)
+logger.addHandler(fh)
 
 
 # noinspection PyAttributeOutsideInit
@@ -101,7 +109,8 @@ class AttributeClass(QtCore.QObject):
                                 time.sleep(0.1)
                             else:
                                 reply_ready = True
-                                print 'Error reply ', self.name, str(e)
+                                # print 'Error reply ', self.name, str(e)
+                                logger.error("Error read_attribuite_reply: {0}, {1}".format(self.name, e))
                                 self.attr = pt.DeviceAttribute()
                                 self.attr.quality = pt.AttrQuality.ATTR_INVALID
                                 self.attr.value = None
@@ -126,7 +135,8 @@ class AttributeClass(QtCore.QObject):
                     time.sleep(0.1)
                 else:
                     reply_ready = True
-                    print 'Error reply ', self.name, str(e)
+                    # print 'Error reply ', self.name, str(e)
+                    logger.error("Error read_attribuite_reply: {0}, {1}".format(self.name, e))
                     self.attr = pt.DeviceAttribute()
                     self.attr.quality = pt.AttrQuality.ATTR_INVALID
                     self.attr.value = None
