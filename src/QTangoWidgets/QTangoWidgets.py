@@ -17,7 +17,7 @@ import decimal
 import logging
 
 logger = logging.getLogger("QTangoWidgets")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 f = logging.Formatter("%(asctime)s - %(name)s.   %(funcName)s - %(levelname)s - %(message)s")
 fh = logging.StreamHandler()
 fh.setFormatter(f)
