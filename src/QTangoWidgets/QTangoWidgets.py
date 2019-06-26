@@ -1555,7 +1555,6 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
         if type(event) == QtGui.QKeyEvent:
             self.lastKey = event.key()
             if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_Down:
-                print 'Upp!'
                 txt = str(self.text()).lower()
                 if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
                     self.dataValue = np.double(self.text())
@@ -1571,15 +1570,13 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
                         commaPos = expPos
                 cursorPos = self.cursorPosition()
                 cursorDecimalPos = commaPos - cursorPos
-                print 'decimal pos', cursorDecimalPos
-                print 'comma pos', commaPos
-                print 'cursor pos', cursorPos
-                print 'exp pos', expPos
-                print 'Old dataValue: ', self.dataValue
+                logger.debug("\n decimal pos: {0}\n comma pos: {1}\n cursor pos: {2}\n"
+                             " exp pos: {3}\n old data value: {4}".format(cursorDecimalPos, commaPos, cursorPos,
+                                                                          expPos, self.dataValue))
 
                 # Compensate for the length of the comma character if we are to left of the comma
                 if cursorDecimalPos < 0:
-                    print 'New decimal pos ', cursorDecimalPos
+                    logger.debug('New decimal pos: {0}'.format(cursorDecimalPos))
                     newDecimalPos = cursorDecimalPos + 1
                 else:
                     newDecimalPos = cursorDecimalPos
@@ -1597,9 +1594,9 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
                     else:
                         stepDir = -1
                     self.dataValue += stepDir * 10 ** (expValue + newDecimalPos)
-                    print 'New decimal pos', newDecimalPos
-                    print "Step ", stepDir * 10 ** newDecimalPos
-                    print 'New decimal dataValue: ', self.dataValue
+                    logger.debug('New decimal pos: {0}'.format(newDecimalPos))
+                    logger.debug("Step: {0}".format(stepDir * 10 ** newDecimalPos))
+                    logger.debug('New decimal dataValue: {0}'.format(self.dataValue))
 
                     txt = self.dataFormat.format(self.dataValue)
                     newCommaPos = txt.find('.')
@@ -1611,10 +1608,10 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
                         newCursorPos = newCommaPos - cursorDecimalPos
                     else:
                         newCursorPos = newCommaPos - cursorDecimalPos
-                    print "newCursorPosition: ", newCursorPos
+                    logger.debug("newCursorPosition: {0}".format(newCursorPos))
                     # Check if the new number was truncated due to trailing zeros being removed
                     if newCursorPos > txt.__len__() - 1:
-                        print "Adding ", newCursorPos - txt.__len__(), " zeros"
+                        logger.debug("Adding {0} zeros".format(newCursorPos - txt.__len__()))
                         txt += '0' * (newCursorPos - txt.__len__())
                     self.clear()
                     self.insert(txt)
@@ -1622,21 +1619,20 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
 
                 else:
                     # We are adjusting exponent value
-                    print "Adjusting exponent"
                     cursorExpPos = txt.__len__() - cursorPos
-                    print "cursorExpPos ", cursorExpPos
+                    logger.debug("Adjusting exponent: cursorExpPos {0}".format(cursorExpPos))
                     if event.key() == QtCore.Qt.Key_Up:
                         self.dataValue *= 10 ** (cursorExpPos + 1)
                     else:
                         self.dataValue /= 10 ** (cursorExpPos + 1)
 
-                    print 'New decimal dataValue: ', self.dataValue
+                    logger.debug('New decimal dataValue: {0}'.format(self.dataValue))
                     txt = self.dataFormat.format(self.dataValue)
                     self.clear()
                     self.insert(txt)
 
             elif event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]:
-                print 'Enter!'
+                logger.debug('Enter!')
                 if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
                     self.dataValue = np.double(self.text())
                 self.newValueSignal.emit()
@@ -1649,8 +1645,8 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
                 txt = str(self.text()).lower()
                 if self.validatorObject.validate(self.text(), 0)[0] == QtGui.QValidator.Acceptable:
                     self.dataValue = np.double(self.text())
-                print "cursorPos ", cursorPos
-                print "txt.__len__", txt.__len__()
+                logger.debug("cursorPos: {0}".format(cursorPos))
+                logger.debug("txt.__len__: {0}".format(txt.__len__()))
                 if cursorPos == txt.__len__():
                     # We are at the right edge so add a zero if it is a decimal number
                     commaPos = txt.find('.')
@@ -1732,18 +1728,15 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
         self.setMinimum(-1e9)
 
     def valueReady(self, value):
-        print 'Value ready::', value
+        logger.debug('Value ready:: {0}'.format(value))
         self.lineEdit().setCursorPosition(self.storedCursorPos)
 
     def editReady(self):
-        print 'Edit ready::'
-        print 'Cursor pos set to ', self.storedCursorPos
+        logger.debug('Cursor pos set to {0}'.format(self.storedCursorPos))
         self.lineEdit().setCursorPosition(self.storedCursorPos)
 
     def stepBy(self, steps):
-        print 'Step ', steps
-        print 'Value: ', self.value()
-        print 'Text: ', self.valueFromText(self.text())
+        logger.debug('Step {0}, value: {1}, text: {2}'.format(steps, self.value(), self.valueFromText(self.text())))
         txt = self.text()
         currentValue = self.valueFromText(txt)
         commaPos = str(txt).find('.')
@@ -1756,7 +1749,7 @@ class QTangoWriteAttributeSpinBox(QtGui.QDoubleSpinBox):
         self.setValue(currentValue + 10 ** pos * steps)
 
     def changeStep(self, old, new):
-        print 'In changeStep::'
+        logger.debug('In changeStep::')
 
     # Check if the last key was return, then the cursor
     # shouldn't change
@@ -1822,11 +1815,11 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
 
         self.storedCursorPos = 0
         self.lastKey = QtCore.Qt.Key_0
-        if colors == None:
+        if colors is None:
             self.attrColors = QTangoColors()
         else:
             self.attrColors = colors
-        if sizes == None:
+        if sizes is None:
             self.sizes = QTangoSizes()
         else:
             self.sizes = sizes
@@ -1869,28 +1862,26 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
         self.setMinimum(-1e9)
 
     def valueReady(self, value):
-        print 'Value ready::', value
+        logger.debug('Value ready::{0}'.format(value))
         self.lineEdit().setCursorPosition(self.storedCursorPos)
 
     def editReady(self):
-        print 'Edit ready::'
-        print 'Cursor pos set to ', self.storedCursorPos
+        logger.debug('Edit ready::')
+        logger.debug('Cursor pos set to {0}'.format(self.storedCursorPos))
         self.lineEdit().setCursorPosition(self.storedCursorPos)
 
     def stepBy(self, steps):
-        print "In stepBy::"
-        print 'stepBy::Step ', steps
-        print 'stepBy::Value: ', self.value()
-        print 'stepBy::Text: ', self.valueFromText(self.text())
+        logger.debug('stepBy::Step {0}, value {1}, text {2}'.format(steps, self.value(),
+                                                                    self.valueFromText(self.text())))
         txt = self.text()
         currentValue = self.valueFromText(txt)
         commaPos = str(txt).find('.')
         self.storedCursorPos = self.lineEdit().cursorPosition()
         #		self.lineEdit().setCursorPosition(self.storedCursorPos)
         pos = commaPos - self.storedCursorPos + 1
-        print 'stepBy::comma pos', commaPos
-        print 'stepBy::stored pos', self.storedCursorPos
-        print 'stepBy::cursor pos', self.lineEdit().cursorPosition()
+        logger.debug('stepBy::comma pos {0}'.format(commaPos))
+        logger.debug('stepBy::stored pos {0}'.format(self.storedCursorPos))
+        logger.debug('stepBy::cursor pos {0}'.format(self.lineEdit().cursorPosition()))
         if pos + self.decimals() < 0:
             pos = -self.decimals()
         elif pos > 0:
@@ -1898,7 +1889,6 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
         self.setValue(currentValue + 10 ** pos * steps)
 
     def changeStep(self, old, new):
-        print 'In changeStep::'
         # Check if the last key was return, then the cursor
         # shouldn't change
         if self.lastKey != QtCore.Qt.Key_Return:
@@ -1907,15 +1897,12 @@ class QTangoWriteAttributeSpinBox2(QtGui.QDoubleSpinBox):
             commaPos = txt.find('.')
             #			self.storedCursorPos = self.lineEdit().cursorPosition()
             pos = commaPos - self.storedCursorPos + 1
-            print 'pos', pos
-            print 'comma pos', commaPos
-            print 'stored pos', self.storedCursorPos
+            logger.debug('pos {0}, comma pos {1}, stored pos {2}'.format(pos, commaPos, self.storedCursorPos))
             if pos + self.decimals() < 0:
                 pos = -self.decimals()
             elif pos > 0:
                 pos -= 1
 
-            print txt, pos
         #			self.setSingleStep(10 ** pos)
 
     def keyPressEvent(self, event):
@@ -4250,7 +4237,7 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
                 self.valueSpinbox.setValue(data.value)
                 self.valueSlider.setValue(data.value)
                 if self.writeValueInitialized is False:
-                    print 'Initializing write value'
+                    logger.debug('Initializing write value')
                     self.writeValueInitialized = True
                     self.setAttributeWriteValue(data.w_value)
 
@@ -4281,7 +4268,7 @@ class QTangoWriteAttributeSlider(QTangoAttributeBase):
     def editingFinished(self):
         self.valueSlider.setWriteValue(self.writeValueSpinbox.value())
         self.update()
-        print 'updating slider to ', self.writeValueSpinbox.value()
+        logger.debug('updating slider to {0}'.format(self.writeValueSpinbox.value()))
 
     def getWriteValue(self):
         return self.writeValueSpinbox.value()
@@ -4407,7 +4394,7 @@ class QTangoWriteAttributeSlider4(QTangoWriteAttributeSlider):
                 self.valueSlider.setValue(data.value)
                 self.valueSpinbox.setValue(data.value)
                 if self.writeValueInitialized is False:
-                    print 'Initializing write value'
+                    logger.debug("Initializing write value")
                     self.writeValueInitialized = True
                     self.setAttributeWriteValue(data.w_value)
 
@@ -4437,7 +4424,7 @@ class QTangoWriteAttributeSlider4(QTangoWriteAttributeSlider):
             0] == QtGui.QValidator.Acceptable:
             self.valueSlider.setWriteValue(np.double(self.writeValueLineEdit.text()))
         self.update()
-        print 'updating slider to ', self.writeValueLineEdit.text()
+        logger.debug('updating slider to {0}'.format(self.writeValueLineEdit.text()))
 
     def getWriteValue(self):
         return self.writeValueLineEdit.value()
@@ -4448,6 +4435,8 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
     def __init__(self, sizes=None, colors=None, parent=None):
         QTangoWriteAttributeSlider.__init__(self, sizes, colors, parent)
         self.unit = None
+        self.wheel_step = 0.1
+        self.wheel_update = False
 
     def setupLayout(self):
         self.nameLabel = QTangoAttributeNameLabel(self.sizes, self.attrColors)
@@ -4508,7 +4497,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
                 #				self.valueSlider.setValue(data.value)
                 self.valueSlider.setValue(data)
                 if self.writeValueInitialized is False:
-                    print 'Initializing write value'
+                    logger.debug('Initializing write value')
                     self.writeValueInitialized = True
                     self.setAttributeWriteValue(data.w_value)
 
@@ -4543,7 +4532,7 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
             0] == QtGui.QValidator.Acceptable:
             self.valueSlider.setWriteValue(np.double(self.writeValueLineEdit.text()))
         self.update()
-        print 'updating slider to ', self.writeValueLineEdit.text()
+        logger.debug('updating slider to {0}'.format(self.writeValueLineEdit.text()))
 
     def configureAttribute(self, attrInfo):
         QTangoAttributeBase.configureAttribute(self, attrInfo)
@@ -4561,6 +4550,12 @@ class QTangoWriteAttributeSliderV(QTangoWriteAttributeSlider):
 
     def getWriteValue(self):
         return self.writeValueLineEdit.value()
+
+    def wheelEvent(self, event):
+        logger.debug("Wheel event delta: {0}".format(event.delta()))
+        self.setAttributeWriteValue(self.getWriteValue() + self.wheel_step * event.delta() / 120.0)
+        if self.wheel_update:
+            self.writeValueLineEdit.newValueSignal.emit()
 
 
 # noinspection PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit
@@ -4587,7 +4582,7 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
     def setupLayout(self):
         readValueWidth = self.sizes.barWidth
         readWidth = self.sizes.readAttributeWidth - int(self.sizes.barHeight / 6) - readValueWidth
-        print 'writeAttr readwidth:', readWidth
+        logger.debug('writeAttr readwidth: {0}'.format(readWidth))
         writeValueWidth = self.sizes.writeAttributeWidth - self.sizes.readAttributeWidth - int(
             self.sizes.barHeight / 6) - int(self.sizes.barHeight / 2)
 
@@ -4754,7 +4749,7 @@ class QTangoWriteAttributeDouble(QtGui.QWidget):
         if type(value) == pt.DeviceAttribute:
             if value.value is not None:
                 if self.writeValueInitialized is False:
-                    print 'Initializing write value'
+                    logger.debug('Initializing write value')
                     self.writeValueInitialized = True
                     self.setAttributeWriteValue(value.w_value)
 
@@ -4852,7 +4847,7 @@ class QTangoWriteAttributeComboBox(QtGui.QWidget):
         if type(value) == pt.DeviceAttribute:
             if value.value is not None:
                 if self.writeValueInitialized is False:
-                    print 'Initializing write value'
+                    logger.debug('Initializing write value')
                     self.writeValueInitialized = True
                     self.setAttributeWriteValue(value.w_value)
 

@@ -14,7 +14,7 @@ import PyTango as pt
 import logging
 
 logger = logging.getLogger("AttributeClass")
-logger.setLevel(logging.FATAL)
+logger.setLevel(logging.INFO)
 f = logging.Formatter("%(asctime)s - %(name)s.   %(funcName)s - %(levelname)s - %(message)s")
 fh = logging.StreamHandler()
 fh.setFormatter(f)
@@ -24,12 +24,15 @@ logger.addHandler(fh)
 # noinspection PyAttributeOutsideInit
 class AttributeClass(QtCore.QObject):
     attrSignal = QtCore.pyqtSignal(pt.device_attribute.DeviceAttribute)
+    attrSignalName = QtCore.pyqtSignal(tuple)
     attrInfoSignal = QtCore.pyqtSignal(pt.AttributeInfoEx)
+    attrInfoSignalName = QtCore.pyqtSignal(tuple)
 
     def __init__(self, name, device, interval, slot=None, getInfo=False, startImmediate=True):
         super(AttributeClass, self).__init__()
         self.name = name
         self.device = device
+        self.dev_name = device.name()
         self.interval = interval
         self.get_info_flag = getInfo
         self.pause_read_flag = False
@@ -55,19 +58,23 @@ class AttributeClass(QtCore.QObject):
                 if self.get_info_flag is True:
                     try:
                         self.attr_info = self.device.get_attribute_config(self.name)
+                        # logger.info("{0} Attr info name: {1}".format(self.name, self.attr_info.name))
                         self.attrInfoSignal.emit(self.attr_info)
+                        self.attrInfoSignalName.emit((self.dev_name, self.attr_info))
 
                     except pt.DevFailed as e:
                         if e[0].reason == 'API_DeviceTimeOut':
                             logger.error('AttrInfo Timeout')
                         else:
-                            logger.error("{0} attrinfo error {1}".format(self.name, e[0].reason))
+                            logger.error("{0}/{1} attrinfo error {2}".format(self.dev_name, self.name, e[0].reason))
                         self.attr_info = pt.AttributeInfoEx()
                         self.attrInfoSignal.emit(self.attr_info)
+                        self.attrInfoSignalName.emit((self.dev_name, self.attr_info))
                     except Exception as e:
-                        logger.error("{0} recoviering from attrInfo error {1}".format(self.name, e))
+                        logger.error("{0}/{1} recoviering from attrInfo error {2}".format(self.dev_name, self.name, e))
                         self.attr_info = pt.AttributeInfoEx()
                         self.attrInfoSignal.emit(self.attr_info)
+                        self.attrInfoSignalName.emit((self.dev_name, self.attr_info))
                     self.get_info_flag = False
 
                 t = time.time()
@@ -82,25 +89,28 @@ class AttributeClass(QtCore.QObject):
                         if e[0].reason == 'API_DeviceTimeOut':
                             logger.error('Timeout')
                         else:
-                            logger.error("{0} error DevFailed {1}".format(self.name, e[0].reason))
+                            logger.error("{0}/{1} error DevFailed {2}".format(self.dev_name, self.name, e[0].reason))
                         self.attr = pt.DeviceAttribute()
                         self.attr.quality = pt.AttrQuality.ATTR_INVALID
                         self.attr.value = None
                         self.attr.w_value = None
                         self.attrSignal.emit(self.attr)
+                        self.attrSignalName.emit((self.dev_name, self.attr))
 
                     except Exception as e:
-                        logger.error("{0} recovering from {1}".format(self.name, e))
+                        logger.error("{0}/{1} recovering from {2}".format(self.dev_name, self.name, e))
                         self.attr = pt.DeviceAttribute()
                         self.attr.quality = pt.AttrQuality.ATTR_INVALID
                         self.attr.value = None
                         self.attrSignal.emit(self.attr)
+                        self.attrSignalName.emit((self.dev_name, self.attr))
 
                     while reply_ready is False and self.stop_thread_flag is False:
                         try:
                             self.attr = self.device.read_attribute_reply(reply_id)
                             reply_ready = True
                             self.attrSignal.emit(self.attr)
+                            self.attrSignalName.emit((self.dev_name, self.attr))
                             # Read only once if interval = None:
                             if self.interval is None:
                                 self.stop_thread_flag = True
@@ -111,18 +121,19 @@ class AttributeClass(QtCore.QObject):
                             else:
                                 reply_ready = True
                                 # print 'Error reply ', self.name, str(e)
-                                logger.error("Error read_attribuite_reply: {0}, {1}".format(self.name, e))
+                                logger.error("{0}/{1} Error read_attribuite_reply: {2}".format(self.dev_name, self.name, e))
                                 self.attr = pt.DeviceAttribute()
                                 self.attr.quality = pt.AttrQuality.ATTR_INVALID
                                 self.attr.value = None
                                 self.attr.w_value = None
                                 self.attrSignal.emit(self.attr)
+                                self.attrSignalName.emit((self.dev_name, self.attr))
 
                 if self.interval is not None:
                     time.sleep(self.interval)
                 else:
                     time.sleep(1)
-        logger.info("{0} waiting for final reply".format(self.name))
+        logger.info("{0}/{1} waiting for final reply".format(self.dev_name, self.name))
         final_timeout = 1.0  # Wait max 1 s
         final_start_time = time.time()
         final_timeout_flag = False
@@ -131,24 +142,26 @@ class AttributeClass(QtCore.QObject):
                 self.attr = self.device.read_attribute_reply(reply_id)
                 reply_ready = True
                 self.attrSignal.emit(self.attr)
+                self.attrSignalName.emit((self.dev_name, self.attr))
             except Exception as e:
                 if e[0].reason == 'API_AsynReplyNotArrived':
                     time.sleep(0.1)
                 else:
                     reply_ready = True
                     # print 'Error reply ', self.name, str(e)
-                    logger.error("Error read_attribuite_reply: {0}, {1}".format(self.name, e))
+                    logger.error("{0}/{1} Error read_attribuite_reply: {2}".format(self.dev_name, self.name, e))
                     self.attr = pt.DeviceAttribute()
                     self.attr.quality = pt.AttrQuality.ATTR_INVALID
                     self.attr.value = None
                     self.attr.w_value = None
                     self.attrSignal.emit(self.attr)
+                    self.attrSignalName.emit((self.dev_name, self.attr))
             if time.time()-final_start_time > final_timeout:
                 final_timeout_flag = True
         if final_timeout_flag is False:
-            logger.debug("{0}... Thread stopped".format(self.name))
+            logger.debug("{0}/{1}... Thread stopped".format(self.dev_name, self.name))
         else:
-            logger.error("{0}... Thread timed out".format(self.name))
+            logger.error("{0}/{1}... Thread timed out".format(self.dev_name, self.name))
 
     def attr_write(self, wvalue):
         self.device.write_attribute(self.name, wvalue)
