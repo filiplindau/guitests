@@ -493,6 +493,7 @@ class TangoDeviceClient(QtGui.QWidget):
 
         self.update()
 
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 

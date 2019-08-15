@@ -251,7 +251,6 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.limit0Widget.setAttributeName('Limit 0')
 		self.limit1Widget = qw.QTangoReadAttributeBoolean(colors = self.colors, sizes = self.attr_sizes)
 		self.limit1Widget.setAttributeName('Limit 1')
-		
 				
 		layout2.addWidget(self.title)		
 		layout2.addLayout(layoutData)
@@ -265,7 +264,6 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.layout_attributes.addWidget(self.limit1Widget)
 		self.layout_attributes.addWidget(self.positionWidget)
 		
-		
 		layout1.addWidget(self.sidebar)
 		layout1.addLayout(layout2)
 		layout0.addLayout(layout1)
@@ -275,7 +273,8 @@ class TangoDeviceClient(QtGui.QWidget):
 		self.setGeometry(200,100,400,300)
 		
 		self.update()
-		
+
+
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
 	

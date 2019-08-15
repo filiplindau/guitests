@@ -134,7 +134,7 @@ class FloatValidator(QtGui.QValidator):
 
 def format_float(value):
     """Modified form of the 'g' format specifier."""
-    string = "{:.4g}".format(value).replace("e+", "e")
+    string = "{0:.4g}".format(value).replace("e+", "e")
     string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
     return string
 
@@ -1443,7 +1443,7 @@ class QTangoWriteAttributeLineEdit(QtGui.QLineEdit, QTangoAttributeBase):
         self.lastKey = QtCore.Qt.Key_0
 
         self.dataValue = 1.0
-        self.dataFormat = "{:.4g}"
+        self.dataFormat = "{0:.4g}"
 
         self.setupLayout()
 
@@ -2523,8 +2523,8 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
         self.warnLow = 0.1
 
         self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.setMaximumWidth(self.sizes.barWidth * 4.0 - 2)
-        self.setMinimumWidth(self.sizes.barWidth * 4.0 - 2)
+        self.setMaximumWidth(self.sizes.barWidth * 4.2 - 2)
+        self.setMinimumWidth(self.sizes.barWidth * 4.2 - 2)
 
     def paintEvent(self, e):
         qp = QtGui.QPainter()
@@ -2543,9 +2543,9 @@ class QTangoVSliderBase2(QtGui.QSlider, QTangoAttributeBase):
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
 
         # Strings to draw
-        sVal = ''.join(("{:.4g}".format(self.attrValue), " ", self.unit))
-        sMin = "{:.4g}".format(self.attrMinimum)
-        sMax = "{:.4g}".format(self.attrMaximum)
+        sVal = ''.join(("{0:.4g}".format(self.attrValue), " ", self.unit))
+        sMin = "{0:.4g}".format(self.attrMinimum)
+        sMax = "{0:.4g}".format(self.attrMaximum)
 
         # Width of value text:
         sValWidth = QtGui.QFontMetricsF(font).width(sVal)
@@ -3061,6 +3061,7 @@ class QTangoSpectrumBase(pg.PlotWidget, QTangoAttributeBase):
         self.spectrumCurves = list()
         self.spectrumNames = list()
         self.spectrumColors = list()
+        self.vb2 = None
         self.setupLayout()
 
     def setupLayout(self):
@@ -3089,22 +3090,31 @@ class QTangoSpectrumBase(pg.PlotWidget, QTangoAttributeBase):
     def setSpectrum(self, xData, yData, index=0):
         if self.quality in ["UNKNOWN", "INVALID"]:
             pi = self.getPlotItem()
-            axLeft = pi.getAxis('right')
-            axLeft.setPen(self.attrColors.unknownColor)
+            axRight = pi.getAxis('right')
+            axRight.setPen(self.attrColors.unknownColor)
             axBottom = pi.getAxis('bottom')
             axBottom.setPen(self.attrColors.unknownColor)
+            if self.vb2 is not None:
+                axLeft = pi.getAxis('left')
+                axLeft.setPen(self.attrColors.unknownColor)
             for ind, cur in enumerate(self.spectrumCurves):
                 cur.setPen(self.attrColors.unknownColor, width=2.0)
         else:
             pi = self.getPlotItem()
-            axLeft = pi.getAxis('right')
-            axLeft.setPen(self.attrColors.secondaryColor0)
+            axRight = pi.getAxis('right')
+            axRight.setPen(self.attrColors.secondaryColor0)
             axBottom = pi.getAxis('bottom')
             axBottom.setPen(self.attrColors.secondaryColor0)
+            if self.vb2 is not None:
+                axLeft = pi.getAxis('left')
+                axLeft.setPen(self.attrColors.secondaryColor0)
             for ind, cur in enumerate(self.spectrumCurves):
                 cur.setPen(self.spectrumColors[ind], width=2.0)
             self.spectrumCurves[index].setData(y=yData, x=xData, antialias=False)
         self.update()
+        if self.vb2 is not None:
+            self.vb2.setGeometry(self.getViewBox().sceneBoundingRect())
+            self.vb2.linkedViewChanged(self.getViewBox(), self.vb2.XAxis)
 
     def showLegend(self, state):
         pi = self.getPlotItem()
@@ -3124,12 +3134,26 @@ class QTangoSpectrumBase(pg.PlotWidget, QTangoAttributeBase):
             self.legend.removeItem(name)
             self.legend.addItem(self.spectrumCurves[index], self.spectrumNames[index])
 
-    def addPlot(self, color, name=''):
-        p = self.plot()
+    def addPlot(self, color, name='', axis="right"):
+        if axis == "right":
+            p = self.plot()
+        else:
+            if self.vb2 is None:
+                self.setupDualAxis()
+            p = pg.PlotCurveItem()
+            self.vb2.addItem(p)
         p.setPen(color, width=2.0)
         self.spectrumCurves.append(p)
         self.spectrumNames.append(name)
         self.spectrumColors.append(color)
+
+    def setupDualAxis(self):
+        self.vb2 = pg.ViewBox()
+        self.scene().addItem(self.vb2)
+        self.getAxis('left').linkToView(self.vb2)
+        self.vb2.setXLink(self)
+        pi = self.getPlotItem()
+        pi.showAxis('left', True)
 
 
 class QTangoImageWithHistBase(pg.ImageView):
@@ -3648,8 +3672,8 @@ class QTangoReadAttributeSliderV(QTangoReadAttributeSlider2):
         self.layout.addWidget(self.nameLabel)
         self.layout.addWidget(self.unitLabel)
 
-        self.setMaximumWidth(self.sizes.barWidth * 4)
-        self.setMinimumWidth(self.sizes.barWidth * 4)
+        self.setMaximumWidth(self.sizes.barWidth * 4.3)
+        self.setMinimumWidth(self.sizes.barWidth * 4.3)
         self.setMaximumHeight(self.sizes.readAttributeHeight)
         self.setMinimumHeight(self.sizes.readAttributeHeight)
         self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -3831,8 +3855,8 @@ class QTangoReadAttributeTrend(QtGui.QWidget):
 
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        #		self.layout.setMargin(int(self.sizes.barHeight/10))
-        self.layout.setMargin(0)
+        self.layout.setMargin(int(self.sizes.barHeight/10))
+        # self.layout.setMargin(0)
         self.layout.setSpacing(self.sizes.barWidth / 3)
 
         layout2 = QtGui.QVBoxLayout()
@@ -3843,18 +3867,8 @@ class QTangoReadAttributeTrend(QtGui.QWidget):
         layout3.addWidget(self.curveNameLabel)
         layout3.addWidget(self.valueSpinbox)
         layout3.addWidget(self.unitLabel)
-        # 		self.layoutGrid = QtGui.QGridLayout()
-        # 		self.layoutGrid.setContentsMargins(0, 0, 0, 0)
-        # 		self.layoutGrid.setMargin(0)
-        # 		self.layoutGrid.addWidget(self.nameLabel, 0, 0)
-        # 		self.layoutGrid.addWidget(self.valueSpinbox, 0, 1)
-        # 		self.layoutGrid.addWidget(self.unitLabel, 0, 2)
-        # 		self.layoutGrid.addWidget(self.valueTrend, 1, 0, 1, 3)
-        # 		self.layoutGrid.setHorizontalSpacing(self.sizes.barWidth/4)
-        # 		self.layoutGrid.setVerticalSpacing(0)
 
         self.layout.addWidget(self.startLabel)
-        #		self.layout.addLayout(self.layoutGrid)
         self.layout.addLayout(layout2)
         self.layout.addWidget(self.endLabel)
 
